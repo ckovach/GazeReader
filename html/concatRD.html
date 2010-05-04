@@ -1,0 +1,175 @@
+
+<!DOCTYPE html
+  PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+<html>
+   <head>
+      <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+   
+      <!--
+This HTML is auto-generated from an M-file.
+To make changes, update the M-file and republish this document.
+      -->
+      <title>concatRD</title>
+      <meta name="generator" content="MATLAB 7.8">
+      <meta name="date" content="2009-09-14">
+      <meta name="m-file" content="concatRD"><style type="text/css">
+
+body {
+  background-color: white;
+  margin:10px;
+}
+
+h1 {
+  color: #990000; 
+  font-size: x-large;
+}
+
+h2 {
+  color: #990000;
+  font-size: medium;
+}
+
+/* Make the text shrink to fit narrow windows, but not stretch too far in 
+wide windows. */ 
+p,h1,h2,div.content div {
+  max-width: 600px;
+  /* Hack for IE6 */
+  width: auto !important; width: 600px;
+}
+
+pre.codeinput {
+  background: #EEEEEE;
+  padding: 10px;
+}
+@media print {
+  pre.codeinput {word-wrap:break-word; width:100%;}
+} 
+
+span.keyword {color: #0000FF}
+span.comment {color: #228B22}
+span.string {color: #A020F0}
+span.untermstring {color: #B20000}
+span.syscmd {color: #B28C00}
+
+pre.codeoutput {
+  color: #666666;
+  padding: 10px;
+}
+
+pre.error {
+  color: red;
+}
+
+p.footer {
+  text-align: right;
+  font-size: xx-small;
+  font-weight: lighter;
+  font-style: italic;
+  color: gray;
+}
+
+  </style></head>
+   <body>
+      <div class="content"><pre class="codeinput"><span class="keyword">function</span> RD = concatRD(varargin)
+
+<span class="comment">%RDcat = concatRD(RD1,RD2,RD3,...)</span>
+<span class="comment">%Concatenates multiple regData structures into a single one. This assumes</span>
+<span class="comment">%that the corresponding regressors are the same in each case.</span>
+
+RD = makeRegData([]);
+trind = [];
+lasttr = 0;
+fxind = [];
+lastfx = 0;
+
+<span class="keyword">if</span> length(varargin)&gt;1
+    RDin = cat(2,varargin{:});
+<span class="keyword">end</span>
+<span class="keyword">for</span> i = 1:length(RDin)
+
+        <span class="keyword">if</span> i == 1
+            RD= RDin(i);
+        <span class="keyword">else</span>
+
+            <span class="keyword">if</span> isfield(RDin(i),<span class="string">'trialIndex'</span>)
+                trind = cat(1,trind(:),RDin(i).trialIndex + lasttr);
+                lasttr = trind(end);
+                RD.trialIndex = trind;
+            <span class="keyword">end</span>
+            <span class="keyword">if</span> isfield(RDin(i),<span class="string">'fixationIndex'</span>)
+                fxind = cat(1,fxind(:),RDin(i).fixationIndex + lastfx);
+                lastfx = fxind(end);
+                RD.fixationIndex = fxind;
+            <span class="keyword">end</span>
+
+             <span class="keyword">for</span> k = 1:length(RDin(i).regressors)
+
+                 <span class="keyword">if</span> ~isequal(RD.regressors(k).label,RDin(i).regressors(k).label)
+                     warning(<span class="string">'Labels do not match for all regressors. Are they the same quantities?'</span>)
+                 <span class="keyword">end</span>
+
+                 RD.regressors(k).value = cat(1,RD.regressors(k).value,RDin(i).regressors(k).value);
+                 RD.regressors(k).noptions = cat(1,RD.regressors(k).noptions(:),RDin(i).regressors(k).noptions(:));
+             <span class="keyword">end</span>
+        <span class="keyword">end</span>
+
+<span class="keyword">end</span>
+</pre><pre class="codeoutput">Undefined function or variable "RDin".
+
+Error in ==&gt; concatRD at 16
+for i = 1:length(RDin)
+</pre><p class="footer"><br>
+            Published with MATLAB&reg; 7.8<br></p>
+      </div>
+      <!--
+##### SOURCE BEGIN #####
+function RD = concatRD(varargin)
+
+%RDcat = concatRD(RD1,RD2,RD3,...)
+%Concatenates multiple regData structures into a single one. This assumes
+%that the corresponding regressors are the same in each case.
+
+RD = makeRegData([]);
+trind = [];
+lasttr = 0;
+fxind = [];
+lastfx = 0;
+
+if length(varargin)>1
+    RDin = cat(2,varargin{:});
+end
+for i = 1:length(RDin)
+
+        if i == 1
+            RD= RDin(i);
+        else
+
+            if isfield(RDin(i),'trialIndex')
+                trind = cat(1,trind(:),RDin(i).trialIndex + lasttr);
+                lasttr = trind(end);
+                RD.trialIndex = trind;
+            end
+            if isfield(RDin(i),'fixationIndex')
+                fxind = cat(1,fxind(:),RDin(i).fixationIndex + lastfx);
+                lastfx = fxind(end);
+                RD.fixationIndex = fxind;
+            end
+
+             for k = 1:length(RDin(i).regressors)   
+
+                 if ~isequal(RD.regressors(k).label,RDin(i).regressors(k).label)
+                     warning('Labels do not match for all regressors. Are they the same quantities?')
+                 end
+
+                 RD.regressors(k).value = cat(1,RD.regressors(k).value,RDin(i).regressors(k).value);
+                 RD.regressors(k).noptions = cat(1,RD.regressors(k).noptions(:),RDin(i).regressors(k).noptions(:));
+             end
+        end
+        
+end
+
+        
+##### SOURCE END #####
+-->
+   </body>
+</html>

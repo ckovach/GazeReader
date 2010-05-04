@@ -1,0 +1,2 @@
+LIBRARY	sparseblockmex
+EXPORTS mexFunction

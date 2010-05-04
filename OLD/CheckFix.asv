@@ -1,0 +1,66 @@
+    
+bl = 1;
+s = 1;
+%Check fixations by plotting them
+    etdatH =ASL(s).segData(bl).horz;
+    etdatV =ASL(s).segData(bl).vert;
+    screenDat = (ASL(s).segData(bl).arrayFixData.et2screen*cat(2,etdatH,etdatV,ones(length(etdatH),1))')';
+    ArrayStartTs(ASL(s).segData(bl).trialData.Array.id) = ASL(s).segData(bl).trialData.Array.T; 
+    f1 = figure;
+    f2 = figure;
+    for i = 1:length(ASL(s).segData(bl).arrayFixRoi)
+
+        if ~isempty(ASL(s).segData(bl).arrayFixRoi(i).roi)
+
+%            X = imread(sprintf(stimPicNames{s},i));
+            X = imread(sprintf(stimPicNames{stimFileOder{s}(bl)},i));
+    %         subplot(2,1,1)
+            figure(f1)
+            X = X(end:-1:1,:,:);
+            imagesc(X),axis('xy'), shading flat, colormap gray, axis image
+            axis([0  1024 0 768])
+            [etTrialDat.Array.T]
+            tpoints = [0:4*etfs] + ArrayStartTs(i);
+
+
+            hold on 
+
+            af = arrayFixDat.fix([ASL(s).segData(bl).arrayFixData.fix.trial] == i );
+            drawt = tpoints(1);
+            for k = 1:length(af);
+
+    %             subplot(2,1,1)
+              figure(f1)
+                plot(screenDat(drawt:af(k).startT + af(k).durT,1),screenDat(drawt:af(k).startT + af(k).durT,2))
+    %             subplot(2,1,2), hold on
+                figure(f2), hold on
+                plot(tpoints./etfs,[etdatH( tpoints),etdatV( tpoints),ones(length( tpoints),1)]*arrayFixDat.et2screen(1:2,:)');
+
+                drawt = af(k).startT + af(k).durT;
+
+                tstring = sprintf('Trial %i\tFixation %i',i,k);
+                if af(k).suspect == 1, tstring = [tstring,sprintf('\tSUSPECT')];end
+
+                fxtimepts = af(k).timepts;
+
+    %             subplot(2,1,1)
+                figure(f1)
+                p= plot(screenDat(fxtimepts,1),screenDat(fxtimepts,2),'r');
+    %             subplot(2,1,2)
+                figure(f2)
+                p2= plot(double(fxtimepts)./etfs,[etdatH( fxtimepts),etdatV( fxtimepts),ones(length( fxtimepts),1)]*arrayFixDat.et2screen(1:2,:)','r');
+
+                drawnow, shg
+
+                title(tstring)
+                pause
+                delete(p)
+                delete(p2)
+            end
+    %         subplot(2,1,2)
+            figure(f2),
+            cla
+        end
+    end
+
+
