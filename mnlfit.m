@@ -56,6 +56,7 @@ while i <= length(varargin)
         case 'firth'     %Firth's method for incorporating the Jeffrey's prior (makes things slow)
             firth= varargin{i+1};
             i = i+1;
+            beep
         case 'diagsonly'%ignore cross terms in computing 2nd derivative
             diagsonly= varargin{i+1};
             i = i+1;         
@@ -81,6 +82,7 @@ while i <= length(varargin)
     
 end
 
+
 if isempty(binvolume)
     binvolume = 0;
 end
@@ -94,6 +96,10 @@ if size(X,1) ~= length(Ysp)
 end
     
 clear R;
+
+if any(b>2) || any(any(abs(X(1:2:end,:).*X(2:2:end,:)>max((1e-10).*mean(X))) ))
+      error('Jeffrey''s prior is currently implemented only for dichotomous logistic regression.')
+end
 
 if checkdesign
     xx = X'*X;  
@@ -304,15 +310,21 @@ while dstep + sqrt( damp*sum(del.^2)./sum(Theta.^2)) > tol  && runiter   ; %Adde
 %         end
         
         % For now, ignoring the second term in I related to multiple assignment
-        DL = DL - .5*DI1'*Iinv1(:) ;% + .5*DI2'*Iinv2(:); %Modified score function by Jeffreys prior (see Firth 1993)
+        DL = DL + .5*DI1'*Iinv1(:) ;% + .5*DI2'*Iinv2(:); %Modified score function by Jeffreys prior (see Firth 1993)
         
+%         dgP = sparseblockmex(P,0:length(P), 0:length(P),length(P)); %Equivalent to but faster than diag(P) or diag(sparse(P))      
+%         spP = sparseblock(P,b);
+%         S1 = full( - X*dgP*X'  + spblocktrace( (spX*spP')*(spP*spX'), Npar ));
+%         D2L =  S1; % + S2;        
+
         LL = sum(log(P*Yblocksum)) + .5*log(det(-D2L));         
     else
+        
+        %Redundant. 
+%         lrr = Theta' * X + binvolume;
+%         lrr = lrr - blocknorm(lrr,b)./blockn; %subtract mean to improve numerical stability
+%         P =  exp( lrr )./  (blocknorm(exp( lrr ) ,b)); %Proabability of each outcome
 
-        lrr = Theta' * X + binvolume;
-        lrr = lrr - blocknorm(lrr,b)./blockn; %subtract mean to improve numerical stability
-        P =  exp( lrr )./  (blocknorm(exp( lrr ) ,b)); %Proabability of each outcome
-%         P =  exp( Theta' * X + binvolume)./  (blocknorm(exp( Theta' * X + binvolume ) ,b)+eps); 
         LL = sum(log(P*Yblocksum));
     end
     
