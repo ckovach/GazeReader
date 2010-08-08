@@ -519,7 +519,7 @@ circy = sin(th)*fxdur + repmat(fxpos(2,:),length(th),1);
 
 pld = cat(1,pld,plot(circx,circy,varargin{:},'parent',phandles.axes2));
 
-if currentFixation ~= 0 && ismember(currentFixation,fxs)
+if ~isempty(currentFixation) && currentFixation ~= 0 && ismember(currentFixation,fxs)
     pld = cat(1,pld,plot(circx(:,ismember(fxs,currentFixation)),circy(:,ismember(fxs,currentFixation)),'r','parent',phandles.axes2));
     pld = cat(1,pld,plot(fxpos(1,ismember(fxs,currentFixation)),fxpos(2,ismember(fxs,currentFixation)),'r','parent',phandles.axes2));
 end

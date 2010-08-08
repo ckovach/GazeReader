@@ -642,7 +642,8 @@ UpdateImage(hObject,eventdata,handles);
 function MakeActive(hObject, eventdata, handles)
 % Makes the current control active in the main window
 
-if gcf~=handles.figure1
+% if gcf~=handles.figure1
+if gcbo~=handles.figure1
     return
 end
 

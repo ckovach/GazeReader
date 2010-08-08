@@ -9,12 +9,15 @@ trind = [];
 lasttr = 0;
 fxind = [];
 lastfx = 0;
+add_indicator = true; %Adds a regressor that indicates the original subject
 
 if length(varargin)>1
     RDin = cat(2,varargin{:});
 else
     RDin = varargin{1};
 end
+
+indr = [];
 for i = 1:length(RDin)
         if isfield(RDin(i),'trialIndex')
             trind = cat(1,trind(:),RDin(i).trialIndex + lasttr);
@@ -42,7 +45,11 @@ for i = 1:length(RDin)
                  RD.regressors(k).noptions = cat(1,RD.regressors(k).noptions(:),RDin(i).regressors(k).noptions(:));
              end
         end
-        
+        if    add_indicator
+            indr = cat(1,indr,ones(size(RDin(i).regressors(1).value,1),1)*i);
+        end
 end
 
-        
+if   add_indicator
+    RD.regressors(end+1) = makeregressor(indr,'codeincr',max([RD.regressors.code]),'label','data_set');
+end

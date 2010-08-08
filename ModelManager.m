@@ -170,7 +170,11 @@ selected(selected ==0 ) = [];
 if ~isempty(selected)   
     setappdata(parent,'CurrentModel',selected(1));
 elseif isequal(get(handles.figure1,'selectiontype'),'open')
-    modelData(currentDataSet) = makeModelData(modelData(currentDataSet),'Label',sprintf('model %i',length(modelData(currentDataSet).models)+1));
+    if length(modelData) < currentDataSet
+        modelData(currentDataSet) = makeModelData([],'Label',sprintf('model %i',1));
+    else        
+        modelData(currentDataSet) = makeModelData(modelData(currentDataSet),'Label',sprintf('model %i',length(modelData(currentDataSet).models)+1));
+    end
     setappdata(parent,'modelData',modelData);
     setappdata(parent,'CurrentModel',length(modelData(currentDataSet).models));
 end

@@ -1,4 +1,4 @@
-function [TD,lasttrs] = concatTD(lastendts,lastfxns,lastBGRs,xdmaps,varargin)
+function [TD,lasttrs] = concatTD(lastendts,lastfxns,lastBGRs,xdmaps,newxdcodes,evtcodemaps,varargin)
 
 %TDcat = concatTD(TD1,TD2,TD3,...)
 %Concatenates multiple trialData structures into a single one.
@@ -17,6 +17,7 @@ lastnumber = 0;
 lastfxn = 0;
 lastBGR = 0;
 lasttrn = 0;
+lasttrs = 0;
 
 TD = TDin(1);
 TD.trials= cat(2,TDin.trials);
@@ -39,8 +40,16 @@ for i = 1:length(TDin)
                  TD.trials(lasttrn + k).samplePts = TDin(i).trials(k).samplePts + lastendt;
                  TD.trials(lasttrn + k).code = TDin(i).trials(k).code + lastcode;
                  TD.trials(lasttrn + k).binGroup = TDin(i).trials(k).binGroup + lastBGR;
-                 TD.trials(lasttrn + k).startCode = xdmaps{i}(ismember(xdmaps{i},TDin(i).trials(k).startCode));
-                 TD.trials(lasttrn + k).stopCode = xdmaps{i}(ismember(xdmaps{i},TDin(i).trials(k).stopCode));
+                 TD.trials(lasttrn + k).startEventCode = evtcodemaps{i}(TDin(i).trials(k).startEventCode);
+                 TD.trials(lasttrn + k).stopEventCode = evtcodemaps{i}(TDin(i).trials(k).stopEventCode);
+                 if isnumeric(xdmaps{i})
+                     TD.trials(lasttrn + k).startCode = xdmaps{i}(ismember(xdmaps{i},TDin(i).trials(k).startCode));
+                    TD.trials(lasttrn + k).stopCode = xdmaps{i}(ismember(xdmaps{i},TDin(i).trials(k).stopCode));
+                 else
+                     TD.trials(lasttrn + k).startCode = find(ismember(newxdcodes,TDin(i).trials(k).startCodeLabel));
+                     TD.trials(lasttrn + k).stopCode = find(ismember(newxdcodes,TDin(i).trials(k).stopCodeLabel));
+                     
+                 end
              end
            
           

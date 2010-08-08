@@ -233,9 +233,13 @@ currentDataSet = getappdata(parent,'CurrentDataSet');
 
 % trialData = getappdata(parent,'trialData');
 
-if isempty(currentDataSet)
-    currentDataSet = 1;
-    setappdata(parent,'CurrentDataSet',currentDataSet )
+% if isempty(currentDataSet) || currentDataSet==0
+%     currentDataSet = 1;
+%     setappdata(parent,'CurrentDataSet',currentDataSet )
+% end
+if isempty(currentDataSet) || currentDataSet==0
+    fprintf('No data set selected...')
+    return
 end
 
 
@@ -321,6 +325,9 @@ elseif any(trialEnds-trialOnsets < 0)
     warning('Some trials have negative duration. Trial beginnings and ends are likely mismatched.')
 end
 
+if currentDataSet > length(trialData)
+    trialData(currentDataSet).codeincr = 0;
+end
     
 trialData(currentDataSet) = makeTrialData('startTime',trialOnsets,'stopTime', trialEnds,'startCode',trialOnsetCodes,...
     'stopCode',trialEndCodes,'code',(1:length(trialOnsets))+ trialData(currentDataSet).codeincr,...

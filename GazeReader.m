@@ -443,6 +443,10 @@ function trial_Menu_Callback(hObject, eventData, handles)
 
 
 % --------------------------------------------------------------------
+function Trial_Manager_Callback(hObject, eventData, handles)
+    trialManager_menu_Callback(hObject, eventData, handles)
+    
+% --------------------------------------------------------------------
 function trialManager_menu_Callback(hObject, eventData, handles)
 % hObject    handle to trialManager_menu (see GCBO)
 % eventData  reserved - to be defined in a future version of MATLAB
@@ -516,7 +520,7 @@ for i = 1:length(filenames)
     switch lower(ext)
 
         case '.edf'
-            [fixdata,rawdata] = readEDF(fullfile(fpath,filename),[],'subtract_first_xdat_time');        
+            [fixdata,rawdata] = readEDF(fullfile(fpath,filename),'subtract_first_xdat_time');        
         case '.fix'
             fixdata = readFIX(fullfile(fpath,filename));        
             try
@@ -890,6 +894,10 @@ activefigure(handles.figure1);
 % setappdata(hObject,'buttonNumber',0)
 
 
+% --------------------------------------------------------------------
+function Image_Manager_Callback(hObject, eventData, handles)
+
+         Images_Menu_Callback(hObject, eventData, handles)
 % --------------------------------------------------------------------
 function Images_Menu_Callback(hObject, eventData, handles)
 % hObject    handle to Images_Menu (see GCBO)

@@ -30,6 +30,7 @@ binvolume = 0;
 max_iterations_reached = 0;
 design_is_singular = [];
 LevMar = true; %use Levenberg-Marquardt damping if true
+showprog = true; %Generate output 
 % LC = 0;
 i=1;
 while i <= length(varargin)
@@ -53,10 +54,7 @@ while i <= length(varargin)
         case 'fix'     %Leave specified parameters fixed (not subject to maximization)
             fix = varargin{i+1};
             i = i+1;
-        case 'firth'     %Firth's method for incorporating the Jeffrey's prior (makes things slow)
-            firth= varargin{i+1};
-            i = i+1;
-            beep
+       
         case 'diagsonly'%ignore cross terms in computing 2nd derivative
             diagsonly= varargin{i+1};
             i = i+1;         
@@ -74,6 +72,9 @@ while i <= length(varargin)
                                     %  parameter vector.
         case 'include_null'     %Doesn't do anything now
             const = varargin{i+1};
+            i = i+1;
+        case 'show_progress' 
+            showprog = varargin{i+1};
             i = i+1;
         otherwise
             error('%s is not a valid keyword.',varargin{i})
@@ -97,7 +98,7 @@ end
     
 clear R;
 
-if any(b>2) || any(any(abs(X(1:2:end,:).*X(2:2:end,:)>max((1e-10).*mean(X))) ))
+if firth && ( any(b>2) || any(any(abs(X(1:2:end,:).*X(2:2:end,:)>max((1e-10).*mean(X))) )) )
       error('Jeffrey''s prior is currently implemented only for dichotomous logistic regression.')
 end
 
@@ -174,8 +175,9 @@ Theta = InitTheta(:);
 
 dstep = Inf;
 count = 0;
-fprintf('%5i: damping: %1.2e,  dstep = %1.2e',0,lmnu,0);
-
+if showprog
+    fprintf('%5i: damping: %1.2e,  dstep = %1.2e',0,lmnu,0);
+end
 
 del = Inf;
 
@@ -454,15 +456,16 @@ while dstep + sqrt( damp*sum(del.^2)./sum(Theta.^2)) > tol  && runiter   ; %Adde
         
     
     dstep = sqrt( sum(del.^2)./sum(Theta.^2));
-
-    fprintf('\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b')
-    fprintf('\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b')
-    if ~isinf(dstep)
-        fprintf('%5i: damping: %1.2e,  dstep = %1.2e',count,damp,dstep);
-    else
-        fprintf('%5i: damping: %1.2e,  dstep = %1.2e',count,damp,0);
-    end
-        
+    
+    if showprog
+        fprintf('\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b')
+        fprintf('\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b')
+        if ~isinf(dstep)
+            fprintf('%5i: damping: %1.2e,  dstep = %1.2e',count,damp,dstep);
+        else
+            fprintf('%5i: damping: %1.2e,  dstep = %1.2e',count,damp,0);
+        end
+    end        
         count = count+1;
 
          dsteps(count) = dstep;
@@ -482,7 +485,8 @@ while dstep + sqrt( damp*sum(del.^2)./sum(Theta.^2)) > tol  && runiter   ; %Adde
              break
          end
 end
-fprintf('\n');
+
+if showprog, fprintf('\n');end
 
 %One more pass to Compute final value of everyting and observed Fisher information 
 lrr = Theta' * X + binvolume;

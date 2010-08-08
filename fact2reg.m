@@ -31,7 +31,7 @@ while i <= length(varargin)
        case 'noptions'
             noptions = varargin{i+1};
             i = i+1;
-       case 'labels'
+       case {'labels','label'}
             labels = varargin{i+1};
             i = i+1;
         case 'cellmeans'

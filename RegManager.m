@@ -70,6 +70,9 @@ setappdata(parent,'CurrentModel',1);
 rmfuns.update = @() UpdateFields([],[],handles);
 rmfuns.designMatrix= @(varargin) designMatrix([],[],handles,varargin{:});
 
+
+rmfuns.reset= @() resetRegressors(hObject,[],handles);
+
 setappdata(parent,'RegManagerFunctions',rmfuns);
 
 InitializeRegressors(hObject, eventdata, handles)
@@ -432,6 +435,11 @@ for CurrentDataSet = length(regData)+1:length(trialData)
         continue
     end
 
+    if sum([trialData(CurrentDataSet).trials.nfix])==0   
+        warning('Trials in set %i do not contain any fixations, skipping...',CurrentDataSet);
+        continue
+    end
+
     % X,Y positions of bin centers  for each fixation
 
     % posField = 'meanPos';
@@ -715,13 +723,16 @@ CurrentDataSet = getappdata(parent,'CurrentDataSet');
     
 trialData = getappdata(parent,'trialData');
 if isempty(trialData) || isempty([trialData(CurrentDataSet).trials.number])   
-    error('No trials have been defined');
+    warning('No trials have been defined');
+    return
 end
 if  isempty([trialData(CurrentDataSet).trials.fixations])   
-    error('No trials have been defined');
+    warning('No fixations in trial');
+    return
 end
 if isempty([trialData(CurrentDataSet).trials.binGroup])   
-    error('Trials have not been associated with any sampling bins');
+    warning('Trials have not been associated with any sampling bins');
+    return
 end
 
 
@@ -763,8 +774,12 @@ end
 
 % We will correct for screen aspect ratio
 scrndata = getappdata(parent,'screenData');
-fxnormMat = diag(scrndata(CurrentDataSet).res.^-1); %Fixation position is normalized to width
-% 
+if CurrentDataSet> length(scrndata)
+    fxnormMat = diag(scrndata(1).res.^-1); %Fixation position is normalized to width
+else
+    fxnormMat = diag(scrndata(CurrentDataSet).res.^-1); %Fixation position is normalized to width
+end
+%
 % fxnormMat = diag([1 1]./scrndata.res(1)); %Fixation position is normalized to width
 % 
 % binnormMat = diag(scrndata.res./scrndata.res(1));
@@ -861,3 +876,14 @@ function IneractionMenu_Callback(hObject, eventdata, handles)
 % handles    structure with handles and user data (see GUIDATA)
 
 
+%----------------------------------------------------
+function resetRegressors(hObject,eventdata,handles)
+
+parent = getappdata(hObject,'parent');
+evh = getappdata(parent,'eyetrackerHeaderData');
+
+for i = 1:length(evh)
+    setappdata(parent,'CurrentDataSet',i)
+    InitializeRegressors(hObject, eventdata, handles)
+    
+end

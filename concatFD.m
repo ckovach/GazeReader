@@ -81,6 +81,7 @@ for i = 1:length(FDin)
                      FD.xdat(lastxdn + k).id = xdatmap(FDin(i).xdat(k).id == FDin(i).xdatCodes);
                  else
                      FD.xdat(lastxdn + k).id = xdatmap(FDin(i).xdat(k).id);                     
+                     FD.xdat(lastxdn + k).code = FD.xdatCodes{xdatmap(FDin(i).xdat(k).id)};                     
                  end
            end
            
@@ -103,7 +104,7 @@ for i = 1:length(FDin)
         lastfxn = fixns(i)+lastfxn;
         lastfxns(i) = lastfxn;
         lastsacn = sacns(i)+lastsacn;
-        lastxdn = xdns(i);
+        lastxdn = xdns(i) + lastxdn;
         if isnumeric(FDin(i).xdatCodes)
             xdmaps{i}(FDin(i).xdatCodes) = FD.xdatCodes(xdatmap);
         else

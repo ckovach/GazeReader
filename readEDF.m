@@ -1,25 +1,32 @@
-function [FIX,RAW] = readEDF(filename,nhist,varargin)
+function [FIX,RAW] = readEDF(filename,varargin)
 
 
 %Uses edfmex to read edf files and convert them to a format consistent with
 %that used for ASL files. 
 
-
+nhist = 2;
 i = 1;
 subtractFirstXdat = false;
+eyeinp = 'x';
 while i <= length(varargin)
    switch lower(varargin{i})
        case 'subtract_first_xdat_time' %Subtract the time of the first message event. 
            subtractFirstXdat = true;
+       case 'eye' %'Use EYE: 'L' for left,'R' for Right
+           eyeinp = varargin{i+1};
+           i = i+1;
+       case 'nhist' %'Use EYE: 'L' for left,'R' for Right
+           eyeinp = varargin{i+1};
+           i = i+1;
         otherwise
            error([varargin{i},' is not a valid option.']);
    end         
     i = i+1;
 end
 
-if nargin < 2 || isempty(nhist)
-    nhist = 2;
-end
+% if nargin < 2 || isempty(nhist)
+%     nhist = 2;
+% end
 
 if ~exist(filename,'file')
     error('Unable to find: %s',filename);
@@ -31,6 +38,7 @@ try
     EDF = edfmex(filename);
     fprintf('\n')
 catch
+    le = lasterror;
     error(sprintf(['\nIt appears the pre-compiled file edfmex.mex is broken or incompatible with your system.',...
             '\nTry recompiling edfmex.cpp in the source directory with mex ''edfmex.cpp edfapi.lib''']))
 end
@@ -47,12 +55,12 @@ FIX.filename = EDF.FILENAME;
 eye = EDF.RECORDINGS(1).eye;
 etfs = EDF.RECORDINGS(1).sample_rate;
 if eye == 3
-    inp = 'x';
-    while ~ismember(inp,{'R','L'})
-        inp = inputdlg('Which eye to analyze: L or R?');
+%     inp = 'x';
+    while ~ismember(eyeinp,{'R','L'})
+        eyeinp = inputdlg('Which eye to analyze: L or R?');
     end
     
-    eye = isequal(inp,'L')+1;
+    eye = isequal(eyeinp,'L')+1;
 end
     
 code = {EDF.FEVENT.codestring};
@@ -94,7 +102,7 @@ endsacc = strcmp(code,'ENDSACC');
 fxs = EDF.FEVENT(endfix);
 
 if length(msgevnt) ~= length(msgcodes)
-    warning(sprintf('Uh Oh. Some of the messages fields are empty.\nEverything will be out of alignment if I continue.'))        
+    warning('Uh Oh. Some of the messages fields are empty.\nEverything will be out of alignment if I continue.')        
     inp = input(sprintf('1. Stop\n2. Continue\n: '));
     if inp == 1
          error('Stopping...');
@@ -136,8 +144,8 @@ for k = 1:length(fxs)
     FIX.seg.fix(i).lastcode = msgcodes{frecentmsg(end)};
     
     if i>1
-        FIX.seg.fix(i).shiftvec = diff(cat(1,FIX.seg.fix(i + [-1:0]).meanPos));
-        FIX.seg.fix(i).dt = diff(cat(1,FIX.seg.fix(i + [-1:0]).startT)); % difference between fixation onsets of 
+        FIX.seg.fix(i).shiftvec = diff(cat(1,FIX.seg.fix(i + (-1:0)).meanPos));
+        FIX.seg.fix(i).dt = diff(cat(1,FIX.seg.fix(i + (-1:0)).startT)); % difference between fixation onsets of 
     
         FIX.seg.fix(i).sac = find( sact <= FIX.seg.fix(i).startT,1,'last');
         

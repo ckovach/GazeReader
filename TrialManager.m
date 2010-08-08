@@ -401,6 +401,10 @@ imageData = getappdata(parent,'imageData');
 binData = getappdata(parent,'binData');
 currentDataSet = getappdata(parent,'CurrentDataSet');
 
+if currentDataSet == 0
+    fprintf('No data set selected...\n')
+    return
+end
 if isempty(currentTrial)
     currentTrial = 0;
 end

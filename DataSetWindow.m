@@ -344,8 +344,11 @@ fixationData = getappdata(parent,'fixationData');
 
 
 [fixationData(end+1), lastendts, lastfxns,xdmaps] = concatFD(fixationData(DataSets));
+
+[eventData(end+1),evtcodemaps] = concatED(lastendts, xdmaps,fixationData(end).xdatCodes,eventData(DataSets));
+
 if   ~isempty(trialData) &&  min(DataSets) <=length(trialData)
-    [trialData(end+1),lasttrs] = concatTD(lastendts,lastfxns,zeros(size(DataSets)),xdmaps, trialData(DataSets));
+    [trialData(end+1),lasttrs] = concatTD(lastendts,lastfxns,zeros(size(DataSets)),xdmaps, fixationData(end).xdatCodes,evtcodemaps,trialData(DataSets));
 end
 if ~isempty(regData) && min(DataSets) <=length(regData)
     regData(end+1) = concatRD(lastfxns,lasttrs,regData(DataSets));
@@ -353,7 +356,6 @@ end
 if ~isempty(rawGazeData) && min(DataSets) <=length(rawGazeData)
     rawGazeData(end+1) = concatRWD(lastendts, rawGazeData(DataSets));
 end
-eventData(end+1) = concatED(lastendts, xdmaps,eventData(DataSets));
 
 %Image Data !
  

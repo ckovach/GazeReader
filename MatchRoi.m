@@ -105,29 +105,30 @@ else
     unitCorrOrder = [1 2];
 end
 
-for i = 1:length(trialnumbers)
+for i = 1:max(trialnumbers)
    %i = trials(trnum);
-   
-   RoiDat(i).Center = cat(1,imdat.trialdat(trialnumbers(i)).pos{:}) + roi_center_offset(ones(1,length(imdat.trialdat(trialnumbers(i)).pos)),:);
-   
-    if strcmp(RoiUnits,'ij');
-        RoiDat(i).Center = RoiDat(i).Center(:,unitCorrOrder);
-        
-        RoiDat(i).Center(:,2) =  unitCorrOffset - RoiDat(i).Center(:,2); %Flip vertical axis if ROIs are in ij units
-     end
-        
-   stim = cat(1,imdat.trialdat(trialnumbers(i)).num{:});
-   RoiDat(i).stimNum = stim; 
-   RoiDat(i).ID = idnum(stim); 
-   RoiDat(i).EM = emonum(stim);
-   RoiDat(i).rad = RoiRadius ;
-   RoiDat(i).trial = trialnumbers(i);
+   if sum(trialnumbers == i) >0
+       RoiDat(i).Center = cat(1,imdat.trialdat(trialnumbers == i).pos{:}) + roi_center_offset(ones(1,length([imdat.trialdat(trialnumbers == i).pos])),:);
+
+        if strcmp(RoiUnits,'ij');
+            RoiDat(i).Center = RoiDat(i).Center(:,unitCorrOrder);
+
+            RoiDat(i).Center(:,2) =  unitCorrOffset - RoiDat(i).Center(:,2); %Flip vertical axis if ROIs are in ij units
+         end
+
+       stim = cat(1,imdat.trialdat(trialnumbers == i).num{:});
+       RoiDat(i).stimNum = stim; 
+       RoiDat(i).ID = idnum(stim); 
+       RoiDat(i).EM = emonum(stim);
+       RoiDat(i).rad = RoiRadius ;
+   end
+   RoiDat(i).trial = i;
 end
 
 
     
 %for i = 1:length(trialOnsets)
-for i = 1:length(trialnumbers)
+for i = 1:max(trialnumbers)
 %     
 %     if i == 18
 %         keyboard
@@ -181,8 +182,8 @@ for i = 1:length(trialnumbers)
         FixRoi(i).fixRoiNum = cumsum(RoiBlock > 0);%Order of fixation excluding fixations at ROI 0 (outside any specified ROIs).  
         FixRoi(i).PointNum = 1:size(fix,2);%Order of data point in trial.  
         FixRoi(i).startT = [FixDat.fix(getfix).(startTfield)]; %Fixation onset times
-        FixRoi(i).trialT = [FixDat.fix(getfix).(startTfield)] - trialOnsets(i); %Onset with respect to trial onset
-         FixRoi(i).trial = trialnumbers(i);
+        FixRoi(i).trialT = [FixDat.fix(getfix).(startTfield)] - trialOnsets(trialnumbers == i); %Onset with respect to trial onset
+         FixRoi(i).trial =i;
         FixRoi(i).(durfield) = [FixDat.fix(getfix).(durfield)]';  %Fixation duration
         FixRoi(i).fixdat = FixDat.fix(getfix);  %Original fixation data associated with this trial
         FixRoi(i).fixIndex = getfix;  %Indices in the FIX structure
@@ -220,7 +221,8 @@ for i = 1:length(trialnumbers)
          FixRoi(i).startpos = initfix; %Position of the last fixation before trial onset if interfixation time is less than 750 msec,
                                         %otherwise, the location of the fixation cross.
     else
-         FixRoi(i).trial = trialnumbers(i);
+         FixRoi(i).trial = i;
     end
 end
 
+% 0
