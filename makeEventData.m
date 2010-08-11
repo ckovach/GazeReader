@@ -4,7 +4,23 @@ function EventData = makeEventData(varargin)
 % EventData = makeEventData([fieldname],value,...)
 % EventData = makeEventData(EventData, [fieldname],value,...)
 % 
-% Intitializes an EventData Structure, or appends events to an existing one;
+% Intitializes an EventData Structure, or appends events to an existing
+% one, with the following fields:
+%
+%   .xdat  - structure of inputs recorded by the eye tracker with fields
+%              .startT - onset time in ms
+%              .id     - id code of event
+%              .code   - numerical or character code describing event 
+%
+%   .event - structure of events with fields
+%       .label - label for event
+%       .time  - time in ms for event
+%       .type  - type of event: 0 - nothing, 1 - trial onset, 2 - trial offset
+%       .xdatcide - associated xdatcode
+%       .info - miscellaneous info.
+%       .code - unique identifying code
+
+
 
 EventData.events = struct('label',[],'time',[],'type',[],'xdatcode',[],'info',[],'code',[]);
 EventData.events(1) = [];

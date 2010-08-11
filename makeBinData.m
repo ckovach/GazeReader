@@ -42,6 +42,10 @@ function [binData, binfunctions] = makeBinData(varargin)
 %         bintype = 'poly' creates a single polygonal bin
 % 
 %             data is a Mx2 matrix of vertices.
+%
+%         bintype = 'simplex' creates N simplicial bins 
+%             data{1} is an Mx2 matrix of vertices.
+%             data{2} is an Nx3 matrix of indices into data{1}.
 % 
 % Additional options:
 % 
@@ -56,7 +60,21 @@ function [binData, binfunctions] = makeBinData(varargin)
 %       structure, binData.
 % 
 %       makeBinData(binData1,binData2,...) concatenates two binData structures.
-
+%
+%       binData.groups is a structure array with the following fields:
+%           .type       -   type of bin (grid, simplex, rect, etc.)
+%           .label      -   descriptive label
+%           .binnums    -   bin numbers
+%           .pos        -   array or structure defining bin position (depending on type)
+%           .nbin       -   number of bins in group
+%           .centers    -   bin centers [x y]
+%           .isinside   -   function handle which takes xy coordinate as
+%                          input and returns bin membership indicator
+%           .plot       -  function for plotting bin boundaries
+%           .patch      - function for plotting bin as a patch
+%           .activeTrials - unused
+%           .inputData  -  data argument passed to makeBinData
+%           .code       - unique identifying code
 
 
 if nargin > 0 && (~isstruct(varargin{1}) || isfield(varargin{1},'vert'))

@@ -1,8 +1,11 @@
 function [FIX,RAW] = readEDF(filename,varargin)
 
-
+% [FIX,RAW] = readEDF(filename,varargin)
+%
 %Uses edfmex to read edf files and convert them to a format consistent with
 %that used for ASL files. 
+%
+% See also EDFMEX
 
 nhist = 2;
 i = 1;

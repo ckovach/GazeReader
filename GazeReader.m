@@ -636,20 +636,24 @@ end
 
 dataFileDir = getappdata(handles.figure1,'dataFileDir');
 
-if nargin > 3 
+
+if nargin > 4 && ~isempty(varargin{2})
+    fpath= varargin{2};
+    dataFileDir = fpath;
+else
+        fpath = [cd,filesep];
+end
+
+if nargin > 3 && ~isempty(varargin{1})
     filenames = varargin{1};
     if ~iscell(filenames)
         filenames = {filenames};
     end
-    fpath = [cd,filesep];
+else
+    [filenames,fpath] = uigetfile('mat','Select Data File(s)', dataFileDir ,'multiselect','on');
 end
-if nargin > 4 
-    fpath= varargin{2};
-end
+
     
-if nargin <= 3
-    [filenames,fpath] = uigetfile('mat','Select a Data File', dataFileDir ,'multiselect','on');
-end
 
 if isnumeric(filenames)
     return
@@ -681,15 +685,15 @@ end
 for i = 1:length(filenames)
     filename = filenames{i};
 
-    load([fpath,filename]);
+    load(fullfile(fpath,filename));
     
 %     if exist('fixdata','var') 
 %         ;
     if exist('FIX','var') 
        fixdata = FIX;
        clear FIX
-    else
-        return
+%     else        
+%         return
     end
 %     if exist('rawdata','var') 
 %         ;
@@ -699,11 +703,15 @@ for i = 1:length(filenames)
            rawdata.seg = RAW.segData;
        end
        clear RAW
-    else
-        return
+%     else
+%         return
     end
     
-        
+    if ~exist('rawdata','var') && ~exist('fixdata','var')
+        warning('The data file %s does not contain the variables I''m looking for.',filename)
+        continue
+    end
+    
     nseg = max([length(fixdata.seg),length(rawdata.seg)]);
 
    rf = fieldnames(rawdata);    

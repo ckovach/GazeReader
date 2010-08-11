@@ -6,7 +6,34 @@ function trialData = makeTrialData(varargin)
 % function trialData = makeTrialData('property',value)
 % Intitialize a trial sructure.
 %   
-%           trialData.trials
+%           trialData.trials - a structure array with the following fiels:
+% 
+%         number        -   Trial number
+%         startTime     -   start time (ms)
+%         stopTime      -   stop time (ms)
+%         startCode     -   code for xdat which marks the onset of the trial
+%         startCodeLabel-   code label for event which marks the offset of the trial
+%         startEventCode-   code for event which marks the onset of the trial
+%         stopCode      -   code for xdat which marks the offset of the trial
+%         stopCodeLabel -   etc
+%         stopEventCode -   etc
+%         samplePts     -   samples within the raw data contained in trial
+%         info          -
+%         image         -   code for the image associated with the trial
+%         binGroup      -   vector of codes for bin group(s) associated with the trial
+%         roiIndex      -   
+%         seg           -   
+%         fixations     -   indices of fixations within trial
+%         fixmat        -   matrix of fixations x binmembership
+%         fixOnsetTimes -   fixation onset times for fixations within the trial
+%         fixbin        -   bins which contain the fixations
+%         nfix          -   number of fixations within the trial
+%         nbin          -   number of bins within the trial
+%         binarea       -   areas of bins within the trials
+%
+% See also SETTRIALDATA
+
+
 newtrials  = struct('number',[],'startTime',[],'stopTime',[],'startCode',[],'startCodeLabel',[],'startEventCode',[],...
                     'stopCode',[],'stopCodeLabel',[],'stopEventCode',[],'samplePts',[],'info',[],'image',[],'binGroup',[],...
                     'roiIndex',[],'seg',[],'fixations',[],'fixmat',[],'fixOnsetTimes',[],'fixbin',[],'nfix',[],'nbin',[],...
