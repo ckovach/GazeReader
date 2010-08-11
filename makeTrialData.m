@@ -24,9 +24,10 @@ function trialData = makeTrialData(varargin)
 %         roiIndex      -   
 %         seg           -   
 %         fixations     -   indices of fixations within trial
-%         fixmat        -   matrix of fixations x binmembership
+%         fixmat        -   matrix of fixation x binmembership indicator
+%                           variable
 %         fixOnsetTimes -   fixation onset times for fixations within the trial
-%         fixbin        -   bins which contain the fixations
+%         fixbin        -   bin numbers which contain the fixations
 %         nfix          -   number of fixations within the trial
 %         nbin          -   number of bins within the trial
 %         binarea       -   areas of bins within the trials

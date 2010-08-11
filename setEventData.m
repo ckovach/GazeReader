@@ -1,4 +1,4 @@
-function setEventData(h,eventdata)
+function eventdata = setEventData(h,eventdata)
 
 
 %  setEventData(h,evtdata)
@@ -20,10 +20,21 @@ end
 
 if nargin > 1
     setappdata(h,'expEventData',eventdata);
+elseif nargout > 0
+    eventdata = getappdata(h,'expEventData');
 end
 
 handles = guidata(h);
 
 GazeReader('EventManager_Callback',h,[],handles); %Initialize events
 
+emfun = getappdata(h,'EventManagerFunctions');
+tmfun = getappdata(h,'trialManagerFunctions');
 
+if ~isempty(emfun)
+    emfun.updateTrials();
+end
+
+if ~isempty(tmfun)
+    tmfun.update();
+end

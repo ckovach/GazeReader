@@ -10,7 +10,7 @@ if nargin < 1 || isempty(h) || ~ishandle(h)
 end
 
 if nargin < 2
-    datafile = [];
+    datafiles = [];
 elseif ~iscell(datafiles)
     datafiles = {datafiles};
 end
@@ -21,4 +21,4 @@ end
 
 handles = guidata(h);
 
-GazeReader('importEytrackerData_menu_Callback',h,[],handles,datafiles,fpath);
+GazeReader('importEyetrackerData_menu_Callback',h,[],handles,datafiles,fpath);

@@ -1,4 +1,4 @@
-function setTrialData(h,trialdata)
+function trialdata = setTrialData(h,trialdata)
 
 
 %  setTrialData(h,trialdata)
@@ -20,9 +20,17 @@ end
 
 if nargin > 1
     setappdata(h,'trialData',trialdata);
+elseif nargout > 0
+    trialdata = getappdata(h,'trialData');
 end
-
 handles = guidata(h);
 
-GazeReader('trialManagerMenu_Callback',h,[],handles);
+GazeReader('Trial_Manager_Callback',h,[],handles);
+
+tmfun = getappdata(h,'trialManagerFunctions');
+
+if ~isempty(tmfun)
+    tmfun.update();
+end
+
 

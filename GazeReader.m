@@ -467,7 +467,7 @@ function import_menu_Callback(hObject, eventData, handles)
 
 
 % --------------------------------------------------------------------
-function importEytrackerData_menu_Callback(hObject, eventData, handles,filenames,fpath)
+function importEyetrackerData_menu_Callback(hObject, eventData, handles,filenames,fpath)
 % hObject    handle to importEytrackerData_menu (see GCBO)
 % eventData  reserved - to be defined in a future version of MATLAB
 % handles    structure with handles and user data (see GUIDATA)
@@ -477,7 +477,7 @@ supported_file_types = {'edf','fix','eyd'};
 
 dataFileDir = getappdata(handles.figure1,'dataFileDir');
 
-if nargin < 4
+if nargin < 4 || isempty(filenames)
     [filenames,fpath] = uigetfile({sprintf('*.%s;',supported_file_types{:})},'Select a Data File', dataFileDir ,'multiselect','on');
 elseif nargin < 5
     fpath = cd;
