@@ -27,7 +27,7 @@ handles = guidata(h);
 
 GazeReader('Image_Manager_Callback',h,[],handles);
 imgfun  = getappdata(h,'ImageManagerFunctions');
-imgfun.LoadImages('stimuli',fpath,imagefiles);
+imgfun.LoadImages(fpath,imagefiles);
 
 if nargou > 1
     imdata = getappdata(h,'imageData');

@@ -22,7 +22,7 @@ function varargout = GazeReader(varargin)
 
 % Edit the above text to modify the response to help GazeReader
 
-% Last Modified by GUIDE v2.5 29-Jan-2008 10:44:06
+% Last Modified by GUIDE v2.5 17-Aug-2010 02:48:01
 
 % Begin initialization code - DO NOT EDIT
 gui_Singleton = 1;
@@ -468,7 +468,7 @@ function import_menu_Callback(hObject, eventData, handles)
 
 % --------------------------------------------------------------------
 function importEyetrackerData_menu_Callback(hObject, eventData, handles,filenames,fpath)
-% hObject    handle to importEytrackerData_menu (see GCBO)
+% hObject    handle to importEyetrackerData_menu (see GCBO)
 % eventData  reserved - to be defined in a future version of MATLAB
 % handles    structure with handles and user data (see GUIDATA)
 
@@ -1879,3 +1879,6 @@ return
 function plot2Dcontrast_menu_Callback(hObject, eventdata, handles)
 
 return 
+
+
+% --------------------------------------------------------------------

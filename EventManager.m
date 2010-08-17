@@ -13,7 +13,8 @@ function varargout = EventManager(varargin)
 %      existing singleton*.  Starting from the left, property value pairs are
 %      applied to the GUI before EventManager_OpeningFunction gets called.  An
 %      unrecognized property name or invalid value makes property application
-%      stop.  All inputs are passed to EventManager_OpeningFcn via varargin.
+%      stop.  All inputs are passed to EventManager_OpeningFcn via
+%      varargin.
 %
 %      *See GUI Options on GUIDE's Tools menu.  Choose "GUI allows only one
 %      instance to run (singleton)".
@@ -328,11 +329,16 @@ end
 if currentDataSet > length(trialData)
     trialData(currentDataSet).codeincr = 0;
 end
-    
-trialData(currentDataSet) = makeTrialData('startTime',trialOnsets,'stopTime', trialEnds,'startCode',trialOnsetCodes,...
-    'stopCode',trialEndCodes,'code',(1:length(trialOnsets))+ trialData(currentDataSet).codeincr,...
-    'startCodeLabel',trialOnsetCodeLabels,'stopCodeLabel',trialEndCodeLabels,'startEventCode',trialOnsetEvtCode,...
-    'stopEventCode',trialEndEvtCode);
+
+if ~isempty(trialOnsets)    
+    trialData(currentDataSet) = makeTrialData('startTime',trialOnsets,'stopTime', trialEnds,'startCode',trialOnsetCodes,...
+        'stopCode',trialEndCodes,'code',(1:length(trialOnsets))+ trialData(currentDataSet).codeincr,...
+        'startCodeLabel',trialOnsetCodeLabels,'stopCodeLabel',trialEndCodeLabels,'startEventCode',trialOnsetEvtCode,...
+        'stopEventCode',trialEndEvtCode);
+
+else
+    trialData(currentDataSet) = makeTrialData;
+end
 
 % trialData(currentDataSet).trials = trialdat; 
 % trialData(currentDataSet).codeincr = max([trialdat.code]);
