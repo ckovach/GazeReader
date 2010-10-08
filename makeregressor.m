@@ -112,7 +112,11 @@ ntrials = length(noptions);
 
 MKX = mkfun(X);
 
-MKX = MKX.*repmat(postmult,1,size(MKX,2));
+if length(postmult) > 1
+    MKX = MKX.*repmat(postmult,1,size(MKX,2));
+else
+    MKX = MKX.*postmult;
+end
 
 npar = size(MKX,2);
 

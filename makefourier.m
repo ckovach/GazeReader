@@ -1,4 +1,4 @@
-function [f,frq] = makefourier(nfrq,varargin)
+function [f,frq,fderiv] = makefourier(nfrq,varargin)
 
 % [f,frq] = makefourier(nfrq,varargin)
 %
@@ -87,4 +87,5 @@ end
 %f = @(txy,th) (th*[exp(j*freqconst*frq*txy(:,useindex)')])';
 f = @(txy,th) (th*[cos(freqconst*frq*txy(:,useindex)' + ph(:,ones(size(txy,1),1)))]);
 
-
+%This function returns the nth derivative wrt the kth variable
+fderiv = @(txy,ns,th)  diag(prod((freqconst*frq).^repmat(ns,size(frq,1),1),2))*(th*(cos(freqconst*frq*txy(:,useindex)' + sum(ns)*pi/2 +  ph(:,ones(size(txy,1),1))))); 

@@ -5,6 +5,7 @@ function Rout = split(R,grps,codeincr)
 %   Splits the block R.value into separate blocks of regressors, where
 %   block i has grp(i) parameters.
 %
+% See also POOL, MAKEREGRESSOR
 
 
 Rout = makeregressor([]);
@@ -60,6 +61,7 @@ for k = 1:length(R)
             Rout(indx).value =V(:,grpvec);
         end
         
+        
         Rout(indx).normconst = R(k).normconst; 
 
          Rout(indx).levmat = R(k).levmat(:,grpvec);
@@ -80,8 +82,9 @@ for k = 1:length(R)
         Rout(indx).info.intxnord = R(k).info.intxnord;
         Rout(indx).noptions = R(k).noptions;
         Rout(indx).Npar = grp(i);
-         Rout(indx).code = codeincr+i;
-
+        Rout(indx).code = codeincr+i;
+        Rout(indx).codevec = Rout(indx).code*ones(1,grp(i));
+        
         Rout(indx).info.hashcode = 0;
         for j = 1:length(grpvec )
             

@@ -15,6 +15,7 @@ noptions = [];
 labels = repmat({[]},1,size(F,2));
 cellmeans = false;
 codeincr = [];
+postmult = 1;
 i = 1;
 
 varargin{end+1} = 'finis';
@@ -39,6 +40,9 @@ while i <= length(varargin)
             i = i+1;
         case 'codeincr'
             codeincr = varargin{i+1};
+            i = i+1;
+        case 'postmultiply'
+            postmult = varargin{i+1};
             i = i+1;
       case 'finis'
          
@@ -72,7 +76,7 @@ for f = 1:size(F,2)
         XF = XF(:,2:end);
     end
 
-    RF(f) = makeregressor(XF,'noptions',noptions,'label',labels{f},'codeincr',codeincr);
+    RF(f) = makeregressor(XF,'noptions',noptions,'label',labels{f},'codeincr',codeincr,'postmultiply',postmult);
 
 end
 

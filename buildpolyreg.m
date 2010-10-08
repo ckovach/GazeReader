@@ -98,9 +98,13 @@ else
     subdc = zeros(1,length(poly)); 
 end
 
-intxnindx = zeros(1,size(x,2)*(1+size(x,2))./2);
+dim = size(x,2);
+
+intxnindx = zeros(1,dim*(1+dim)./2);
+
+
 if ~trig    
-    if size(x,2) == 1
+    if dim == 1
         polyfunsdc = @(x,subdc) (repmat(x,1,length(poly)).^repmat(poly,size(x,1),1) - repmat(subdc,length(x),1))...
                         .*repmat(x>cliplimits(1),1,length(poly)).*repmat(x<=cliplimits(2),1,length(poly)); 
         polyfun = @(x) polyfunsdc(x*premult,subdc); 
@@ -108,15 +112,15 @@ if ~trig
         
          Dmat = diag(1:polyord,1); %Derivative Matrix 
          if minord == 0
-            derivfun = @(X,n) polyfunsdc(X*premult,zeros(1,polyord+1))*Dmat^n;  %Function which returns the nth order polynomial derivative
+            derivfun = @(X,n) polyfunsdc(X*premult,subdc*(n==0))*Dmat^n;  %Function which returns the nth order polynomial derivative
         elseif minord == 1
-            derivfun = @(X,n) ([(X*premult>cliplimits(1)).*(X*premult<=cliplimits(2)),polyfunsdc(X*premult,zeros(1,polyord))]*Dmat^n)*diag(ones(1,polyord),-1)*eye(polyord+1,polyord); 
+            derivfun = @(X,n) ([(X*premult>cliplimits(1)).*(X*premult<=cliplimits(2)),polyfunsdc(X*premult,subdc*(n==0))]*Dmat^n)*diag(ones(1,polyord),-1)*eye(polyord+1,polyord); 
         end
 
     else
         ind = 1;
         if isscalar(polyord)
-            polyord = repmat(polyord,1,size(x,2));
+            polyord = repmat(polyord,1,dim);
         end
          
         ind = 1;
@@ -125,7 +129,8 @@ if ~trig
         endind = 0;
         Rintxn = [];
         argind = [];
-        for i = 1:size(x,2)
+        
+        for i = 1:dim
             for j = 1:polyord(i)
                 R(ind) =  buildpolyreg(x(:,i)*premult,j,'polyvec','subtractdc',false,varargin{:});
                 R(ind).levmat(:) = j;
@@ -152,6 +157,7 @@ if ~trig
         if minord == 0
             R0 = makeregressor(ones(size(x,1),1),'noptions',noptions);
             R0.factmat = 1; R0.levmat = 1;
+            R0.function = @(X) ones(size(X));
         else
             R0 = [];
         end
@@ -168,20 +174,47 @@ if ~trig
 
         polygen = regexprep(polygen,',)',')');
         polygen = [polygen,']'];
+        polyfun = str2func(polygen);
         
         R = pool(R,'codeincr',codeincr,'label',label);
-       
-        polyfun = str2func(polygen);
+        
+        %%% Creating matrix to compute derivatives...note this assumes that the
+        %%% complete series of polynomials (1...p) are included...
+        fmat = R.factmat';
+        lmat = R.levmat';
+        for i = 1:size(fmat,1)
+            ordmat(i,fmat(i,fmat(i,:)~=0)) = lmat(i,fmat(i,:)~=0);
+        end
+        ordmat(end+1,:) = 0;
+        
+        for i = 1:dim
+          dmat = zeros(R.Npar+1);
+            dord = ordmat;
+            dord(:,i) = dord(:,i)-1;
+%             dord(dord<0) = 0;
+            [ism,ismindx] = ismember(dord,ordmat,'rows');
+            dmat(ismindx(ism),ordmat(:,i)~=0) = diag(ordmat(ordmat(:,i)~=0,i));
+            Dmats{i} = dmat; %Dmats{k}^n*R.value computes the nth derivative wrt the kth variable 
+        end
+        
+        
         
         if  subtractdc
             
-             subdc = prod(1./(1+R.levmat)); 
+             subdc = prod(1./(1+R.levmat),1); 
             R.function = @(x)polyfun(x*premult) - repmat(subdc,size(polyfun(x*premult),1),1);
+            R.deriv = @(x,n) getderivx(polyfun(x*premult),n,Dmats) - (sum(n)==0)*repmat(subdc,size(polyfun(x*premult),1),1);
+            
         else       
             R.function = polyfun;
+            R.deriv = @(x,n) getderivx(polyfun(x*premult),n,Dmats);
+            
+            if minord == 0
+                R.levmat(:,1) = 0;
+            end
         end
-        R.factmat = R.code*ones(1,size(R.factmat,2));
-        R.levmat = 1:size(R.factmat,2);
+%         R.factmat = R.code*ones(1,size(R.factmat,2));
+%         R.levmat = 1:size(R.factmat,2);
         
         return
     end
@@ -192,10 +225,12 @@ else
     if ~subtractdc 
         mkfarg = {'keepdc'};
     end
-    [makefourier_output,fr] = makefourier(polyord*ones(1, size(x,2)),mkfarg{:});     %trig polynomials may be in an arbitrary number of dimension based on length of polyord
+    [makefourier_output,fr,deriv] = makefourier(polyord*ones(1, dim),mkfarg{:});     %trig polynomials may be in an arbitrary number of dimension based on length of polyord
     polyfun = @(x)makefourier_output(x*premult,1)';    
+    derivfun = @(x,ns)deriv(x*premult,ns,1)';    
 %     ncol = 2*length(poly)-sum(poly==0);
     ncol = length(polyfun(x(1,:)));
+    
 end    
 
 if center
@@ -245,3 +280,16 @@ if nargin >3
 end
 R = regfun(X,varargin{:});
 
+
+%-----------------------
+function DMX = getderivx(X,n,Dmats)
+
+DM = Dmats{1}^n(1);
+
+for k = 2:length(Dmats)
+    DM = DM*Dmats{k}^n(k);
+end
+DM(:,end) =[];
+X(:,end+1) = 1;
+
+DMX = X*DM;

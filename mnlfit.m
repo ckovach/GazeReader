@@ -31,6 +31,7 @@ max_iterations_reached = 0;
 design_is_singular = [];
 LevMar = true; %use Levenberg-Marquardt damping if true
 showprog = true; %Generate output 
+maxcount = 500; %maximum iterations to continue 
 % LC = 0;
 i=1;
 while i <= length(varargin)
@@ -45,13 +46,16 @@ while i <= length(varargin)
         case 'runiter'    %do not run iterations (ie only compute likelihood at InitTheta) if false
             runiter = varargin{i+1};
             i = i+1;
+        case 'maxiter'    %maximum iterations
+            maxcount = varargin{i+1};
+            i = i+1;
         case 'inittheta'     %Only fits the full model (no LLR statistic on submodels
             InitTheta = varargin{i+1};
             i = i+1;
         case 'binvolume'     %Adds the specified vector of constants to log weight to correct for bin volume.
             binvolume = varargin{i+1};
             i = i+1;
-        case 'fix'     %Leave specified parameters fixed (not subject to maximization)
+        case 'fix'     %Leave specified parameters fixed (not subject to maximization); Change this to use constraint.
             fix = varargin{i+1};
             i = i+1;
        
@@ -107,11 +111,21 @@ if checkdesign
     design_is_singular = rank(xx) < length(xx);
     if design_is_singular
        beep
-       fprintf('Design Matrix is singular! Press Ctrl-C to stop, or wait to continue')
+       fprintf('Design Matrix is singular or poorly conditioned! Press Ctrl-C to stop, or wait to continue')
        pause(10)
     end
 end
 
+%Create constraint matrix for fixed parameters
+if any(fix)
+    constraint = true;
+    fixed = find(fix);
+    LC = zeros(Npar,1);
+    for i = 1:length(fixed)
+        LC(i,fixed(i)) = 1;
+    end
+        LC(end+1,:) = InitTheta(fixed);
+end
 
 transposeSpx = true;
 % maxMatSize = 1e9./64; % Uses a slower loop to compute Hessian matrix if the number of non-zero elements exceeds this number
@@ -120,7 +134,6 @@ lmnu = 1.5; %Damping parameter
 
 badcond =0;
 
-maxcount = 500; %maximum iterations to continue 
 % % trblockstep = 1;
 
 % 
@@ -146,10 +159,10 @@ elseif length(Hreg) == 1
     Hreg = eye(Npar).*Hreg;
 end
 
-if any(fixed~=0)      %Check Regressor structure to see if any values are to remain fixed.
-    fix = fixed~=0;
-    InitTheta(fix) = fixed(fix);
-end
+% if any(fixed~=0)      %Check Regressor structure to see if any values are to remain fixed.
+%     fix = fixed~=0;
+%     InitTheta(fix) = fixed(fix);
+% end
 
 if isempty(X)
     runiter = false;
@@ -335,7 +348,7 @@ while dstep + sqrt( damp*sum(del.^2)./sum(Theta.^2)) > tol  && runiter   ; %Adde
     if ~LevMar  
         if ~constraint
             del = -D2L^-1 * (DL - Hreg*Theta);
-            del(fix) = 0;
+%             del(fix) = 0;
         else
             %Updating with lagrange multiplier
             Q = cat(2,D2L,LC(1:end-1,:));
@@ -344,7 +357,7 @@ while dstep + sqrt( damp*sum(del.^2)./sum(Theta.^2)) > tol  && runiter   ; %Adde
             del = -Q^-1 * ( cat(1,DL,Dlgm) - cat(Hreg*Theta,zeros(nlgm,1)));
             dellgm = del([1:nlgm]+Npar);
             del = del(1:Npar);
-            del(fix) = 0;
+%             del(fix) = 0;
             
             lgm = lgm + dellgm;
         end            
@@ -355,9 +368,9 @@ while dstep + sqrt( damp*sum(del.^2)./sum(Theta.^2)) > tol  && runiter   ; %Adde
 %         del1 = -(D2L - Hreg*lmnu)^-1 * DL;
         if ~constraint
             del1 = -(D2L - Slev - Hreg)^-1  * (DL - Hreg*Theta);
-            del1(fix) = 0;
+%             del1(fix) = 0;
             del2 = -(D2L - Slev./lmnu - Hreg)^-1 * (DL - Hreg*Theta);
-            del2(fix) = 0;
+%             del2(fix) = 0;
             Theta1 = Theta + del1;
             Theta2 = Theta + del2;
             
@@ -371,12 +384,12 @@ while dstep + sqrt( damp*sum(del.^2)./sum(Theta.^2)) > tol  && runiter   ; %Adde
             del1 = -Q1^-1 * ( cat(1,DL,Dlgm(:)) - cat(1,Hreg*Theta,zeros(nlgm,1)));
             dellgm1 = del1([1:nlgm]+Npar);
             del1 = del1(1:Npar);
-            del1(fix) = 0;
+%             del1(fix) = 0;
 
             del2 = -Q2^-1 * ( cat(1,DL,Dlgm(:)) - cat(1,Hreg*Theta,zeros(nlgm,1)));
             dellgm2 = del2([1:nlgm]+Npar);
             del2 = del2(1:Npar);
-            del2(fix) = 0;
+%             del2(fix) = 0;
             Theta1 = Theta + del1;
             Theta2 = Theta + del2;
             

@@ -22,13 +22,19 @@ llrtests = [];
 inittheta = 0; %starting point for numerical maximization
 % parallel = false; %use of parallel toolbox to be implemented
 % maxcpu = 8; %Maximum workers used when using parallel computing
+
+H0theta = 0;
+
+fix = [R.fixed]; %specified parameters remain fixed
+mnlfitopts = {};
+
 while i <= length(varargin)
     
     switch lower(varargin{i})
         case 'regularization'   %Specify gaussian regularization (ridge)
             Hreg = varargin{i+1};
             i = i+1;            
-        case 'firth'    %Use Jeffrey's prior as described by Firth
+        case 'firth'    %Use Jeffrey's prior as described by Firth -- this currently works only for dichotomous logistic regression with one 
             Firth = varargin{i+1};
             i = i+1;
        case 'include_null'    %Include a constant term for a "null" option not explicitly represented 
@@ -51,11 +57,20 @@ while i <= length(varargin)
         case 'inittheta'     
             inittheta = varargin{i+1};
             i = i+1;
+        case 'H0theta'  %value of the parameters for the null hypothesis in the global test (defaults to 0)   
+            H0theta = varargin{i+1};
+            i = i+1;
         case 'binvolume'     %LOG bin volume
             binvolume = varargin{i+1};
             i = i+1;
-        case 'parallel'     %use parallel computing toolbox if available
-            parallel = varargin{i+1};
+%         case 'parallel'     %use parallel computing toolbox if available
+%             parallel = varargin{i+1};
+%             i = i+1;
+        case 'fix'    
+            fix = varargin{i+1};
+            i = i+1;
+        case {'diagsonly','show_progress','maxiter'}     %Other options passed to mnlfit
+            mnlfitopts(end+(1:2)) = varargin(i+(0:1)); 
             i = i+1;
         otherwise
             error('%s is not a valid keyword.',varargin{i})
@@ -129,8 +144,10 @@ elseif isnumeric(trialData) && ~issparse(trialData)
     if length(noptions) == 1;
             noptions = noptions*ones(1,length(Wnum));
     end
-    W = sparse(zeros(sum(noptions),1));
+%     W = spalloc(sum(noptions),1,length(noptions));
+    W(sum(noptions)) = 0;
     W(cumsum([0;noptions(1:end-1)]) + Wnum) = 1;
+    W = sparse(W');
 %     FB = Wnum;
     FB  = Wnum;
     FBr = sparseblock(ones(size(W)),noptions','transpose')*Wnum;
@@ -151,6 +168,11 @@ else
     FBr = sparseblock(ones(size(W)),noptions','transpose')*FB;
 end
 
+if sum(noptions) ~= length(W)
+    error('Sum of noptions does not match the size of the observation vector')
+end
+
+
 if isnumeric(R)
     R = makeregressor(R,'noptions',noptions);
 end
@@ -167,6 +189,17 @@ blockC = full(sparseblock(ones(1,Rpooled.Npar),Npars)');
 Rpooled.value(isnan(Rpooled.value)) = eps;
 
 
+if any(fix)
+    fixed = find(fix);
+    LC = zeros(sum(Npars),1);
+    for i = 1:length(fixed)
+        LC(fixed(i),i) = 1;
+    end
+    if any(inittheta~=0)
+        LC(end+1,:) = inittheta(fixed);
+    end
+end
+
 %Where W = 0, data are discarded
 Rpooled.value = Rpooled.value(FBr~=0, any( Rpooled.value(FBr~=0,:)~=0,1) );
 Worig = W;
@@ -181,12 +214,12 @@ nobs = sum(FB~=0);
 % [parest,I,LL,badcond] = logitmodelsp(Rpooled,W, [] , Hreg);
 % [parest,I,LL,badcond] = mnlfit(Rpooled,W,0, Hreg, true, [],Firth);
 [parest,I,LL,badcond,lgm,max_iter] = mnlfit(Rpooled,W,'inittheta',inittheta,'regularization',Hreg, 'runiter',true, 'fix',[],'firth',Firth,...
-                                'linearconstraint',LC,'include_null',include_null,'binvolume',binvolume,'checkdesign',true);
+                                'linearconstraint',LC,'include_null',include_null,'binvolume',binvolume,'checkdesign',true,mnlfitopts{:});
 
 %The point estimate corresponding to fixed values and 0 otherwise
 % [parest0,I0,LL0] = mnlfit(Rpooled,W,0, Hreg, false, [],Firth);
-[parest0,I0,LL0] = mnlfit(Rpooled,W,'inittheta',inittheta, 'regularization',Hreg, 'runiter',false, 'fix',[],'firth',Firth,...
-                                'linearconstraint',LC,'include_null',include_null,'binvolume',binvolume);
+[parest0,I0,LL0] = mnlfit(Rpooled,W,'inittheta',H0theta, 'regularization',Hreg, 'runiter',false, 'fix',[],'firth',Firth,...
+                                'linearconstraint',LC,'include_null',include_null,'binvolume',binvolume,mnlfitopts{:});
 
 npar = length(parest) - rank(LC);
 fit(1) = fitstruct;
@@ -250,7 +283,10 @@ if length(R)>1 && ~fullOnly
         if ~isempty(LC)
             invC = eye(size(C))-C;
             LCcontr = invC(:,sum(invC)>0);
+            LCcontr(sum([Npars])+1,:) = 0;
             LCsub = LCcontr'*LC;
+            LCsub(end+1,:) = LC(end,:);
+            LCsub(:,sum(LCsub(1:end-1,:))==0)= [];
         else
             LCsub = [];
         end
@@ -267,9 +303,9 @@ if length(R)>1 && ~fullOnly
         end
         fprintf('\nFitting submodel %i: %s\n',i,fit(i+1).label );
         [parest,I,LL,badcond,lgm,max_iter] = mnlfit(Rpooled,W,'inittheta',stth, 'regularization',Hreg, 'runiter',true,...
-                                                     'firth',Firth,'linearconstraint',LCsub,'binvolume',binvolume);
+                                                     'firth',Firth,'linearconstraint',LCsub,'binvolume',binvolume,mnlfitopts{:});
 
-        npar = length(parest);
+        npar = length(parest) - rank(LCsub);
         fit(i+1).parest = parest;
         fit(i+1).I = I;
         fit(i+1).badcond = badcond;

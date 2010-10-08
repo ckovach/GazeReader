@@ -202,7 +202,10 @@ for i = 1:length(R1)
         RX(rxind).Npar = R1(i).Npar*R2(j).Npar;
         RX(rxind).fixed = zeros(1,RX(rxind).Npar);
         RX(rxind).function = makemefun(R1.function,R2.function,R1.Npar,R2.Npar);
- 
+        if isfield(R1,'deriv') && isfield(R2,'deriv') && ~isempty(R1.deriv)&& ~isempty(R2.deriv)
+            RX(rxind).deriv = @(x,ns) kron(R1.deriv(x,ns(1)),ones(1,R2.Npar)).*repmat(R2.deriv(x,ns(2:end)),1,R1.Npar);
+        end
+        
         rxind = rxind+1;
     end
 end
