@@ -3,16 +3,45 @@ function R = buildpolyreg(x,polyord,varargin)
 
 % R = buildpolyreg(x,polyord)
 % 
-%   Generates a regressor block of polynomial terms in x, where x is a N x 1 vector
+%   x is an Nxk input matrix and polyord is a 1xk matrix of polynomial
+%   orders.
 %
-%   Each block is is [x,x^2,x^3,...,x^polyord]
+%   For k == 1
+%   R.value = [x,x^2,x^3,...,x^polyord]
+% 
+%   For k > 1
+%   R.value = [..., x(:,1)^a1*x(:,2)^a2*x(:,3)^a3..., ...]
+%   for all values of a1,a2,a3,...ak such that ai < polyord(i), and 
+%    a1+a2+...+ak <= max(polyord).
+% 
 % 
 % R = buildpolyreg(x,polyord,'trig')
 %   
-%   Returns trigonometric polynomials (sinusoids)
+%   Return series of 1D or 2D trigonometric polynomials (that is, sinusoids)
 % 
-%   R = [sin(x), cos(x), sin(2*x), cos(2*x),...,sin(nx),cos(nx)]
-
+%   R.value = [sin(x), cos(x), sin(2*x), cos(2*x),...,sin(nx),cos(nx)]
+%
+% R = buildpolyreg(x,polyord,'option',value)
+%
+% Create the regressor with any of the following options:
+%      'premultiply' -  multiply the columns of the input matrix by this value
+%                         BEFORE constructing the polynomial.
+%       'postmultiply' -  multipy the columns of the output matrix AFTER 
+%                           constructing the polynomial.
+%       'subtractdc'   - subtracts a constant term equivalent to
+%                        decorrelating with dc over the unit invterval (default = true). 
+%       'trig'         -  No argument. Polynomials are trigonometric, that is, sinusoids.
+%       'dc'           - No argument. Include the unit constant (zeroth order) term 
+%                        (default is to start at 1st order)
+%       'center'      - Subtract mean value for each polynomial term except DC (if it's included)
+%       'clip'        - for values of the input outside this range, the row of the output matrix is set to zero
+%       'polyvec'     -  treat polyord as a 1xp vector, explicitly representing 
+%                           terms in the polynomial (for building
+%                           polynomials that skip some terms).
+%       Other options as taken by MAKEREGRESSOR including the important options
+%        'noptions' and 'codeincr'.
+% 
+% See also MAKEREGRESSOR and FACT2REG
 
 normconst = 1; 
 label = '';

@@ -29,6 +29,7 @@ end
 indx = 1;
 for k = 1:length(R)
     
+    
 
     if nargin < 2
         grp = [];
@@ -54,6 +55,8 @@ for k = 1:length(R)
     for i = 1:length(grp)   
 
         grpvec = stindex(i)+ (1:grp(i));
+        
+        Rout(indx) = makeregressor([],'codeincr',i-1+codeincr,'noptions',R(k).noptions);
 
         if strcmp(R(k).info.form,'sparse')
             Rout(indx).value = sparseblock(V(:,grpvec),R(k).noptions, 'transpose');
@@ -80,9 +83,9 @@ for k = 1:length(R)
         Rout(indx).info.parent = R(k).info;
         Rout(indx).info.form = R(k).info.form;
         Rout(indx).info.intxnord = R(k).info.intxnord;
-        Rout(indx).noptions = R(k).noptions;
+%         Rout(indx).noptions = R(k).noptions;
         Rout(indx).Npar = grp(i);
-        Rout(indx).code = codeincr+i;
+%         Rout(indx).code = codeincr+i;
         Rout(indx).codevec = Rout(indx).code*ones(1,grp(i));
         
         Rout(indx).info.hashcode = 0;

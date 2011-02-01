@@ -7,7 +7,7 @@ function R = makeregressor(X,varargin)
 %   MAKEREGRESSOR takes input X and puts it into the form of a regressor
 %   structure.
 %   
-%   Nopt is the the number-of-options vector giving the number of options
+%   Nopt is the the number-of-options vector giving the number of outcome options
 %   (bins) for each event. X must have sum(Nopt) rows if Nopt is a vector
 %   and have an integer multiple of Nopt if Nopt is a scalar.
 %
@@ -19,7 +19,36 @@ function R = makeregressor(X,varargin)
 %     
 %   Initializes an empty regressor
 %
-% See also INTERACTION, SPLIT, POOL
+%   R = makergressor(X,'option',value)
+%
+%   Create regressor with the following options.
+%       'codeincr' - (IMPORTANT) Each regressor is assigned a unique identifying
+%                      numeric code by incrementing a number starting from this value.
+%                      If this value is less than the code for any existing
+%                      regressor then the code for the new regressor may not be unique,
+%                      and there will be problems.Therefore, when making
+%                      groups of regressors, do something like this:
+%                            R1 = makeregressor(X1,'noptions',noptions);
+%                            R2 = makeregressor(X2,'noptions',noptions,'codeincr',R2(end).code);
+%                            R3 = makeregressor(X3,'noptions',noptions,'codeincr',R3(end).code);
+%                            R = [R1,R2,R3];
+%       'noptions' - (IMPORTANT) If the argument is a vector, Nopts, then it gives the
+%                       number of options on each trial, such that
+%                       sum(Nopts) = size(X,1). If it is scalar, then it
+%                       must evenly divide size(X,1).
+%       'label'    -  A label for the regressor.
+%       'fixed'    -  A vector of parameter values, bfix, which are to remain
+%                     fixed (i.e. which assume a fixed value and are not
+%                     fitted). All parameters for which bfix(k) == 0, are fitted.
+%                     If bfix(k) is to remain fixed at 0, then set
+%                     bfix(k) = eps.
+%       'function' - A function handle used to generate values of the
+%                    regressor. Default is @(X)X.
+%       'postmultiply' - Multiply each column of X by this vector.
+%
+%
+%
+% See also INTERACTION, SPLIT, POOL, BUILDPOLYREG, FACT2REG
 
 %
 % C. Kovach 2007

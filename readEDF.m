@@ -63,7 +63,7 @@ if eye == 3
         eyeinp = inputdlg('Which eye to analyze: L or R?');
     end
     
-    eye = isequal(eyeinp,'L')+1;
+    eye = isequal(eyeinp{1},'L')+1;
 end
     
 code = {EDF.FEVENT.codestring};
@@ -121,8 +121,13 @@ end
 msgts = [FIX.seg.xdat.startT];
 
 saccs = EDF.FEVENT(endsacc);
+if ~isempty(saccs)
+    saceye = double([saccs.eye]);
+    saccs = saccs(saceye == eye -1);
+    sact = [saccs.sttime];
+end
 
-sact = [saccs.sttime];
+    
 i = 0;
 for k = 1:length(fxs)
     if double(fxs(k).eye) ~= eye -1
@@ -193,7 +198,8 @@ for k = 1:length(saccs)
     frecentmsg = find(msgts <= saccs(k).sttime);
     FIX.seg.sac(i).xdhist  = zeros(1,nhist);
     FIX.seg.sac(i).xdhist(end:-1:end-min([length(frecentmsg) nhist]-1)) = msgmap(frecentmsg(end:-1:end-min([length(frecentmsg) nhist]-1)));
-    FIX.seg.sac(i).xdindex = cumsum(recentmsg);
+    cr = cumsum(recentmsg);
+    FIX.seg.sac(i).xdindex = cr(end);
     FIX.seg.sac(i).lastcode = msgcodes{frecentmsg(end)};
     
 end

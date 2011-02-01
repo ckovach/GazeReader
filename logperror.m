@@ -1,0 +1,44 @@
+
+function [lp, lperr,lperrmat] = logperror(phis1,theta,S,phis2)
+
+%  [lp, lperr] = logpperror(phis1,theta,S,phis2)
+%Given the log weight and asymptotic error covariance matrix, S, for a collection of bins,
+%this function returns the estimation error for the log probability over
+%the bins. 
+
+
+
+nbin = size(phis1,1);
+npar = size(phis1,2);
+
+rhos1 = phis1*theta;
+pr1 = exp(rhos1)./nansum(exp(rhos1(:)));
+phis1(pr1==0 | isnan(pr1),:) = 0; %This avoids possible nan if phis1 == +/-Inf
+rhos1(pr1==0 | isnan(pr1),:) = -1./eps; 
+pr1(isnan(pr1)) = 0; %treat nans as excluded bins
+exph1 = pr1'*phis1; %expected phi
+
+if nargin > 3
+    rhos2 = phis2*theta;
+    pr2 = exp(rhos2)./nansum(exp(rhos2(:)));
+    pr2(isnan(pr2)) = 0; %treat nans as excluded bins
+    phis2(pr2==0 ,:) = 0; %This avoids possible nan if phis1 == +/-Inf
+    rhos2(pr2==0 ,:) = -1./eps; 
+    exph2 = pr2'*phis2; %expected phi
+else
+    exph2 = 0;
+    rhos2 = 0;
+    phis2 = 0;
+end
+
+C = phis1 - phis2 -repmat((exph1 - exph2),nbin,1);
+
+lp = rhos1 - rhos2 - (log(sum(exp(rhos1)))-log(sum(exp(rhos2))));
+
+Q = S*C';
+lperr = sqrt(sum(C'.*Q));
+% lperr = sqrt(diag(lperrmat));
+
+if nargout > 2
+    lperrmat = C*S*C';
+end

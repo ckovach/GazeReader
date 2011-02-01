@@ -505,7 +505,7 @@ for CurrentDataSet = length(regData)+1:length(trialData)
             
             %Get log bin volume and normalize
             lbv = log(trialData(CurrentDataSet).trials(i).binareas);
-            lbv =  lbv - mean(lbv);
+            lbv =  lbv - repmat(mean(lbv),size(lbv,1),1);
             fxlbv = kron(ones(nfix,1),lbv(:));
 %             logbinvolume = cat(1,logbinvolume,fxlbv);
             logbinvolume( assigninds,: ) =fxlbv;

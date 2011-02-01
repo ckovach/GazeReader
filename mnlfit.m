@@ -1,6 +1,6 @@
 
 
-function [Theta, I, LL, badcond,lgm, max_iterations_reached,design_is_singular] = mnlfit(R,Ysp,varargin)
+function [Theta, I, LL, badcond,lgm, max_iterations_reached,design_is_singular, N] = mnlfit(R,Ysp,varargin)
 
 %function [Theta, I] = mnlfit(R,Ysp,'param',value,... )
 %
@@ -12,6 +12,9 @@ function [Theta, I, LL, badcond,lgm, max_iterations_reached,design_is_singular] 
 %     In the case of multiple assignment, the outcome is
 %     treated as a weighted combination of the assigned values. In that case 
 %     the value of Y(i) gives the relative weight accorded the corresponding option. 
+%
+%  
+%
 
 % C. Kovach 2008
 
@@ -32,6 +35,8 @@ design_is_singular = [];
 LevMar = true; %use Levenberg-Marquardt damping if true
 showprog = true; %Generate output 
 maxcount = 500; %maximum iterations to continue 
+obsfreq = 1;
+discard = [];
 % LC = 0;
 i=1;
 while i <= length(varargin)
@@ -58,6 +63,10 @@ while i <= length(varargin)
         case 'fix'     %Leave specified parameters fixed (not subject to maximization); Change this to use constraint.
             fix = varargin{i+1};
             i = i+1;
+        case 'obsfreq'     % Observation frequency: A vector with the frequency of each observation (the default is 1). 
+                           % Collapsing over trials with equivalent design and outcome can greatly increase efficiency.  
+            obsfreq = varargin{i+1};
+            i = i+1;
        
         case 'diagsonly'%ignore cross terms in computing 2nd derivative
             diagsonly= varargin{i+1};
@@ -80,6 +89,9 @@ while i <= length(varargin)
         case 'show_progress' 
             showprog = varargin{i+1};
             i = i+1;
+        case 'discard'     %
+            discard = varargin{i+1};
+            i = i+1;
         otherwise
             error('%s is not a valid keyword.',varargin{i})
     end
@@ -100,6 +112,42 @@ if size(X,1) ~= length(Ysp)
     error('X must have the same number of rows as elements in Y')
 end
     
+
+
+% blocksum = sparseblock(ones(1,size(X,2)),b)';
+
+
+
+
+
+
+
+if ~isempty(discard)
+      blocksum = sparseblock(ones(1,size(X,1)),b)';
+   disclarge = blocksum*discard;
+   Ysp = Ysp(~disclarge);
+   X = X(~disclarge,:);
+   b = b(~discard); 
+end
+
+if length(obsfreq) > 1 
+    if ~isempty(discard)
+        obsfreq = obsfreq(~discard);
+    end
+    
+      blocksum = sparseblock(ones(1,size(X,1)),b)';
+    OF = diag(sparse(obsfreq)); %Frequency of each observation
+    OFlarge = diag(sparse(blocksum*obsfreq)); %Frequency of each observation
+else
+    OF      = obsfreq(1);
+    OFlarge = obsfreq(1);
+end
+
+
+Yblocksum = sparseblock(full(Ysp)',b)';
+Y = full(Ysp);
+
+
 clear R;
 
 if firth && ( any(b>2) || any(any(abs(X(1:2:end,:).*X(2:2:end,:)>max((1e-10).*mean(X))) )) )
@@ -195,14 +243,7 @@ end
 del = Inf;
 
 
-% blocksum = sparseblock(ones(1,size(X,2)),b)';
-Yblocksum = sparseblock(full(Ysp)',b)';
 
-% P =  exp( Theta' * X )./  blocknorm(exp( Theta' * X ) ,b); %Proabability of each outcome
-% Pobs = P*Yblocksum;    %Probability of observed outcome
-
-
-Y = full(Ysp);
 
 %Second level for multiple assignment
 b2 = full(sum(Yblocksum));
@@ -257,7 +298,7 @@ while dstep + sqrt( damp*sum(del.^2)./sum(Theta.^2)) > tol  && runiter   ; %Adde
     
     % Derivative of the log likelihood
     
-    DL = X*(P2 - P)';
+    DL = X*OFlarge*(P2 - P)';
     
     if constraint 
         DL = DL + LC(1:end-1,:)*lgm; %Derivative of parameters under linear constraint
@@ -287,7 +328,7 @@ while dstep + sqrt( damp*sum(del.^2)./sum(Theta.^2)) > tol  && runiter   ; %Adde
 
         if diagsonly 
             
-            W = sparseblockmex(P.*(1-P),0:length(P), 0:length(P),length(P)); %Equivalent to but faster than diag(P) or diag(sparse(P))
+            W = sparseblockmex(P.*(1-P),0:length(P), 0:length(P),length(P))*OFlarge; %Equivalent to but faster than diag(P) or diag(sparse(P))
             S1 = - X*W*X';
             D2L = S2 + S1;        
         else 
@@ -297,7 +338,7 @@ while dstep + sqrt( damp*sum(del.^2)./sum(Theta.^2)) > tol  && runiter   ; %Adde
 %            q = spX*spP'; %faster but uses more memory
 %            S1 = full( - X*dgP*X'  + spblocktrace( q*q', Npar ));
 %            clear q;
-           S1 = full( - X*dgP*X'  + spblocktrace( (spX*spP')*(spP*spX'), Npar ));
+           S1 = full( - X*dgP*OFlarge*X'  + spblocktrace( (spX*spP')*OF*(spP*spX'), Npar));
            D2L = S2 + S1;        
 
         end
@@ -332,7 +373,7 @@ while dstep + sqrt( damp*sum(del.^2)./sum(Theta.^2)) > tol  && runiter   ; %Adde
 %         S1 = full( - X*dgP*X'  + spblocktrace( (spX*spP')*(spP*spX'), Npar ));
 %         D2L =  S1; % + S2;        
 
-        LL = sum(log(P*Yblocksum)) + .5*log(det(-D2L));         
+        LL = sum(log(P*Yblocksum)*OF) + .5*log(det(-D2L));         
     else
         
         %Redundant. 
@@ -340,7 +381,7 @@ while dstep + sqrt( damp*sum(del.^2)./sum(Theta.^2)) > tol  && runiter   ; %Adde
 %         lrr = lrr - blocknorm(lrr,b)./blockn; %subtract mean to improve numerical stability
 %         P =  exp( lrr )./  (blocknorm(exp( lrr ) ,b)); %Proabability of each outcome
 
-        LL = sum(log(P*Yblocksum));
+        LL = sum(log(P*Yblocksum)*OF);
     end
     
     % Newton's method
@@ -400,13 +441,13 @@ while dstep + sqrt( damp*sum(del.^2)./sum(Theta.^2)) > tol  && runiter   ; %Adde
             lrr = lrr - blocknorm(lrr,b)./blockn; %subtract mean to improve numerical stability
             P =  exp( lrr )./  (blocknorm(exp( lrr ) ,b)); %Proabability of each outcome
 %             P =  exp( Theta1' * X + binvolume)./  (blocknorm(exp( Theta1' * X+ binvolume ) ,b) + eps); 
-            LL1 = sum(log(P*Yblocksum));
+            LL1 = sum(log(P*Yblocksum)*OF);
 
            lrr = Theta2' * X + binvolume;
             lrr = lrr - blocknorm(lrr,b)./blockn; %subtract mean to improve numerical stability
             P =  exp( lrr )./  (blocknorm(exp( lrr ) ,b)); %Proabability of each outcome
 %      P =  exp( Theta2' * X + binvolume )./  (blocknorm(exp( Theta2' * X + binvolume) ,b) + eps); 
-            LL2  = sum(log(P*Yblocksum));
+            LL2  = sum(log(P*Yblocksum)*OF);
 
         else
 
@@ -416,10 +457,10 @@ while dstep + sqrt( damp*sum(del.^2)./sum(Theta.^2)) > tol  && runiter   ; %Adde
 %             P =  exp( Theta1' * X + binvolume)./  blocknorm(exp( Theta1' * X + binvolume) ,b); 
             dgP = sparseblockmex(P,0:length(P), 0:length(P),length(P)); %Equivalent to but faster than diag(P) or diag(sparse(P))      
             spP = sparseblock(P,b);
-            S1 = full( - X*dgP*X'  + spblocktrace( (spX*spP')*(spP*spX'), Npar ));
+            S1 = full( - X*dgP*OFlarge*X'  + spblocktrace( (spX*spP')*OF*(spP*spX'), Npar ));
             D2L =  S1; % + S2;        
 
-            LL1 = sum(log(P*Yblocksum)) + .5*log(det(-D2L));                     
+            LL1 = sum(log(P*Yblocksum)*OF) + .5*log(det(-D2L));                     
 
             lrr = Theta2' * X + binvolume;
             lrr = lrr - blocknorm(lrr,b)./blockn; %subtract mean to improve numerical stability
@@ -427,11 +468,11 @@ while dstep + sqrt( damp*sum(del.^2)./sum(Theta.^2)) > tol  && runiter   ; %Adde
 %         P =  exp( Theta2' * X + binvolume)./  blocknorm(exp( Theta2' * X + binvolume) ,b); 
             dgP = sparseblockmex(P,0:length(P), 0:length(P),length(P)); %Equivalent to but faster than diag(P) or diag(sparse(P))      
             spP = sparseblock(P,b);
-            S1 = full( - X*dgP*X'  + spblocktrace( (spX*spP')*(spP*spX'), Npar ));
+            S1 = full( - X*dgP*OFlarge*X'  + spblocktrace( (spX*spP')*OF*(spP*spX'), Npar));
             D2L =  S1; % + S2;        
 
             
-            LL2 = sum(log(P*Yblocksum)) + .5*log(det(-D2L));                     
+            LL2 = sum(log(P*Yblocksum)*OF) + .5*log(det(-D2L));                     
 
         end            
 
@@ -506,20 +547,22 @@ lrr = Theta' * X + binvolume;
 lrr = lrr - blocknorm(lrr,b)./blockn; %subtract mean to improve numerical stability
 P =  exp( lrr )./  (blocknorm(exp( lrr ) ,b)); %Proabability of each outcome
 % P =  exp( Theta' * X + binvolume )./  blocknorm(exp( Theta' * X + binvolume ) ,b); %Proabability of each outcome
-LL = sum(log(P*Yblocksum+eps));
+LL = sum(log(P*Yblocksum+eps)*OF);
 Pnorm = blocknorm(P.*Y',b);
 P2 = P.*Y'./Pnorm;
 X2 = X(:,b2bl.*Y' > 1);
 P2 = P2(:,b2bl.*Y' > 1);
 dgP2 = sparseblockmex(P2,0:length(P2), 0:length(P2),length(P2)); %Equivalent to but faster than diag(P) or diag(sparse(P))
 spP2 = sparseblock(P2,b2);
-S2 = full( X2*dgP2*X2'  - spblocktrace( (spX2*spP2')*(spP2*spX2'), Npar ));
+S2 = full( X2*dgP2*X2'  - spblocktrace( (spX2*spP2')*(spP2*spX2'), Npar  ));
 dgP = sparseblockmex(P,0:length(P), 0:length(P),length(P)); %Equivalent to but faster than diag(P) or diag(sparse(P))      
 spP = sparseblock(P,b);
-D2L = full( S2 - X*dgP*X'  + spblocktrace( (spX*spP')*(spP*spX'), Npar ));
+D2L = full( S2 - X*dgP*OFlarge*X'  + spblocktrace( (spX*spP')*OF*(spP*spX'), Npar ));
 if firth
     LL = LL + .5*log(det(-D2L));         
 end
+
+N = sum(ones(1,length(b))*OF);
 
 if any(P==1) || any(P==0)
             fprintf('\nProbability is saturated. Model may be unbounded.\n')

@@ -29,7 +29,7 @@ GazeReader('Image_Manager_Callback',h,[],handles);
 imgfun  = getappdata(h,'ImageManagerFunctions');
 imgfun.LoadImages(fpath,imagefiles);
 
-if nargou > 1
+if nargout > 0
     imdata = getappdata(h,'imageData');
 end
 

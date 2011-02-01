@@ -14,14 +14,17 @@ i=1;
 Hreg = 0; %Default regularization
 Firth = false;
 fullOnly = false;
-multassign =false;
+multassign =true;
 LC = [];
 include_null = 0;
 binvolume = [];
 llrtests = [];
+obsfreq = 1;
+discard = 0;
 inittheta = 0; %starting point for numerical maximization
 % parallel = false; %use of parallel toolbox to be implemented
 % maxcpu = 8; %Maximum workers used when using parallel computing
+
 
 H0theta = 0;
 
@@ -48,7 +51,7 @@ while i <= length(varargin)
             llrtests = varargin{i+1};
             i = i+1;
             fullOnly = false;
-        case 'multassign'     %Allow multiple assignment to bins
+        case 'multassign'     %Allow multiple assignment to bins ( mixture models )
             multassign = varargin{i+1};
             i = i+1;
         case 'linearconstraint'     %A matrix of linear constraints on maximization
@@ -62,6 +65,12 @@ while i <= length(varargin)
             i = i+1;
         case 'binvolume'     %LOG bin volume
             binvolume = varargin{i+1};
+            i = i+1;
+       case 'obsfreq'     %LOG bin volume
+            obsfreq = varargin{i+1};
+            i = i+1;
+       case 'discard'     %LOG bin volume
+            discard= varargin{i+1};
             i = i+1;
 %         case 'parallel'     %use parallel computing toolbox if available
 %             parallel = varargin{i+1};
@@ -90,7 +99,9 @@ end
 % fitstruct = struct('label','','parest',[],'npar',[],'I',[],'badcond',[],...
 %                                 'LL',[],'AIC',[],'BIC',[],'lBayes',[],'llrpval',[],'regressors',[],'contrast',[],'W',[],'firth',[],'Hreg',[],'multassign',[],'blockC',[]);
 fitstruct = struct('label','','parest',[],'npar',[],'I',[],'badcond',[],'max_iterations_reached',[],...
-                                'LL',[],'LLR',[],'AIC',[],'BIC',[],'llrpval',[],'R',[],'regressors',[],'contrast',[],'W',[],'N',[],'firth',[],'Hreg',[],'multassign',[],'blockC',[],'discarded',[],'binvolume',[]);
+                                'LL',[],'LLR',[],'AIC',[],'BIC',[],'llrpval',[],'R',[],'regressors',[],...
+                                'contrast',[],'W',[],'N',[],'obsfreq',[],'firth',[],'Hreg',[],'multassign',[],'blockC',[],...
+                                'discarded',[],'binvolume',[],'singular_design_matrix',[]);
 
 
                             
@@ -201,10 +212,13 @@ if any(fix)
 end
 
 %Where W = 0, data are discarded
-Rpooled.value = Rpooled.value(FBr~=0, any( Rpooled.value(FBr~=0,:)~=0,1) );
+% Rpooled.value = Rpooled.value(FBr~=0, any( Rpooled.value(FBr~=0,:)~=0,1) );
+Rpooled.value = Rpooled.value(:, any( Rpooled.value(FBr~=0,:)~=0,1) );
+% Rpooled.noptions = Rpooled.noptions(FB ~= 0);
 Worig = W;
-W = W(FBr ~= 0);
-Rpooled.noptions = Rpooled.noptions(FB ~= 0);
+% W = W(FBr ~= 0);
+
+discard = discard | FB==0;
 
 if length(binvolume) > 1
     binvolume = binvolume(FBr~=0);
@@ -213,13 +227,13 @@ end
 nobs = sum(FB~=0);
 % [parest,I,LL,badcond] = logitmodelsp(Rpooled,W, [] , Hreg);
 % [parest,I,LL,badcond] = mnlfit(Rpooled,W,0, Hreg, true, [],Firth);
-[parest,I,LL,badcond,lgm,max_iter] = mnlfit(Rpooled,W,'inittheta',inittheta,'regularization',Hreg, 'runiter',true, 'fix',[],'firth',Firth,...
-                                'linearconstraint',LC,'include_null',include_null,'binvolume',binvolume,'checkdesign',true,mnlfitopts{:});
+[parest,I,LL,badcond,lgm,max_iter,design_singular,Nobs] = mnlfit(Rpooled,W,'inittheta',inittheta,'regularization',Hreg, 'runiter',true, 'fix',[],'firth',Firth,...
+                                'linearconstraint',LC,'include_null',include_null,'binvolume',binvolume,'checkdesign',true,'discard',discard,'obsfreq',obsfreq,mnlfitopts{:});
 
 %The point estimate corresponding to fixed values and 0 otherwise
 % [parest0,I0,LL0] = mnlfit(Rpooled,W,0, Hreg, false, [],Firth);
 [parest0,I0,LL0] = mnlfit(Rpooled,W,'inittheta',H0theta, 'regularization',Hreg, 'runiter',false, 'fix',[],'firth',Firth,...
-                                'linearconstraint',LC,'include_null',include_null,'binvolume',binvolume,mnlfitopts{:});
+                                'linearconstraint',LC,'include_null',include_null,'binvolume',binvolume,'discard',discard,'obsfreq',obsfreq,mnlfitopts{:});
 
 npar = length(parest) - rank(LC);
 fit(1) = fitstruct;
@@ -227,6 +241,7 @@ fit(1).label = 'full';
 fit(1).parest = parest;
 fit(1).I = I;
 fit(1).badcond = badcond;
+fit(1).singular_design_matrix = design_singular;
 fit(1).max_iterations_reached = max_iter;
 fit(1).LL = LL;
 fit(1).LLR = LL0-LL;
@@ -246,7 +261,10 @@ fit(1).blockC = blockC;
 fit(1).firth = Firth;
 fit(1).multassign= multassign;
 fit(1).Hreg = Hreg;
-fit(1).N = length(Rpooled.noptions);
+% fit(1).N = length(Rpooled.noptions);
+fit(1).N = full(Nobs);
+fit(1).obsfreq = obsfreq;
+
 fit(1).discarded = FBr == 0;
 fit(1).binvolume = binvolume;
 
@@ -265,9 +283,9 @@ if length(R)>1 && ~fullOnly
         getreg = ~ismember(regcodes,llrtests{i});
         Rpooled = pool(R(getreg));
         
-        Rpooled.value(isnan( Rpooled.value)) = 0;
-        Rpooled.value = Rpooled.value(FBr~=0, any( Rpooled.value(FBr~=0,:)~=0,1) );
-        Rpooled.noptions = Rpooled.noptions(FB ~= 0);
+%         Rpooled.value(isnan( Rpooled.value)) = 0;
+%         Rpooled.value = Rpooled.value(FBr~=0, any( Rpooled.value(FBr~=0,:)~=0,1) );
+%         Rpooled.noptions = Rpooled.noptions(FB ~= 0);
 
 %         fit(i+1).contrast = zeros(sum([R.Npar]),R(i).Npar);
 %         fit(i+1).contrast( sum([R(1:i-1).Npar]) +(1:R(i).Npar),: ) = eye(R(i).Npar);
@@ -303,7 +321,7 @@ if length(R)>1 && ~fullOnly
         end
         fprintf('\nFitting submodel %i: %s\n',i,fit(i+1).label );
         [parest,I,LL,badcond,lgm,max_iter] = mnlfit(Rpooled,W,'inittheta',stth, 'regularization',Hreg, 'runiter',true,...
-                                                     'firth',Firth,'linearconstraint',LCsub,'binvolume',binvolume,mnlfitopts{:});
+                                                     'firth',Firth,'linearconstraint',LCsub,'binvolume',binvolume,'discard',discard,'obsfreq',obsfreq,mnlfitopts{:});
 
         npar = length(parest) - rank(LCsub);
         fit(i+1).parest = parest;

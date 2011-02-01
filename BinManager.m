@@ -735,7 +735,7 @@ end
 
 binData = getappdata(parent,'binData');
 
-if (length(binData.groups) == 1 &&  binData.groups(currentBinGroups).nbin==0 )||...
+if (length(binData.groups) == 1 &&   ~isequal(currentBinGroups,0) && binData.groups(currentBinGroups).nbin==0 )||...
         ( ~isequal(currentBinGroups,0) && all(cellfun(@isempty, {binData.groups.pos})))
     return
 end
