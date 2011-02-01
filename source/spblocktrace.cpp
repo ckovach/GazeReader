@@ -7,6 +7,11 @@
  *  TrB = blocktrace(SpX,n);
  * 
  *  Computes the sum of n X n blocks in the block-diagonal matrix SpX.
+ *
+ *  TrB = blocktrace(SpX,n,w); 
+ *
+ *  Weights each block by the corresponding element in w.
+ *
  */
 
 
@@ -28,11 +33,20 @@ void mexFunction(int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[] )
     double * xout = mxGetPr(plhs[0]);
     double * xin  = mxGetPr(prhs[0]);
     
-        
+    
+    double * xwgt;
+    double xw;
+    
+    if ( nrhs > 2) xwgt = mxGetPr(prhs[2]);
+    
     for (int i = 0 ; i < mxGetNzmax(prhs[0]) ;  i++)
     {
+       
+
+        if ( nrhs > 2 ) xw = xwgt[ i / numelInBlock ]; else xw = 1.0;
         
-       xout[ i % numelInBlock ] += xin[ i ];
+        
+       xout[ i % numelInBlock ] += xin[ i ]*xw;
         
     };
     
