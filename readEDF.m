@@ -182,7 +182,8 @@ for k = 1:length(saccs)
     FIX.seg.sac(i).startT= stt;
     FIX.seg.sac(i).dur= saccs(k).entime-saccs(k).sttime;
     FIX.seg.sac(i).startPos= [saccs(k).gstx saccs(k).gsty];
-    FIX.seg.sac(i).shiftVec= [saccs(k).gstx saccs(k).gsty] - [saccs(k).genx saccs(k).geny];    
+%     FIX.seg.sac(i).shiftVec= [saccs(k).gstx saccs(k).gsty] - [saccs(k).genx saccs(k).geny];    
+    FIX.seg.sac(i).shiftVec= [saccs(k).genx saccs(k).geny] - [saccs(k).gstx saccs(k).gsty];    
     FIX.seg.sac(i).eye= saccs(k).eye;
     if ~isempty(lastfix)
         FIX.seg.sac(i).lastfix= lastfix;

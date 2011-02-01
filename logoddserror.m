@@ -52,7 +52,8 @@ for i = 1:length(rhos1)
     npr([1:i-1,i+1:end]) = pr1([1:i-1,i+1:end]);
     prnot1(i,:) = npr./sum(npr);
     if nargin > 3
-        npr2 = pr2([1:i-1,i+1:end]);
+        npr2 = zeros(1,nbin);
+        npr2([1:i-1,i+1:end]) = pr2([1:i-1,i+1:end]);
         prnot2(i,:) = npr2./sum(npr2);
     end
 end
