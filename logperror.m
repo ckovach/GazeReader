@@ -1,10 +1,23 @@
 
 function [lp, lperr,lperrmat] = logperror(phis1,theta,S,phis2)
 
-%  [lp, lperr] = logpperror(phis1,theta,S,phis2)
-%Given the log weight and asymptotic error covariance matrix, S, for a collection of bins,
-%this function returns the estimation error for the log probability over
-%the bins. 
+%  [lp, lperr, lperrmat] = logperror(x,theta,S)
+%Given the input regressor and asymptotic error covariance matrix, S, for a collection of bins,
+%this function returns the mle estimate and estimation error for the log probability over
+%the bins, given input x. x is an MxK matrix with regressor values for each
+%of M bins. theta is a Kx1 vector of parameter values. 
+% 
+% [lpr, lprerr,lprerrmat] = logperror(x1,theta,S,x2)
+% 
+% Provides maximum likelihood and error estimate for the log ratio of
+% outcome probabilities for ph1 over phi2. Note that x1 and x2 are both
+% MxK matrices, where K is the value of each input regressor for each of M
+% multinomial outcomes.
+%
+% See also ModelFit, mnlfit
+%
+
+% C. Kovach 2010
 
 
 
