@@ -42,7 +42,7 @@ codeincr = 0;
 postmult = 1;
 i = 1;
 
-ignore = false(size(F));
+ignore = false(size(F,1),1);
 
 varargin{end+1} = 'finis';
 while i <= length(varargin)
