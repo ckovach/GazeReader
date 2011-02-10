@@ -4,16 +4,20 @@ function [Theta, I, LL, badcond,lgm, max_iterations_reached,design_is_singular, 
 
 %function [Theta, I] = mnlfit(R,Ysp,'param',value,... )
 %
-%     R is a regressor structure as returned by makeregressor. 
+%     Fits a multinomial generalized linear model with regressor R and
+%     observation vector Ysp.
+%
+%     R is a regressor structure as returned by makeregresso, where. 
 %     R.value is an N x M matrix.
+%
 %     Ysp is the Mx1 vector of observations.with 1 denoting that the chosen option
 %     associated with the corresponding row of X.
 %
 %     In the case of multiple assignment, the outcome is
-%     treated as a weighted combination of the assigned values. In that case 
+%     treated as a weighted mixture of the assigned values. In that case 
 %     the value of Y(i) gives the relative weight accorded the corresponding option. 
 %
-%  
+%     SEE ALSO makeregressor, modelFit
 %
 
 % C. Kovach 2008

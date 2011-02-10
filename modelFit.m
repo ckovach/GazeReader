@@ -1,12 +1,103 @@
 
 function fit = modelFit(trialData ,R,varargin)
 
-% function fit = modelFit(W,R,llrtests)
-%Fits model. W is vector of outcomes. R is an array of regressor structures.
-%Submodels are fit and LLR test carried out on all regressor groups in R if
-%llrtests is true
+% function fit = modelFit(Y,R,option,'value')
 %
-% SEE MNLFIT
+% Function to fit multinomial generalized linear models and compute
+% likelihood ratio tests.
+%
+% R is an array of regressor group structures as returned by makeregressor. 
+%
+% Y is the vector of observations. 
+%
+% Submodels are fit and likelihood ratio tests are carried out on all 
+% regressor groups in R by default.
+%
+% fit is a 1 x K structure where fit(1) contains data on the model fit
+% for the full model, and fit(i) contains data for the (i-1)th likelihood
+% ratio test.
+%  
+%    .label: label for the test
+%
+%    .parest: model parameter estimates for the full model in fit(1), and
+%            for the model excluding the (i-1)th group of regressors otherwise. 
+%
+%    .npar:  number of parameters in the fitted model.
+%
+%    .I   :   Observed Fisher information matrix.
+%
+%    .badcond: 1 if the Fisher information matrix is singular, 0 otherwise.
+%
+%    .max_iterations_reached: 1 if fitting terminated after the maximum
+%                number of iterations was reached.
+%     
+%    .LL:     log likelihood for the parameter estimates.
+% 
+%    .LLR:    log likelihood ratio with respect to the full model. For
+%           fit(1).LLR, LLR is the likelihood ratio with respect to the maximum
+%           entropy model (having uniform probability). Note that deviance
+%           is given by -2*fit(i).LLR.
+%           
+%    .AIC:  Bias corrected Akaike's information criterion.
+% 
+%    .BIC:  Bayes information criterion.
+% 
+%    .llrpval: p-value from the likelihood ratio test, which refers
+%            deviance (-2*LLR) to a chi-square distribution with degrees of
+%            freedom equal to the difference in the number of parameters
+%            between the full and reduced model.
+% 
+%    .R:    pseudo R-squared statistic.
+%
+%    .regressors: codes for the regressors included in the LLR test.
+%
+%    .contrast: Contrast matrix to extract the regressors included in the LLR test. 
+%
+%    .W: Vector of observation
+%
+%    .N: number of data points.
+%
+%    .obsfreq: frequency of each observation. Model fitting is more
+%             efficient when observations that are repeated with respect to design 
+%             matrix and outcome are represented by a single row in the
+%             design matrix with the number of occurrences in obsfreq.
+%   
+%    .firth: 1 if regularization with Jeffrey's prior is used. This currently works only with
+%           dichotomous outcomes.: 
+% 
+%    .Hreg:  inverse covariance matrix of a Gaussian prior distribution on
+%       the parameters.
+%
+%    .Multassign: 1 if multiple assignment to bins is treated as a mixture
+%            model.
+%    
+%    .discarded:  Indicates discarded data points
+%    
+%    .binvolume:  the volume (area) of each bin.
+%  
+%    .singular_design_matrix: True if design matrix is singular.
+%
+%  Options: 
+%          'regularization'    Specify gaussian prior covariance matrix
+%          'firth'             Use Jeffrey's prior as described by Firth -- this currently works only for dichotomous logistic regression with one 
+%          'include_null'      Include a constant term for a "null" option not explicitly represented 
+%                                   in the outcome vector and regressor matrix.
+%          'fullonly'          Only fits the full model (no LLR statistic on submodels
+%          'llrtests'          groups of regressors on which to conduct log-likelihood ratio tests.
+%          'multassign'        Allow multiple assignment to bins ( mixture models )
+%          'linearconstraint'  A matrix of linear constraints on maximization
+%          'inittheta'         Starting value of the parameter estimate.
+%          'H0theta'           value of the parameters for the null hypothesis in the global test (defaults to 0, implying maximum entropy)   
+%          'binvolume'         LOG bin volume
+%          'obsfreq'           Vector of observation frequncies for each
+%                              observation in the input.
+%           'discard'     	   True for every data point which should eb
+%           'fix'              1 x npar vector which is non-zer0 for every regressor whos parameter estimate 
+%                              should remain fixed at the specified value.
+%          {'diagsonly','show_progress','maxiter'}     %Other options passed to mnlfit
+%
+%
+% SEE MAKEREGRESSOR, MNLFIT
 
 %C Kovach 2008
 

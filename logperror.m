@@ -1,11 +1,12 @@
 
-function [lp, lperr,lperrmat] = logperror(phis1,theta,S,phis2)
+function [lp, lperr,lperrmat,C] = logperror(phis1,theta,S,phis2)
 
 %  [lp, lperr, lperrmat] = logperror(x,theta,S)
-%Given the input regressor and asymptotic error covariance matrix, S, for a collection of bins,
-%this function returns the mle estimate and estimation error for the log probability over
-%the bins, given input x. x is an MxK matrix with regressor values for each
-%of M bins. theta is a Kx1 vector of parameter values. 
+%
+% Given the input regressor and asymptotic error covariance matrix, S, for a collection of bins,
+% this function returns the mle estimate and estimation error for the log probability over
+% the bins, given input x. x is an MxK matrix with regressor values for each
+% of M bins. theta is a Kx1 vector of parameter values. 
 % 
 % [lpr, lprerr,lprerrmat] = logperror(x1,theta,S,x2)
 % 
@@ -14,7 +15,13 @@ function [lp, lperr,lperrmat] = logperror(phis1,theta,S,phis2)
 % MxK matrices, where K is the value of each input regressor for each of M
 % multinomial outcomes.
 %
-% See also ModelFit, mnlfit
+% [lpr, lprerr,lprerrmat,C] = logperror(x1,theta,S,x2)
+% 
+%  Also returns the contrast matrix which gives the first derivative of
+%  lpr with respect to theta. Estimation error can be approximated as C*S*C', where C
+%  is the covariance matrix for parameter estimates.
+%
+% See also ModelFit, mnlfit, logoddserror
 %
 
 % C. Kovach 2010

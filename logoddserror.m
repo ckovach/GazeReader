@@ -1,5 +1,5 @@
 
-function [lodds, loddserr,loddserrmat] = logoddserror(phis1,theta,S,phis2)
+function [lodds, loddserr,loddserrmat,C] = logoddserror(phis1,theta,S,phis2)
 
 %  [lodds, loddserr, loddserrmat] = logoddserror(x,theta,S)
 % Given the input regressor and asymptotic error covariance matrix, S, for a collection of bins,
@@ -7,14 +7,20 @@ function [lodds, loddserr,loddserrmat] = logoddserror(phis1,theta,S,phis2)
 % the bins, relative to uniform distribution, given input x. x is an MxK matrix 
 % with regressor values for each of M bins. theta is a Kx1 vector of parameter values. 
 % 
-% [lpr, lprerr,lprerrmat] = logoddserror(x1,theta,S,x2)
+% [lodds, loddserr,loddserrmat] = logoddserror(x1,theta,S,x2)
 % 
 % Provides maximum likelihood and error estimate for the log odds ratio of
 % outcome probabilities for ph1 over phi2. Note that x1 and x2 are both
 % MxK matrices, where K is the value of each input regressor for each of M
 % multinomial outcomes.
 %
-% See also ModelFit, mnlfit
+% [lodds, loddserr,loddserrmat,C] = logoddserror(x1,theta,S,x2)
+%
+%  Also returns the contrast matrix which gives the first derivative of
+%  lodds with respect to theta. Estimation error can be approximated as C*S*C', where C
+%  is the covariance matrix for parameter estimates.
+%
+% See also ModelFit, mnlfit, logperror
 %
 
 % C. Kovach 2011
