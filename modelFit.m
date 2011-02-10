@@ -245,14 +245,14 @@ fit(1).singular_design_matrix = design_singular;
 fit(1).max_iterations_reached = max_iter;
 fit(1).LL = LL;
 fit(1).LLR = LL0-LL;
-fit(1).llrpval = 1-chi2cdf(2*(LL - LL0),npar); %log likelihood ratio test against null hypothesis of no effect
-fit(1).R = 1-LL./LL0; %Pseudo R-squared based on the ratio of the deviance of the model and the model with maximum entropy.
+fit(1).llrpval = 1-chi2cdf(2*(LL - LL0),npar); % log likelihood ratio test against null hypothesis of no effect
+fit(1).R = 1-LL./LL0; % Pseudo R-squared based on the ratio of the deviance of the model and the model with maximum entropy.
 fit(1).npar = npar;
 % fit(1).AIC = -2*LL + 2*npar; %Akaike Information Criterion
-fit(1).AIC = -2*LL + 2*npar + 2*npar*(npar+1)./(length(Rpooled.noptions) - npar-1); %Akaike Information Criterion
+fit(1).AIC = -2*LL + 2*npar + 2*npar*(npar+1)./(length(Rpooled.noptions) - npar-1); % Akaike Information Criterion
                                                                                     % With second order correction
-fit(1).BIC = -2*LL + npar*log(nobs); %Bayes-Schwartz information criterion
-% fit(1).lBayes = npar./2*log(2*pi) - .5*log(det(I)) + LL; %Laplace's approximation to the log marginal likelihood. This can be used to compute approximate bayes factors
+fit(1).BIC = -2*LL + npar*log(nobs); % Bayes-Schwartz information criterion
+% fit(1).lBayes = npar./2*log(2*pi) - .5*log(det(I)) + LL; % sLaplace's approximation to the log marginal likelihood. This can be used to compute approximate bayes factors
 
 fit(1).contrast = [];%eye(sum([Rpooled.Npar]));
 fit(1).regressors = [];
@@ -336,10 +336,10 @@ if length(R)>1 && ~fullOnly
         fit(i+1).npar= npar;
 %         fit(i+1).AIC = -2*LL + 2*npar;
         fit(i+1).AIC = -2*LL + 2*npar + 2*npar*(npar+1)./(length(Rpooled.noptions) - npar-1); %Akaike Information Criterion
-                                                                                    % With second order correction
+                                                                                              % With second order correction
         fit(i+1).BIC = -2*LL + npar*log(nobs);
 %         fit(i+1).lBayes = npar./2*log(2*pi) - .5*log(det(I)) + LL;
-        fit(i+1).llrpval = 1-chi2cdf(2*(fullfit.LL - fit(i+1).LL),fullfit.npar-fit(i+1).npar); %log likelihood ratio test
+        fit(i+1).llrpval = 1-chi2cdf(2*(fullfit.LL - fit(i+1).LL),fullfit.npar-fit(i+1).npar); %log likelihood ratio significance test
         
         fit(i+1).regressors = [R(~getreg).code]; %Codes for the tested regressors
         
