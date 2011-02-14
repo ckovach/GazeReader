@@ -83,7 +83,7 @@ function fit = modelFit(trialData ,R,varargin)
 %          'include_null'      Include a constant term for a "null" option not explicitly represented 
 %                                   in the outcome vector and regressor matrix.
 %          'fullonly'          Only fits the full model (no LLR statistic on submodels
-%          'llrtests'          groups of regressors on which to conduct log-likelihood ratio tests.
+%          'llrtests'          a cell array of groups of regressors on which to conduct likelihood ratio tests.
 %          'multassign'        Allow multiple assignment to bins ( mixture models )
 %          'linearconstraint'  A matrix of linear constraints on maximization
 %          'inittheta'         Starting value of the parameter estimate.

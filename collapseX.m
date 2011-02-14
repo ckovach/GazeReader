@@ -17,11 +17,8 @@ X = [varargin{:}];
  
 nrows = zeros(size(Xunq,1),1);
 
-for i = 1:size(Xunq,1)
-    
-    nrows(i) = sum(uindx==i);
-    
-end
+dsrtu = diff([sort(uindx)]);
+nrows = diff([0;find(dsrtu);length(dsrtu)]);
 
 if nargout > 2
     for i = 1:length(varargin)
