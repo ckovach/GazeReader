@@ -41,6 +41,7 @@ cellmeans = false;
 codeincr = 0;
 postmult = 1;
 i = 1;
+obsfreq = ones(size(F,1),1);
 
 ignore = false(size(F,1),1);
 
@@ -76,6 +77,9 @@ while i <= length(varargin)
         case 'postmultiply'
             postmult = varargin{i+1};
             i = i+1;
+        case 'obsfreq'
+            obsfreq = varargin{i+1};
+            i = i+1;
       case 'finis'
          
       otherwise
@@ -97,15 +101,24 @@ for f = 1:size(F,2)
 
     for l = 1:length(ufs)
 
-        XF(:,l) = F(:,f) == ufs(l);
+        XF(:,l) = (F(:,f) == ufs(l)).*~ignore;
 
     end
 
 
     if center
         %remove mean
-        u = ones(1,size(XF,1))'./sqrt(size(XF,1));
-        XF = XF-u*(u'*XF);
+        if ~all(obsfreq==1)
+    %         u = ones(1,size(XF,1))'./sqrt(size(XF,1));
+            spbl = sparseblock(ones(1,size(XF,1)),noptions.*ones(size(obsfreq)));
+        else 
+            spbl = 1; 
+        end
+        
+        u1 = (spbl'*obsfreq).*~ignore;
+        u1 = u1./sum(u1);
+        u2 = ~ignore;
+        XF = XF-u2*(u1'*XF);
         XF = XF(:,2:end);
     end
 
