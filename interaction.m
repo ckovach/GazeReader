@@ -44,7 +44,7 @@ label = [];
 maxord = Inf;
 while i <= length(varargin)
     
-    switch lower(varargin{i})
+   switch lower(varargin{i})
         case 'intxnord' %order of interaction 
             intxnord = varargin{i+1};
             i = i+1;            
