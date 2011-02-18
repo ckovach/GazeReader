@@ -980,13 +980,12 @@ end
 
 regData = getappdata(parent,'regData');
 
-reg = regData.regressors(crreg);
+reg = regData(crdat).regressors(crreg);
 
 %%% Second argument is basis set labels
 basish = basisFcnDlg(hObject, {'Polynomial','Sinusoid'});
 
 
-basisSet = 0;
 
 uiwait(basish)
 
@@ -994,13 +993,18 @@ basisSet = getappdata(hObject,'basisSet');
 basisOrd = getappdata(hObject,'basisOrd');
 basisDC = getappdata(hObject,'basisKeepDC');
 keepdc = basisDC == 1;
+
+if isempty(basisSet)
+    basisSet = 0;
+end
+
 if keepdc
     lblap = ' dc';
 else
     lblap = '';
 end
 
-cdi = max([regData.regressors.code]);
+cdi = max([regData(crdat).regressors.code]);
 %%% Define the basis sets here
 switch basisSet
     
@@ -1050,7 +1054,7 @@ end
 
 regData = getappdata(parent,'regData');
 
-reg = regData.regressors(crreg);
+reg = regData(crdat).regressors(crreg);
 
 if reg.Npar ~=2
     beep
