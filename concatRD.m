@@ -51,5 +51,5 @@ for i = 1:length(RDin)
 end
 
 if   add_indicator
-    RD.regressors(end+1) = makeregressor(indr,'codeincr',max([RD.regressors.code]),'label','data_set');
+    RD.regressors = appendReg(RD.regressors,indr,[],'label','data_set');
 end

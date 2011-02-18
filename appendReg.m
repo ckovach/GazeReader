@@ -46,6 +46,9 @@ if ishandle(h)
     R1 = regData(dataset).regressors;
 
     set_regData = true;
+    trialData = getappdata(h,'trialData');
+    ntr = length(trialData(dataset).trials);
+
 
 elseif isstruct(h)
     
@@ -53,7 +56,7 @@ elseif isstruct(h)
     
     set_regData = false;
 
-
+    ntr = 0;
 else
     
     error('First argument is not recognized as a handle or regressor structure.')
@@ -75,16 +78,18 @@ nrows = size(R1(1).value,1);   % Number of rows in the design matrix
 
 nrows2 = size(R2.value,1);
 
-trialData = getappdata(h,'trialData');
-ntr = length(trialData(dataset).trials);
 noptions = R1(1).noptions;
 nbin = unique(noptions);
 if length(nbin) > 1
     nbin = nan;
 end
 
-trialnbins = [trialData(dataset).trials.nbin];
-    
+if ishandle(h)
+    trialnbins = [trialData(dataset).trials.nbin];
+else
+    trialnbins = -1;
+end
+
 %%% for numeric inputs, create regressors of the appropriate size
 switch nrows2
     case  sum( noptions )
@@ -188,8 +193,8 @@ Rout = [R1,R2];
 
 if set_regData
     
-    regData.regressors = Rout;
-    regData.codeincr = max([Rout.code]);
+    regData(dataset).regressors = Rout;
+    regData(dataset).codeincr = max([Rout.code]);
    
     % reassign the appended regressors
     setappdata(h,'regData',regData)

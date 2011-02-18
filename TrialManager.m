@@ -843,7 +843,7 @@ for i = 1:length(trdat.trials)  %Eventually change to modify only altered trials
         multfun2 = @(fun,arg) cellfun(fun,arg,'uniformoutput',0);
           binareas = cellfun(multfun2, binareafuns, ccbingr ); 
           
-         trdat.trials(i).binareas = cat(2,binareas{:});
+         trdat.trials(i).binareas = cat(1,binareas{:});
 %         for bg = 1:length(trialbingrs)
 %             binmembership{bg} = binmemberfuns{gb}(ccbingr{bg}{1}, fixlocs{bg}{1});
 %         end

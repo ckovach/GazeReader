@@ -275,7 +275,8 @@ CurrentDataSet = getappdata(parent,'CurrentDataSet');
 selected = get(handles.regressorGroupList,'value')-1;
 selected(selected==0) =[];
 
-regData(CurrentDataSet).regressors(end+1) = interaction(regData(CurrentDataSet).regressors(selected),'codeincr',regData(CurrentDataSet).codeincr);
+regData(CurrentDataSet).regressors = [regData(CurrentDataSet).regressors,...
+            interaction(regData(CurrentDataSet).regressors(selected),'codeincr',regData(CurrentDataSet).codeincr)];
 regData(CurrentDataSet).codeincr = max([regData(CurrentDataSet).regressors.code]);
 
 setappdata(parent,'CurrentRegressorGroup',length(regData(CurrentDataSet).regressors));

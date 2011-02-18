@@ -66,8 +66,8 @@ setappdata(parent,'children',children)
 plotfig = figure('visible','off');
 setappdata(handles.figure1,'plotfig',plotfig);
 
-setappdata(handles.figure1,'PrimaryRegressor',0);
-setappdata(handles.figure1,'SecondaryRegressor',0);
+setappdata(handles.figure1,'XaxisTerm',0);
+setappdata(handles.figure1,'YaxisTerm',0);
 
 setappdata(handles.figure1,'CurrentInteractionTerm',0);
 
@@ -248,13 +248,26 @@ function intxnValue_Callback(hObject, eventdata, handles)
 
 parent = getappdata(handles.figure1,'parent');
 CurrentDataSet = getappdata(parent,'CurrentDataSet');
-% currentRegressorGroup =  getappdata(parent,'CurrentRegressorGroup');
+
+selRegressorGroup =  getappdata(parent,'SelectedRegressorGroups');
 regData = getappdata(parent,'regData');
 RValues = getappdata(handles.figure1,'RValues');
 RFunctions = getappdata(handles.figure1,'RFunctions');
-intxnRs = getappdata(handles.figure1,'intxnRs');
+% intxnRs = getappdata(handles.figure1,'intxnRs');
 currentInteractionTerm = getappdata(handles.figure1,'CurrentInteractionTerm');
-RValues{ismember([regData(CurrentDataSet).regressors.code],intxnRs(currentInteractionTerm))} = str2num(get(handles.intxnValue,'string'));
+
+infos = [regData(CurrentDataSet).regressors.info];
+inputTerms = {infos.functionInputCodes};
+inputRegs = cellfun(@(a,b) b*ones(1,size(a,2),1),inputTerms,num2cell(1:length(infos)),'uniformoutput',false);
+inputRegs = [inputRegs{:}];
+inputTerms =[inputTerms{:}];
+[unqterms,q,termindex] = unique(inputTerms','rows');
+% indx = code2ind(parent,inputTerms(1,:));
+
+currentTerms = unique(termindex(ismember(inputRegs,selRegressorGroup )));
+currentTermIndex = currentTerms(currentInteractionTerm);
+
+RValues{currentTermIndex} = str2num(get(handles.intxnValue,'string'));
 
 inputstr = get(handles.intxnValue,'string');
 if isempty(deblank(inputstr))
@@ -262,7 +275,7 @@ if isempty(deblank(inputstr))
     set(handles.intxnValue,'string',inputstr);
 
 end
-RFunctions{ismember([regData(CurrentDataSet).regressors.code],intxnRs(currentInteractionTerm))} = str2func(['@(X) [',regexprep(inputstr,'Y','X'),']']);
+RFunctions{currentTermIndex} = str2func(['@(X) [',regexprep(inputstr,'Y','X'),']']);
 setappdata(handles.figure1,'RValues',RValues);
 setappdata(handles.figure1,'RFunctions',RFunctions);
 
@@ -335,39 +348,51 @@ Update(hObject, eventdata, handles)
 function Update(hObject, eventdata, handles,varargin)
 
 
+
 parent = getappdata(handles.figure1,'parent'); %Handle for main GUI
+
+CurrentDataSet = getappdata(parent,'CurrentDataSet');
+
+modelData = getappdata(parent,'modelData');
+regData = getappdata(parent,'regData');
+
+currentModel = getappdata(parent,'CurrentModel');
+
+currmodel = modelData(CurrentDataSet).models(currentModel);
+
+
 
 %Whether the plot is 1d, 2d or on the scene plane
 plottype = 1*get(handles.plot1d,'value') + 2*get(handles.plot2d,'value') + 4*get(handles.plotInScene,'value');
 
 
-currentModel = getappdata(parent,'CurrentModel');
-CurrentDataSet = getappdata(parent,'CurrentDataSet');
 % currentRegressorGroup = getappdata(parent,'CurrentRegressorGroup');
 selectedRegressorGroups =  getappdata(parent,'SelectedRegressorGroups');
 
 
-% PrimaryRegressor = getappdata(handles.figure1,'PrimaryRegressor');
-% SecondaryRegressor = getappdata(handles.figure1,'SecondaryRegressor');
-% currentInteractionTerm = getappdata(handles.figure1,'CurrentInteractionTerm');
+infos = [regData(CurrentDataSet).regressors.info];
+inputTerms = {infos.functionInputCodes};
+inputRegs = cellfun(@(a,b) b*ones(1,size(a,2),1),inputTerms,num2cell(1:length(infos)),'uniformoutput',false);
+inputRegs = [inputRegs{:}];
+inputTerms =[inputTerms{:}];
+[terms,q,termindex] = unique(inputTerms','rows'); 
 
-% RValues = getappdata(handles.figure1,'RValues');
+currentTerms = unique(termindex(ismember(inputRegs,selectedRegressorGroups)));
+
+
+% currentTermIndex = currentTerms(currentInteractionTerm);
+% inputLabels = {regData.regressors(indx).label};
+
+setappdata(handles.figure1,'currentTerms',currentTerms);
+% currentTermIndex = currentTerms(currentInteractionTerm);
+
+modelfit = currmodel.fit(1);
+
+
+
 RValues = getappdata(handles.figure1,'RValues');
 RFunctions = getappdata(handles.figure1,'RFunctions');
 
-
-modelData = getappdata(parent,'modelData');
-regData = getappdata(parent,'regData');
-currmodel = modelData(CurrentDataSet).models(currentModel);
-modelfit = currmodel.fit(1);
-
-% if currentRegressorGroup ~=0 && ~isempty(RValues) 
-%     crind =
-%     find(ismember([regData.regressors.code],currentRegressorGroup));
-%     if ~isempty(crind)
-%         set(handles.intxnValue,'string',num2str(RValues{crind}));
-%     end
-% end
 
 rcode = [regData(CurrentDataSet).regressors.code];
 if ~isequal(selectedRegressorGroups,0) && any(~ismember(rcode(selectedRegressorGroups),modelData(CurrentDataSet).models(currentModel).regressors))
@@ -378,26 +403,22 @@ elseif selectedRegressorGroups ~= 0
     crRegs = regData(CurrentDataSet).regressors(selectedRegressorGroups);
 end
 
-
-intxnRs =[];
-for i = 1:length(crRegs) 
-    a = crRegs(i).factmat(:,1);
-    [a,unqind] = unique(a);
-    a(unqind) = a;
-    intxnRs = cat(1,intxnRs,a);
-end
-
-
-
-rcodes = [regData(CurrentDataSet).regressors.code];
-[a,intxnRindx] = ismember(intxnRs,rcodes);
-
 % 
-% lbls = {regData(CurrentDataSet).regressors(intxnRindx).label};
-% sttlen = cellfun(@length,lbls);
-% spaces1 = cellfun(@(n) repmat(' ',1,n),mat2cell(20-2*sttlen,1,ones(1,length(sttlen))),'UniformOutput',false);
+% intxnRs =[];
+% for i = 1:length(crRegs) 
+%     a = crRegs(i).factmat(:,1);
+% %     [a,unqind] = unique(a);
+% %     if length(a) > 1    
+% %         a(unqind) = a;
+% %     end
+%     intxnRs = cat(1,intxnRs,a);
+% end
 % 
-% set(handles.intxnList,'Value',currentInteractionTerm+1);
+% 
+% 
+% rcodes = [regData(CurrentDataSet).regressors.code];
+% [a,intxnRindx] = ismember(intxnRs,rcodes);
+
 
 UpdateFields(hObject, eventdata, handles)
 
@@ -425,8 +446,8 @@ activePlots = get([handles.plotLRR, handles.LLRerror, handles.LRRoverLRRerr,hand
 activePlots = [activePlots{:}]';
 plotWhat = [1 2 4 8]*activePlots;
 
-PrimaryRegressor = getappdata(handles.figure1,'PrimaryRegressor');
-SecondaryRegressor = getappdata(handles.figure1,'SecondaryRegressor');
+XaxisTerm = getappdata(handles.figure1,'XaxisTerm');
+YaxisTerm = getappdata(handles.figure1,'YaxisTerm');
 
 
 % [qq,selind] = ismember(selectedRegressorGroups,rcodes);
@@ -438,6 +459,10 @@ modelreg = rcodes(ismember(rcodes,currmodel.regressors));
 a = ismember(modelreg,rcodes(selectedRegressorGroups));
 contrast = E(:,sum(modelfit.blockC(:,a),2)==1); 
 parest = modelfit.parest; 
+% infos = [regData(CurrentDataSet).regressors.info];
+% inputcodes = [infos.functionInputCodes];
+
+
 
 errmat = contrast'*modelfit.I^-1*contrast;
 
@@ -448,6 +473,7 @@ if length(crRegs) > 1
 else
     crPool = crRegs;
 end
+
 ca = nan;
 RV = getappdata(handles.figure1,'liststr');
 RV = strcat({' '},RV(2:end));
@@ -504,17 +530,17 @@ switch plottype
         
         Xi = {};
         Xbl = {}; %Baseline
-        for  j = 1:length(intxnRindx)
-            if ismember(intxnRs(j), PrimaryRegressor)
-                if intxnRindx(j) > length(RFunctions) || ~isa(RFunctions{intxnRindx(j)},'function_handle')
-                    RFunctions{intxnRindx(j)} = @(X) X;
+        for  j = 1:length(currentTerms)
+            if ismember(currentTerms(j), XaxisTerm)
+                if currentTerms(j) > length(RFunctions) || ~isa(RFunctions{currentTerms(j)},'function_handle')
+                    RFunctions{currentTerms(j)} = @(X) X;
                 end
-                Xi{j} = RFunctions{intxnRindx(j)}(X);
+                Xi{j} = RFunctions{currentTerms(j)}(X);
 %                 Xbl{j} = plotvalues(CurrentDataSet).xbl*blC.x;
                 Xbl{j} = plotvalues(CurrentDataSet).xbl*blC.x;
             else
-                Xi{j} = repmat(RValues{intxnRindx(j)},size(X,1),1);
-                Xbl{j} = RValues{intxnRindx(j)}*blC.x;
+                Xi{j} = repmat(RValues{currentTerms(j)},size(X,1),1);
+                Xbl{j} = RValues{currentTerms(j)}*blC.x;
             end
         end
         plotvalues(CurrentDataSet).Rx = Xi;
@@ -608,30 +634,31 @@ switch plottype
         
         Xi = {};
 %         Xbl = {};
-        for  j = 1:length(intxnRindx)
-            if ismember(intxnRs(j),PrimaryRegressor) &&  ismember(intxnRs(j), SecondaryRegressor)              
-                if intxnRindx(j) > length(RFunctions) || ~isa(RFunctions{intxnRindx(j)},'function_handle')
-                    RFunctions{intxnRindx(j)} = @(X) X;
+        for  j = 1:length(currentTerms)
+            if ismember(currentTerms(j),XaxisTerm) &&  ismember(currentTerms(j), YaxisTerm)              
+                if currentTerms(j) > length(RFunctions) || ~isa(RFunctions{currentTerms(j)},'function_handle')
+                    RFunctions{currentTerms(j)} = @(X) X;
                 end
-                Xi{j} = RFunctions{intxnRindx(j)}( [Xm(:), Ym(:)]);
+                Xi(currentTerms(j) == currentTerms) = cellfun(RFunctions{currentTerms(j)},{ Xm(:), Ym(:)},'uniformoutput',false);
+%                 Xi{j} = RFunctions{currentTerms(j)}( Xm(:), Ym(:));
 %                 Xbl{j} = [plotvalues(CurrentDataSet).xbl*blC.x, plotvalues(CurrentDataSet).ybl*blC.y]; 
-            elseif ismember(intxnRs(j),PrimaryRegressor)
-                if intxnRindx(j) > length(RFunctions) || ~isa(RFunctions{intxnRindx(j)},'function_handle')
-                    RFunctions{intxnRindx(j)} = @(X) X;
+            elseif ismember(currentTerms(j),XaxisTerm)
+                if currentTerms(j) > length(RFunctions) || ~isa(RFunctions{currentTerms(j)},'function_handle')
+                    RFunctions{currentTerms(j)} = @(X) X;
                 end
-                Xi{j} = RFunctions{intxnRindx(j)}( Xm(:));
+                Xi{j} = RFunctions{currentTerms(j)}( Xm(:));
 %                 Xbl{j} = plotvalues(CurrentDataSet).xbl*blC.x; 
-            elseif ismember(intxnRs(j), SecondaryRegressor)
-                if intxnRindx(j) > length(RFunctions) || ~isa(RFunctions{intxnRindx(j)},'function_handle')
-                    RFunctions{intxnRindx(j)} = @(X) X;
+            elseif ismember(currentTerms(j), YaxisTerm)
+                if currentTerms(j) > length(RFunctions) || ~isa(RFunctions{currentTerms(j)},'function_handle')
+                    RFunctions{currentTerms(j)} = @(X) X;
                 end
-                Xi{j} =  RFunctions{intxnRindx(j)}(Ym(:));
+                Xi{j} =  RFunctions{currentTerms(j)}(Ym(:));
 %                 Xbl{j} = plotvalues(CurrentDataSet).ybl*blC.y;
             else
-%                 Xi{j} = repmat(RValues{intxnRs(j)},numel(Xm),1);
-%                 Xbl{j} = RValues{intxnRs(j)}*(blC.x | blC.y);
-                Xi{j} = repmat(RValues{intxnRindx(j)},numel(Xm),1);
-%                 Xbl{j} = RValues{intxnRindx(j)}*(blC.x | blC.y);
+%                 Xi{j} = repmat(RValues{currentTerms(j)},numel(Xm),1);
+%                 Xbl{j} = RValues{currentTerms(j)}*(blC.x | blC.y);
+                Xi{j} = repmat(RValues{currentTerms(j)},numel(Xm),1);
+%                 Xbl{j} = RValues{currentTerms(j)}*(blC.x | blC.y);
             end
         end
         
@@ -661,12 +688,18 @@ switch plottype
         regval = crPool.function(Xi{:});
         Xbls = Xi;
         if blC.x
-            xregs = ismember(intxnRs,PrimaryRegressor);
+            xregs = ismember(currentTerms,XaxisTerm);
             Xbls(xregs) = { repmat(plotvalues(CurrentDataSet).xbl,size(regval,1),1)}; %baseline values
         end
         if blC.y
-            yregs = ismember(intxnRs,SecondaryRegressor);
-            Xbls(yregs) = { repmat(plotvalues(CurrentDataSet).ybl,size(regval,1),1)}; %baseline values
+            yregs = find(ismember(currentTerms,YaxisTerm));
+            if xregs == yregs
+                for yr = 1:length(yregs)
+                    Xbls{yregs}(:,2) = repmat(plotvalues(CurrentDataSet).ybl,size(regval,1),1); %baseline values
+                end
+            else
+                Xbls(yregs) = { repmat(plotvalues(CurrentDataSet).ybl,size(regval,1),1)}; %baseline values
+            end
         end        
         if blC.x == 1 || blC.y == 1
 %              regval = regval-repmat(crPool.function(Xbl{:}),size(regval,1),1);
@@ -753,12 +786,64 @@ if ishandle(ca)
 end
 setappdata(plotfig,'plothandles',pl);
 
+
+% --------------------------------------------------------------------
+% function pooled_function = makePooledFunctions(grh,selReg )
+% 
+% 
+% %Create a function which distributes inputs to the appropriate arguments
+% 
+% regData = getappdata(grh,'regData');
+% currdat = getappdata(grh,'CurrentDataSet');
+% 
+% 
+% 
+% % Get regressor codes
+% rcodes = [regData(currdat).regressors.code];
+% rfunctions = {regData(currdat).regressors(selReg).function};
+% factmats = {regData(currdat).regressors(selReg).factmat};
+% 
+% 
+% terms= zeros(2,0);
+% for i = 1:length(selReg)
+%     [unq,q,polyterm] = unique(factmats{i}(:,1));
+%      rinputs{i} = [];
+%      for j = 1:length(unq)
+%          for k = 1:sum(polyterm==j)
+%              
+%              input = find(terms(1,:) == unq(j) & terms(2,:) == k);
+%              if isempty(input)
+%                  terms(:,end+1) = [unq(j),k];
+%                  rinputs{i}(end+1) = size(terms,2);
+%              else
+%                  rinputs{i}(end+1) = input;
+%              end
+%                  
+%          end
+%      end
+% end             
+% 
+% nargs = max([rinputs{:}]);
+% args = cellfun(@(n) sprintf('X%i',n),num2cell(1:nargs),'uniformoutput',false);
+% trim = @(a) a(1:end-1);
+% genarg = @(X)trim(sprintf('%s,',X{:}));
+% funs = cellfun(@(inp,i) sprintf('rfunctions{%i}(%s)',i,genarg(args(inp))),rinputs,num2cell(1:length(rinputs)),'uniformoutput',false);
+% 
+% pooled_function = str2func( sprintf('@(%s) cat(2, %s )',genarg(args),genarg(funs)));
+% 
+
+
+
 % --------------------------------------------------------------------
 function UpdateFields(hObject, eventdata, handles)
 
 
 
 parent = getappdata(handles.figure1,'parent');
+
+
+modelData = getappdata(parent,'modelData');
+regData = getappdata(parent,'regData');
 
 plottype = 1*get(handles.plot1d,'value') + 2*get(handles.plot2d,'value') + 4*get(handles.plotInScene,'value');
 
@@ -769,81 +854,115 @@ CurrentDataSet = getappdata(parent,'CurrentDataSet');
 selectedRegressorGroups =  getappdata(parent,'SelectedRegressorGroups');
 
 
-PrimaryRegressor = getappdata(handles.figure1,'PrimaryRegressor');
-SecondaryRegressor = getappdata(handles.figure1,'SecondaryRegressor');
+infos = [regData(CurrentDataSet).regressors.info];
+inputTerms = {infos.functionInputCodes};
+inputRegs = cellfun(@(a,b) b*ones(1,size(a,2),1),inputTerms,num2cell(1:length(infos)),'uniformoutput',false);
+inputRegs = [inputRegs{:}];
+inputTerms =[inputTerms{:}];
+[terms,q,termindex] = unique(inputTerms','rows'); 
+
+currentTerms = unique(termindex(ismember(inputRegs,selectedRegressorGroups)));
+
+
+
+termRegs = code2ind(parent,terms(:,1));
+
+
+% currentTerms = find(ismember(code2ind(parent,terms(:,1)),selectedRegressorGroups ));
+% currentTermIndex = currentTerms(currentInteractionTerm);
+
+% Create labels to display
+inputLabels = {regData(CurrentDataSet).regressors(termRegs(currentTerms)).label};
+for i = 1:length(currentTerms)
+    crind = cumsum(termRegs(currentTerms(i)) == termRegs);    
+    nterm = crind(end);
+    if nterm > 1
+        inputLabels{i} = sprintf('%s (X%i)',inputLabels{i},crind(currentTerms(i)));
+    end
+end
+        
+
+
+XaxisTerm = getappdata(handles.figure1,'XaxisTerm');
+YaxisTerm = getappdata(handles.figure1,'YaxisTerm');
 
 currentInteractionTerm = getappdata(handles.figure1,'CurrentInteractionTerm');
 RValues = getappdata(handles.figure1,'RValues');
 RFunctions = getappdata(handles.figure1,'RFunctions');
 
-modelData = getappdata(parent,'modelData');
-regData = getappdata(parent,'regData');
 % currmodel = modelData(CurrentDataSet).models(currentModel);
 % modelfit = currmodel.fit;
 
+% 
+% rcodes = [regData(CurrentDataSet).regressors.code];
+% if ~isequal(selectedRegressorGroups,0) && any(~ismember(rcodes(selectedRegressorGroups),modelData(CurrentDataSet).models(currentModel).regressors))
+%     selectedRegressorGroups = 0;
+%     setappdata(parent,'SelectedRegressorGroups',selectedRegressorGroups);
+%     return
+% elseif selectedRegressorGroups~=0
+%     crRegs = regData(CurrentDataSet).regressors(selectedRegressorGroups);
+% end
+% 
+% 
+% currentTerms =[];
+% for i = 1:length(crRegs) 
+%     a = crRegs(i).factmat(:,1);
+%     [a,unqind] = unique(a);
+% 
+%      if length(a) > 1    
+%         a(unqind) = a;
+%     end
+%     currentTerms = cat(1,currentTerms,a(:));
+% end
+% 
+% 
+% setappdata(handles.figure1,'currentTerms',currentTerms)
+% 
+% 
+% 
+% rcodes = [regData(CurrentDataSet).regressors.code];
+% [a,currentTerms] = ismember(currentTerms,rcodes);
+% 
+% lbls = {regData(CurrentDataSet).regressors(currentTerms).label};
 
-rcodes = [regData(CurrentDataSet).regressors.code];
-if ~isequal(selectedRegressorGroups,0) && any(~ismember(rcodes(selectedRegressorGroups),modelData(CurrentDataSet).models(currentModel).regressors))
-    selectedRegressorGroups = 0;
-    setappdata(parent,'SelectedRegressorGroups',selectedRegressorGroups);
-    return
-elseif selectedRegressorGroups~=0
-    crRegs = regData(CurrentDataSet).regressors(selectedRegressorGroups);
-end
-
-
-intxnRs =[];
-for i = 1:length(crRegs) 
-    a = crRegs(i).factmat(:,1);
-    [a,unqind] = unique(a);
-    a(unqind) = a;
-    intxnRs = cat(1,intxnRs,a);
-end
-
-
-setappdata(handles.figure1,'intxnRs',intxnRs)
-
-
-
-rcodes = [regData(CurrentDataSet).regressors.code];
-[a,intxnRindx] = ismember(intxnRs,rcodes);
-
-lbls = {regData(CurrentDataSet).regressors(intxnRindx).label};
+lbls = inputLabels;
 sttlen = cellfun(@length,lbls);
 spaces1 = cellfun(@(n) repmat(' ',1,n),mat2cell(20-2*sttlen,1,ones(1,length(sttlen))),'UniformOutput',false);
 
 set(handles.intxnList,'Value',currentInteractionTerm+1);
 
 RV = {};
-for i = 1:length(intxnRindx)
-    if ismember(intxnRs(i),PrimaryRegressor) && (ismember(intxnRs(i),SecondaryRegressor) || isequal(SecondaryRegressor, 0)) && plottype > 1
-        RV{i} = ' = XY';
-    elseif ismember(intxnRs(i), PrimaryRegressor) 
-        if intxnRindx(i) > length(RFunctions) || ~isa(RFunctions{intxnRindx(i)},'function_handle')
+% for i = 1:length(currentTerms)
+for i = 1:length(currentTerms)
+%     if ismember(currentTerms(i),XaxisTerm) && (ismember(currentTerms(i),YaxisTerm) || isequal(YaxisTerm, 0)) && plottype > 1
+%         RV{i} = ' = XY';
+%     elseif ismember(currentTerms(i), XaxisTerm) 
+    if ismember(currentTerms(i), XaxisTerm) 
+        if currentTerms(i) > length(RFunctions) || ~isa(RFunctions{currentTerms(i)},'function_handle')
                         str ='@(X)X';
-                        RFunctions{intxnRindx(i)} = @(X)X;
+                        RFunctions{currentTerms(i)} = @(X)X;
          else
-                        str = char( RFunctions{intxnRindx(i ) });
+                        str = char( RFunctions{currentTerms(i ) });
          end
             RV{i} =  [' = ',str(5:end)];
 %         RV{i} = ' = X';
 
-    elseif ismember(intxnRs(i), SecondaryRegressor) && plottype > 1
-        if intxnRindx(i) > length(RFunctions) || ~isa(RFunctions{intxnRindx(i)},'function_handle')
+    elseif ismember(currentTerms(i), YaxisTerm) && plottype > 1
+        if currentTerms(i) > length(RFunctions) || ~isa(RFunctions{currentTerms(i)},'function_handle')
                 str ='@(Y)Y';
-                RFunctions{intxnRindx(i)} = @(Y)Y;
+                RFunctions{currentTerms(i)} = @(Y)Y;
             
         else
-                    str = char( RFunctions{intxnRindx(i ) });
+                    str = char( RFunctions{currentTerms(i ) });
         end
             RV{i} =  [' = ',str(5:end)];
 
 %         RV{i} = ' = Y';
-    elseif isempty(RValues) || intxnRindx(i) > length(RValues) ||  isempty(RValues{intxnRindx(i)}) 
-        RValues{intxnRindx(i)} = zeros(1,regData(CurrentDataSet).regressors(intxnRindx(i)).Npar);
-        RV{i} = [' =', sprintf(' %0.3g',RValues{intxnRindx(i)})];
+    elseif isempty(RValues) || currentTerms(i) > length(RValues) ||  isempty(RValues{currentTerms(i)}) 
+        RValues{currentTerms(i)} = zeros(1,regData(CurrentDataSet).regressors(inputRegs(currentTerms(i))).Npar);
+        RV{i} = [' =', sprintf(' %0.3g',RValues{currentTerms(i)})];
     else
-        RV{i} = [' =', sprintf(' %0.3g',RValues{intxnRindx(i)})];
+        RV{i} = [' =', sprintf(' %0.3g',RValues{currentTerms(i)})];
     end
 end
 
@@ -860,10 +979,10 @@ setappdata(handles.figure1,'liststr',liststr);
 
 set(handles.intxnList,'string',liststr);
 
-if currentInteractionTerm~=0  && currentInteractionTerm <= length(intxnRs)  && intxnRs(currentInteractionTerm)<=length(RValues)
+if currentInteractionTerm~=0  && currentInteractionTerm <= length(currentTerms)  && currentTerms(currentInteractionTerm)<=length(RValues)
 %     crind = find(ismember([regData.regressors.code],currentRegressorGroup));
 %     if ~isempty(crind)
-    set(handles.intxnValue,'string',num2str(RValues{intxnRindx(currentInteractionTerm)}));
+    set(handles.intxnValue,'string',num2str(RValues{currentTerms(currentInteractionTerm)}));
 %     end
 end
 
@@ -878,27 +997,27 @@ if currentInteractionTerm == 0
 end
 
 
-if ismember(intxnRs(currentInteractionTerm), PrimaryRegressor)
+if ismember(currentTerms(currentInteractionTerm), XaxisTerm)
     set(handles.Xcheck,'value',1);
     set(handles.Ycheck,'value',0);
 %     set(handles.intxnValue,'string','X');
-    if intxnRindx(currentInteractionTerm) > length(RFunctions) || ~isa(RFunctions{intxnRindx(currentInteractionTerm)},'function_handle')
+    if currentTerms(currentInteractionTerm) > length(RFunctions) || ~isa(RFunctions{currentTerms(currentInteractionTerm)},'function_handle')
                 str ='@(X)X';
             
     else
-                str = char( RFunctions{intxnRindx(currentInteractionTerm ) });
+                str = char( RFunctions{currentTerms(currentInteractionTerm ) });
     end
             set( handles.intxnValue, 'string' , str(5:end) );
 
-elseif ismember(intxnRs(currentInteractionTerm),SecondaryRegressor)
+elseif ismember(currentTerms(currentInteractionTerm),YaxisTerm)
     set(handles.Ycheck,'value',1);
     set(handles.Xcheck,'value',0);
 %     set(handles.intxnValue,'string','Y');
-    if intxnRindx(currentInteractionTerm) > length(RFunctions) || ~isa(RFunctions{intxnRindx(currentInteractionTerm)},'function_handle')
+    if currentTerms(currentInteractionTerm) > length(RFunctions) || ~isa(RFunctions{currentTerms(currentInteractionTerm)},'function_handle')
                 str ='@(Y)Y';
             
     else
-                str = char( RFunctions{intxnRindx(currentInteractionTerm ) });
+                str = char( RFunctions{currentTerms(currentInteractionTerm ) });
     end
             set( handles.intxnValue, 'string' , str(5:end) );
 
@@ -926,14 +1045,14 @@ parent = getappdata(handles.figure1,'parent');
 currentRegressorGroup = getappdata(parent,'CurrentRegressorGroup');
 
 
-PR = get(handles.figure1,'PrimaryRegressor');
-SR = get(handles.figure1,'SecondaryRegressor');
+PR = get(handles.figure1,'XaxisTerm');
+SR = get(handles.figure1,'YaxisTerm');
 
 PR = unique(cat(PR,currentRegressorGroup));
 SR(SR == currentRegressorGroup) = [];
 
-set(handles.figure1,'PrimaryRegressor',PR);
-set(handles.figure1,'SecondaryRegressor',SR);
+set(handles.figure1,'XaxisTerm',PR);
+set(handles.figure1,'YaxisTerm',SR);
 
 Update(hObject, eventdata, handles);
 
@@ -950,14 +1069,14 @@ parent = getappdata(handles.figure1,'parent');
 currentRegressorGroup = getappdata(parent,'CurrentRegressorGroup');
 
 
-PR = get(handles.figure1,'PrimaryRegressor');
-SR = get(handles.figure1,'SecondaryRegressor');
+PR = get(handles.figure1,'XaxisTerm');
+SR = get(handles.figure1,'YaxisTerm');
 
 SR = unique(cat(SR,currentRegressorGroup));
 PR(PR == currentRegressorGroup) = [];
 
-set(handles.figure1,'PrimaryRegressor',PR);
-set(handles.figure1,'SecondaryRegressor',SR);
+set(handles.figure1,'XaxisTerm',PR);
+set(handles.figure1,'YaxisTerm',SR);
 
 Update(hObject, eventdata, handles);
 
@@ -972,32 +1091,43 @@ function Xcheck_Callback(hObject, eventdata, handles)
 
 % parent = getappdata(handles.figure1,'parent');
 
-intxnRs = getappdata(handles.figure1,'intxnRs');
+% currentTerms = getappdata(handles.figure1,'currentTerms');
+
 
 currentInteractionTerm = getappdata(handles.figure1,'CurrentInteractionTerm');
+
+selectedInteraction = get(handles.intxnList,'value')-1;
+
+
+currentTerms = getappdata(handles.figure1,'currentTerms');
+
+currtindx = currentTerms(selectedInteraction);
 
 if currentInteractionTerm == 0
     return
 end
 
-PR = getappdata(handles.figure1,'PrimaryRegressor');
-SR = getappdata(handles.figure1,'SecondaryRegressor');
+% PR = getappdata(handles.figure1,'XaxisTerm');
+SR = getappdata(handles.figure1,'YaxisTerm');
 
 
 if get(handles.Xcheck,'value')
     set(handles.intxnValue,'string','X')
-    PR = unique(cat(2,PR,intxnRs(currentInteractionTerm)));
-
-%     set(handles.Ycheck,'value',0)
-%     SR(ismember(SR,intxnRs(currentInteractionTerm))) = [];
+%     PR = unique(cat(2,PR,currentTerms(currentInteractionTerm)));
+    PR = currtindx;
     
-    setappdata(handles.figure1,'PrimaryRegressor',PR);
-    setappdata(handles.figure1,'SecondaryRegressor',SR);
+    RFunctions = getappdata(handles.figure1,'RFunctions');
+    RFunctions{currtindx} = str2func('@(X)X');
+    setappdata(handles.figure1,'RFunctions',RFunctions);
+    
+    setappdata(handles.figure1,'XaxisTerm',PR);
+%     setappdata(handles.figure1,'YaxisTerm',SR);
+%     setappdata(handles.figure1,'YaxisTerm',0);
 
 else
-%     setappdata(handles.figure1,'PrimaryRegressor',0);
-    PR(ismember(PR, intxnRs(currentInteractionTerm))) = [];
-    setappdata(handles.figure1,'PrimaryRegressor',PR);
+    PR = [];
+%     PR(ismember(PR, currentTerms(currentInteractionTerm))) = [];
+    setappdata(handles.figure1,'XaxisTerm',PR);
     
 end    
     
@@ -1011,37 +1141,39 @@ function Ycheck_Callback(hObject, eventdata, handles)
 
 % Hint: get(hObject,'Value') returns toggle state of Ycheck
 
-
 % parent = getappdata(handles.figure1,'parent');
-intxnRs = getappdata(handles.figure1,'intxnRs');
 
 currentInteractionTerm = getappdata(handles.figure1,'CurrentInteractionTerm');
 
-% currentRegressorGroup = getappdata(parent,'CurrentRegressorGroup');
+currentTerms = getappdata(handles.figure1,'currentTerms');
+
+currtindx = currentTerms(currentInteractionTerm);
 
 if currentInteractionTerm == 0
     return
 end
 
-PR = getappdata(handles.figure1,'PrimaryRegressor');
-SR = getappdata(handles.figure1,'SecondaryRegressor');
+PR = getappdata(handles.figure1,'XaxisTerm');
+% SR = getappdata(handles.figure1,'YaxisTerm');
 
 
 
 if get(handles.Ycheck,'value')
     set(handles.intxnValue,'string','Y')
-    SR = unique(cat(2,SR,intxnRs(currentInteractionTerm)));
+%     SR = cat(2,SR,currentTerms(currentInteractionTerm));
+    SR = currtindx; 
+    RFunctions = getappdata(handles.figure1,'RFunctions');
+    RFunctions{currentTerms(currentInteractionTerm )} = str2func('@(Y)Y');
+    setappdata(handles.figure1,'RFunctions',RFunctions);
 
-%     PR(ismember(PR,intxnRs(currentInteractionTerm))) = [];
-%     set(handles.Xcheck,'value',0)
-
-    setappdata(handles.figure1,'PrimaryRegressor',PR);
-    setappdata(handles.figure1,'SecondaryRegressor',SR);
+%     setappdata(handles.figure1,'XaxisTerm',PR);
+%     setappdata(handles.figure1,'XaxisTerm',0);
+    setappdata(handles.figure1,'YaxisTerm',SR);
 
 else
-    SR(ismember(SR,intxnRs(currentInteractionTerm))) = [];
-    setappdata(handles.figure1,'SecondaryRegressor',SR);
-%     setappdata(handles.figure1,'SecondaryRegressor',0);
+    SR = []; 
+%     SR(ismember(SR,currentTerms(currentInteractionTerm))) = [];
+    setappdata(handles.figure1,'YaxisTerm',SR);
 end    
     
 Update(hObject, eventdata, handles);

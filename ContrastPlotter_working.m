@@ -59,6 +59,10 @@ parent = varargin{1};
 setappdata(handles.figure1,'parent',parent);
 setappdata(handles.figure1,'ContrastPlotter',handles.figure1);
 
+children = getappdata(parent,'children');
+children(end+1) = handles.figure1;
+setappdata(parent,'children',children)
+
 plotfig = figure('visible','off');
 setappdata(handles.figure1,'plotfig',plotfig);
 
@@ -243,14 +247,22 @@ function intxnValue_Callback(hObject, eventdata, handles)
 %        str2double(get(hObject,'String')) returns contents of intxnValue as a double
 
 parent = getappdata(handles.figure1,'parent');
-currentDataSet = getappdata(parent,'CurrentDataSet');
+CurrentDataSet = getappdata(parent,'CurrentDataSet');
 % currentRegressorGroup =  getappdata(parent,'CurrentRegressorGroup');
 regData = getappdata(parent,'regData');
 RValues = getappdata(handles.figure1,'RValues');
+RFunctions = getappdata(handles.figure1,'RFunctions');
 intxnRs = getappdata(handles.figure1,'intxnRs');
 currentInteractionTerm = getappdata(handles.figure1,'CurrentInteractionTerm');
-RValues{ismember([regData(currentDataSet).regressors.code],intxnRs(currentInteractionTerm))} = str2num(get(handles.intxnValue,'string'));
-RFunctions{ismember([regData(currentDataSet).regressors.code],intxnRs(currentInteractionTerm))} = inline(get(handles.intxnValue,'string'));
+RValues{ismember([regData(CurrentDataSet).regressors.code],intxnRs(currentInteractionTerm))} = str2num(get(handles.intxnValue,'string'));
+
+inputstr = get(handles.intxnValue,'string');
+if isempty(deblank(inputstr))
+    inputstr = '0';
+    set(handles.intxnValue,'string',inputstr);
+
+end
+RFunctions{ismember([regData(CurrentDataSet).regressors.code],intxnRs(currentInteractionTerm))} = str2func(['@(X) [',regexprep(inputstr,'Y','X'),']']);
 setappdata(handles.figure1,'RValues',RValues);
 setappdata(handles.figure1,'RFunctions',RFunctions);
 
@@ -330,7 +342,7 @@ plottype = 1*get(handles.plot1d,'value') + 2*get(handles.plot2d,'value') + 4*get
 
 
 currentModel = getappdata(parent,'CurrentModel');
-currentDataSet = getappdata(parent,'CurrentDataSet');
+CurrentDataSet = getappdata(parent,'CurrentDataSet');
 % currentRegressorGroup = getappdata(parent,'CurrentRegressorGroup');
 selectedRegressorGroups =  getappdata(parent,'SelectedRegressorGroups');
 
@@ -346,41 +358,44 @@ RFunctions = getappdata(handles.figure1,'RFunctions');
 
 modelData = getappdata(parent,'modelData');
 regData = getappdata(parent,'regData');
-currmodel = modelData(currentDataSet).models(currentModel);
+currmodel = modelData(CurrentDataSet).models(currentModel);
 modelfit = currmodel.fit(1);
 
 % if currentRegressorGroup ~=0 && ~isempty(RValues) 
-%     crind = find(ismember([regData.regressors.code],currentRegressorGroup));
+%     crind =
+%     find(ismember([regData.regressors.code],currentRegressorGroup));
 %     if ~isempty(crind)
 %         set(handles.intxnValue,'string',num2str(RValues{crind}));
 %     end
 % end
 
-rcode = [regData(currentDataSet).regressors.code];
-if ~isequal(selectedRegressorGroups,0) && any(~ismember(rcode(selectedRegressorGroups),modelData(currentDataSet).models(currentModel).regressors))
+rcode = [regData(CurrentDataSet).regressors.code];
+if ~isequal(selectedRegressorGroups,0) && any(~ismember(rcode(selectedRegressorGroups),modelData(CurrentDataSet).models(currentModel).regressors))
     selectedRegressorGroups = 0;
     setappdata(parent,'SelectedRegressorGroups',selectedRegressorGroups);
     return
 elseif selectedRegressorGroups ~= 0 
-    crRegs = regData(currentDataSet).regressors(selectedRegressorGroups);
+    crRegs = regData(CurrentDataSet).regressors(selectedRegressorGroups);
 end
 
 
 intxnRs =[];
 for i = 1:length(crRegs) 
     a = crRegs(i).factmat(:,1);
-    [a,unqind] = unique(a);
-    a(unqind) = a;
+%     [a,unqind] = unique(a);
+%     if length(a) > 1    
+%         a(unqind) = a;
+%     end
     intxnRs = cat(1,intxnRs,a);
 end
 
 
 
-rcodes = [regData(currentDataSet).regressors.code];
+rcodes = [regData(CurrentDataSet).regressors.code];
 [a,intxnRindx] = ismember(intxnRs,rcodes);
 
 % 
-% lbls = {regData(currentDataSet).regressors(intxnRindx).label};
+% lbls = {regData(CurrentDataSet).regressors(intxnRindx).label};
 % sttlen = cellfun(@length,lbls);
 % spaces1 = cellfun(@(n) repmat(' ',1,n),mat2cell(20-2*sttlen,1,ones(1,length(sttlen))),'UniformOutput',false);
 % 
@@ -420,7 +435,7 @@ SecondaryRegressor = getappdata(handles.figure1,'SecondaryRegressor');
 
 E = eye(modelfit.npar);
 
-rcodes = [regData(currentDataSet).regressors.code];
+rcodes = [regData(CurrentDataSet).regressors.code];
 modelreg = rcodes(ismember(rcodes,currmodel.regressors));
 a = ismember(modelreg,rcodes(selectedRegressorGroups));
 contrast = E(:,sum(modelfit.blockC(:,a),2)==1); 
@@ -453,27 +468,30 @@ end
 
 plotvalues = getappdata(parent,'plotvalues');
 
-plotvalues(currentDataSet).Rx = [];
-plotvalues(currentDataSet).function = crPool.function;
-plotvalues(currentDataSet).contrast = [];
-plotvalues(currentDataSet).X = [];
-plotvalues(currentDataSet).Y = [];
-plotvalues(currentDataSet).Z = [];
-plotvalues(currentDataSet).err = [];
+plotvalues(CurrentDataSet).Rx = [];
+plotvalues(CurrentDataSet).function = crPool.function;
+plotvalues(CurrentDataSet).contrast = [];
+plotvalues(CurrentDataSet).X = [];
+plotvalues(CurrentDataSet).Y = [];
+plotvalues(CurrentDataSet).Z = [];
+plotvalues(CurrentDataSet).err = [];
+
+plotvalues(CurrentDataSet).zfun = [];
+plotvalues(CurrentDataSet).errfun = [];
 
 
-plotvalues(currentDataSet).xbl = str2num(get(handles.xBaseLine,'string'));
-if isempty(plotvalues(currentDataSet).xbl)
+plotvalues(CurrentDataSet).xbl = str2num(get(handles.xBaseLine,'string'));
+if isempty(plotvalues(CurrentDataSet).xbl)
     blC.x = 0;
-    plotvalues(currentDataSet).xbl=0;
+    plotvalues(CurrentDataSet).xbl=0;
 else
     blC.x = 1;
 end
 err = [];
-plotvalues(currentDataSet).ybl = str2num(get(handles.yBaseLine,'string'));
-if isempty(plotvalues(currentDataSet).ybl)
+plotvalues(CurrentDataSet).ybl = str2num(get(handles.yBaseLine,'string'));
+if isempty(plotvalues(CurrentDataSet).ybl)
     blC.y = 0;
-    plotvalues(currentDataSet).ybl=0;
+    plotvalues(CurrentDataSet).ybl=0;
 else
     blC.y = 1;
 end
@@ -490,18 +508,18 @@ switch plottype
         Xbl = {}; %Baseline
         for  j = 1:length(intxnRindx)
             if ismember(intxnRs(j), PrimaryRegressor)
-                Xi{j} = X;
-%                 Xbl{j} = plotvalues(currentDataSet).xbl*blC.x;
-                if intxnRindx(j) > length(Rfunctions) || iesmpty(RFunctions{intxnRindx(j)})
+                if intxnRindx(j) > length(RFunctions) || ~isa(RFunctions{intxnRindx(j)},'function_handle')
                     RFunctions{intxnRindx(j)} = @(X) X;
                 end
-                Xbl{j} = RFunctions{intxnRindx(j)}(plotvalues(currentDataSet).xbl*blC.x);
+                Xi{j} = RFunctions{intxnRindx(j)}(X);
+%                 Xbl{j} = plotvalues(CurrentDataSet).xbl*blC.x;
+                Xbl{j} = plotvalues(CurrentDataSet).xbl*blC.x;
             else
                 Xi{j} = repmat(RValues{intxnRindx(j)},size(X,1),1);
                 Xbl{j} = RValues{intxnRindx(j)}*blC.x;
             end
         end
-        plotvalues(currentDataSet).Rx = Xi;
+        plotvalues(CurrentDataSet).Rx = Xi;
         
         regval = crPool.function(Xi{:});
         if blC.x == 1
@@ -514,14 +532,17 @@ switch plottype
         
         if bitand(plotWhat,6)        
             err = sqrt(diag(regval*errmat*regval'));
-            plotvalues(currentDataSet).err = err;
+            plotvalues(CurrentDataSet).err = err;
         end
-        plotvalues(currentDataSet).X = X;
-        plotvalues(currentDataSet).Y = Y;
-        plotvalues(currentDataSet).Z = Z;
-        plotvalues(currentDataSet).contrast= contrast;
+        plotvalues(CurrentDataSet).zfun = @(parest) regval*(contrast'*parest);
+%         plotvalues(CurrentDataSet).errfun = @(errmat) sqrt(diag(regval*errmat*regval'));
+        plotvalues(CurrentDataSet).errfun = @(errmat) sqrt(sum((regval*errmat).*regval,2));
+        plotvalues(CurrentDataSet).X = X;
+        plotvalues(CurrentDataSet).Y = Y;
+        plotvalues(CurrentDataSet).Z = Z;
+        plotvalues(CurrentDataSet).contrast= contrast;
         
-        if bitand(plotWhat,1) 
+        if bitand(plotWhat,1) %LRR or LOR
 
 
             pl = plot(X,Z,varargin{:},plotargs{:},'parent',ca);
@@ -539,11 +560,6 @@ switch plottype
         
                 hold(ca,'on');
                 pla = plotargs;
-%                 strplind= cellfun(@ischar,pla);
-%                 strpla = pla(strplind);
-%                 if isempty(strpla), strpla = {'b'}; pla{end+1} = 'b'; end
-%                 strpla(ismember(strpla,['bgcyrkw']')) = strcat(pla(ismember(strpla,['bgcyrkw']')),'--'); 
-%                 pla(cellfun(@ischar,pla)) = strpla;
                 pl(end+1) = plot(X,Z+err,pla{:},varargin{:},'parent',ca);
                 pl(end+1) = plot(X,Z-err,pla{:},'parent',ca);
                 set(pl(end-1:end),'linestyle','--');
@@ -559,6 +575,16 @@ switch plottype
 %                 pl(end+1) = plot(X,exp(Z)./sum(exp(Z(:))),plotargs{:},varargin{:},'parent',ca);    
                 pl(end+1) = plot(X,exp(Z),plotargs{:},varargin{:},'parent',ca);    
                title(ca(1),strcat('Relative Risk:',RV{:}),'interpreter','none');
+            case 11 % LRR +/- error
+        
+                pl(end+1) = plot(X,exp(Z),plotargs{:},varargin{:},'parent',ca);    
+               title(ca(1),strcat('Relative Risk +/- Err:',RV{:}),'interpreter','none');
+                hold(ca,'on');
+                pla = plotargs;
+                pl(end+1) = plot(X,exp(Z+err),pla{:},varargin{:},'parent',ca);
+                pl(end+1) = plot(X,exp(Z-err),pla{:},'parent',ca);
+                set(pl(end-1:end),'linestyle','--');
+               title(ca(1),strcat('LRR +/- err :',RV{:}),'interpreter','none');
         end
         
     case {2 4} % 2d plots
@@ -580,33 +606,39 @@ switch plottype
 %             Xm = cos(THm*2*pi).*Rm;
 %             Ym = sin(THm*2*pi).*Rm;            
         end
+        szXm = size(Xm);
         
         Xi = {};
-        Xbl = {};
+%         Xbl = {};
         for  j = 1:length(intxnRindx)
-            if ismember(intxnRs(j),PrimaryRegressor)
-                Xi{j} = Xm(:);
-                if intxnRindx(j) > length(Rfunctions) || iesmpty(RFunctions{intxnRindx(j)})
+            if ismember(intxnRs(j),PrimaryRegressor) &&  ismember(intxnRs(j), SecondaryRegressor)              
+                if intxnRindx(j) > length(RFunctions) || ~isa(RFunctions{intxnRindx(j)},'function_handle')
                     RFunctions{intxnRindx(j)} = @(X) X;
                 end
-                Xbl{j} = RFunctions{intxnRindx(j)}(plotvalues(currentDataSet).xbl*blC.x); 
-%                 Xbl{j} = plotvalues(currentDataSet).xbl*blC.x;
+                Xi(intxnRs(j) == j) = {RFunctions{intxnRindx(j)}( Xm(:)),RFunctions{intxnRindx(j)}( Ym(:))};
+%                 Xi(intxnRs(j) == j) = {RFunctions{intxnRindx(j)}( [Xm(:), Ym(:)])};
+%                 Xbl{j} = [plotvalues(CurrentDataSet).xbl*blC.x, plotvalues(CurrentDataSet).ybl*blC.y]; 
+            elseif ismember(intxnRs(j),PrimaryRegressor)
+                if intxnRindx(j) > length(RFunctions) || ~isa(RFunctions{intxnRindx(j)},'function_handle')
+                    RFunctions{intxnRindx(j)} = @(X) X;
+                end
+                Xi{j} = RFunctions{intxnRindx(j)}( Xm(:));
+%                 Xbl{j} = plotvalues(CurrentDataSet).xbl*blC.x; 
             elseif ismember(intxnRs(j), SecondaryRegressor)
-                Xi{j} = Ym(:);
-                if intxnRindx(j) > length(Rfunctions) || iesmpty(RFunctions{intxnRindx(j)})
+                if intxnRindx(j) > length(RFunctions) || ~isa(RFunctions{intxnRindx(j)},'function_handle')
                     RFunctions{intxnRindx(j)} = @(X) X;
                 end
-                Xbl{j} = RFunctions{intxnRindx(j)}(plotvalues(currentDataSet).ybl*blC.y);
-%                Xbl{j} = plotvalues(currentDataSet).ybl*blC.y;
+                Xi{j} =  RFunctions{intxnRindx(j)}(Ym(:));
+%                 Xbl{j} = plotvalues(CurrentDataSet).ybl*blC.y;
             else
 %                 Xi{j} = repmat(RValues{intxnRs(j)},numel(Xm),1);
 %                 Xbl{j} = RValues{intxnRs(j)}*(blC.x | blC.y);
                 Xi{j} = repmat(RValues{intxnRindx(j)},numel(Xm),1);
-                Xbl{j} = RValues{intxnRindx(j)}*(blC.x | blC.y);
+%                 Xbl{j} = RValues{intxnRindx(j)}*(blC.x | blC.y);
             end
         end
         
-        plotvalues(currentDataSet).Rx = Xi;
+        plotvalues(CurrentDataSet).Rx = Xi;
         
         
         if plottype == 2    % plot on new figure
@@ -630,26 +662,48 @@ switch plottype
         axis(ca,'xy');
         
         regval = crPool.function(Xi{:});
-         if blC.x == 1 || blC.y == 1        
-             regval = regval-repmat(crPool.function(Xbl{:}),size(regval,1),1);
+        Xbls = Xi;
+        if blC.x
+            xregs = ismember(intxnRs,PrimaryRegressor);
+            Xbls(xregs) = { repmat(plotvalues(CurrentDataSet).xbl,size(regval,1),1)}; %baseline values
+        end
+        if blC.y
+            yregs = ismember(intxnRs,SecondaryRegressor);
+            if xregs == yregs
+                for yr = 1:length(yregs)
+                    Xbls{yregs}(:,2) = repmat(plotvalues(CurrentDataSet).ybl,size(regval,1),1); %baseline values
+                end
+            else
+                Xbls(yregs) = { repmat(plotvalues(CurrentDataSet).ybl,size(regval,1),1)}; %baseline values
+            end
+        end        
+        if blC.x == 1 || blC.y == 1
+%              regval = regval-repmat(crPool.function(Xbl{:}),size(regval,1),1);
+             regval = regval-crPool.function(Xbls{:});
          end
         
         if bitand(plotWhat,13) 
-            Z = reshape(regval*(contrast'*parest),size(Xm));
+            Z = reshape(regval*(contrast'*parest),szXm);
         end    
         
         if bitand(plotWhat,6) 
-            err = reshape(sqrt(diag(regval*errmat*regval')),size(Xm));
-            plotvalues(currentDataSet).err = err;
+            err = reshape(sqrt(diag(regval*errmat*regval')),szXm);
+            plotvalues(CurrentDataSet).err = err;
             
         end
+        
+        plotvalues(CurrentDataSet).zfun = @(parest) reshape(regval*(contrast'*parest),szXm);
+        
+%         plotvalues(CurrentDataSet).errfun = @(errmat) reshape(sqrt(diag(regval*contrast'*errmat*contrast*regval')),szXm);
+       plotvalues(CurrentDataSet).errfun = @(errmat) reshape(sqrt(sum( (regval*contrast'*errmat*contrast).*regval,2)),szXm);
 
-        plotvalues(currentDataSet).X = X;
-        plotvalues(currentDataSet).Y = Y;
+
+        plotvalues(CurrentDataSet).X = X;
+        plotvalues(CurrentDataSet).Y = Y;
         if exist('Z','var')
-            plotvalues(currentDataSet).Z = Z;
+            plotvalues(CurrentDataSet).Z = Z;
         end
-        plotvalues(currentDataSet).contrast= contrast;
+        plotvalues(CurrentDataSet).contrast= contrast;
         
         if bitand(plotWhat , 1)  %LRR
             if IsRadial
@@ -719,7 +773,7 @@ plottype = 1*get(handles.plot1d,'value') + 2*get(handles.plot2d,'value') + 4*get
 
 
 currentModel = getappdata(parent,'CurrentModel');
-currentDataSet = getappdata(parent,'CurrentDataSet');
+CurrentDataSet = getappdata(parent,'CurrentDataSet');
 % currentRegressorGroup = getappdata(parent,'CurrentRegressorGroup');
 selectedRegressorGroups =  getappdata(parent,'SelectedRegressorGroups');
 
@@ -729,20 +783,21 @@ SecondaryRegressor = getappdata(handles.figure1,'SecondaryRegressor');
 
 currentInteractionTerm = getappdata(handles.figure1,'CurrentInteractionTerm');
 RValues = getappdata(handles.figure1,'RValues');
+RFunctions = getappdata(handles.figure1,'RFunctions');
 
 modelData = getappdata(parent,'modelData');
 regData = getappdata(parent,'regData');
-% currmodel = modelData(currentDataSet).models(currentModel);
+% currmodel = modelData(CurrentDataSet).models(currentModel);
 % modelfit = currmodel.fit;
 
 
-rcodes = [regData(currentDataSet).regressors.code];
-if ~isequal(selectedRegressorGroups,0) && any(~ismember(rcodes(selectedRegressorGroups),modelData(currentDataSet).models(currentModel).regressors))
+rcodes = [regData(CurrentDataSet).regressors.code];
+if ~isequal(selectedRegressorGroups,0) && any(~ismember(rcodes(selectedRegressorGroups),modelData(CurrentDataSet).models(currentModel).regressors))
     selectedRegressorGroups = 0;
     setappdata(parent,'SelectedRegressorGroups',selectedRegressorGroups);
     return
 elseif selectedRegressorGroups~=0
-    crRegs = regData(currentDataSet).regressors(selectedRegressorGroups);
+    crRegs = regData(CurrentDataSet).regressors(selectedRegressorGroups);
 end
 
 
@@ -750,8 +805,11 @@ intxnRs =[];
 for i = 1:length(crRegs) 
     a = crRegs(i).factmat(:,1);
     [a,unqind] = unique(a);
-    a(unqind) = a;
-    intxnRs = cat(1,intxnRs,a);
+
+     if length(a) > 1    
+        a(unqind) = a;
+    end
+    intxnRs = cat(1,intxnRs,a(:));
 end
 
 
@@ -759,10 +817,10 @@ setappdata(handles.figure1,'intxnRs',intxnRs)
 
 
 
-rcodes = [regData(currentDataSet).regressors.code];
+rcodes = [regData(CurrentDataSet).regressors.code];
 [a,intxnRindx] = ismember(intxnRs,rcodes);
 
-lbls = {regData(currentDataSet).regressors(intxnRindx).label};
+lbls = {regData(CurrentDataSet).regressors(intxnRindx).label};
 sttlen = cellfun(@length,lbls);
 spaces1 = cellfun(@(n) repmat(' ',1,n),mat2cell(20-2*sttlen,1,ones(1,length(sttlen))),'UniformOutput',false);
 
@@ -770,14 +828,31 @@ set(handles.intxnList,'Value',currentInteractionTerm+1);
 
 RV = {};
 for i = 1:length(intxnRindx)
-    if ismember(intxnRs(i),PrimaryRegressor) && SecondaryRegressor == 0 && plottype > 1
+    if ismember(intxnRs(i),PrimaryRegressor) && (ismember(intxnRs(i),SecondaryRegressor) || isequal(SecondaryRegressor, 0)) && plottype > 1
         RV{i} = ' = XY';
     elseif ismember(intxnRs(i), PrimaryRegressor) 
-        RV{i} = ' = X';
+        if intxnRindx(i) > length(RFunctions) || ~isa(RFunctions{intxnRindx(i)},'function_handle')
+                        str ='@(X)X';
+                        RFunctions{intxnRindx(i)} = @(X)X;
+         else
+                        str = char( RFunctions{intxnRindx(i ) });
+         end
+            RV{i} =  [' = ',str(5:end)];
+%         RV{i} = ' = X';
+
     elseif ismember(intxnRs(i), SecondaryRegressor) && plottype > 1
-        RV{i} = ' = Y';
+        if intxnRindx(i) > length(RFunctions) || ~isa(RFunctions{intxnRindx(i)},'function_handle')
+                str ='@(Y)Y';
+                RFunctions{intxnRindx(i)} = @(Y)Y;
+            
+        else
+                    str = char( RFunctions{intxnRindx(i ) });
+        end
+            RV{i} =  [' = ',str(5:end)];
+
+%         RV{i} = ' = Y';
     elseif isempty(RValues) || intxnRindx(i) > length(RValues) ||  isempty(RValues{intxnRindx(i)}) 
-        RValues{intxnRindx(i)} = zeros(1,regData(currentDataSet).regressors(intxnRindx(i)).Npar);
+        RValues{intxnRindx(i)} = zeros(1,regData(CurrentDataSet).regressors(intxnRindx(i)).Npar);
         RV{i} = [' =', sprintf(' %0.3g',RValues{intxnRindx(i)})];
     else
         RV{i} = [' =', sprintf(' %0.3g',RValues{intxnRindx(i)})];
@@ -787,6 +862,7 @@ end
 
 
 setappdata(handles.figure1,'RValues',RValues);
+setappdata(handles.figure1,'RFunctions',RFunctions);
 
 [liststr,intxnindex] = unique(strcat(lbls,spaces1,RV),'first');
 setappdata(handles.figure1,'intxnindex',intxnindex);
@@ -799,7 +875,7 @@ set(handles.intxnList,'string',liststr);
 if currentInteractionTerm~=0  && currentInteractionTerm <= length(intxnRs)  && intxnRs(currentInteractionTerm)<=length(RValues)
 %     crind = find(ismember([regData.regressors.code],currentRegressorGroup));
 %     if ~isempty(crind)
-    set(handles.intxnValue,'string',num2str(RValues{intxnRs(currentInteractionTerm)}));
+    set(handles.intxnValue,'string',num2str(RValues{intxnRindx(currentInteractionTerm)}));
 %     end
 end
 
@@ -813,14 +889,31 @@ if currentInteractionTerm == 0
     return
 end
 
+
 if ismember(intxnRs(currentInteractionTerm), PrimaryRegressor)
     set(handles.Xcheck,'value',1);
     set(handles.Ycheck,'value',0);
-    set(handles.intxnValue,'string','X');
+%     set(handles.intxnValue,'string','X');
+    if intxnRindx(currentInteractionTerm) > length(RFunctions) || ~isa(RFunctions{intxnRindx(currentInteractionTerm)},'function_handle')
+                str ='@(X)X';
+            
+    else
+                str = char( RFunctions{intxnRindx(currentInteractionTerm ) });
+    end
+            set( handles.intxnValue, 'string' , str(5:end) );
+
 elseif ismember(intxnRs(currentInteractionTerm),SecondaryRegressor)
     set(handles.Ycheck,'value',1);
     set(handles.Xcheck,'value',0);
-    set(handles.intxnValue,'string','Y');
+%     set(handles.intxnValue,'string','Y');
+    if intxnRindx(currentInteractionTerm) > length(RFunctions) || ~isa(RFunctions{intxnRindx(currentInteractionTerm)},'function_handle')
+                str ='@(Y)Y';
+            
+    else
+                str = char( RFunctions{intxnRindx(currentInteractionTerm ) });
+    end
+            set( handles.intxnValue, 'string' , str(5:end) );
+
 else   
     set(handles.Ycheck,'value',0);
     set(handles.Xcheck,'value',0);
@@ -904,10 +997,12 @@ SR = getappdata(handles.figure1,'SecondaryRegressor');
 
 
 if get(handles.Xcheck,'value')
-    set(handles.Ycheck,'value',0)
     set(handles.intxnValue,'string','X')
     PR = unique(cat(2,PR,intxnRs(currentInteractionTerm)));
-    SR(ismember(SR,intxnRs(currentInteractionTerm))) = [];
+
+%     set(handles.Ycheck,'value',0)
+%     SR(ismember(SR,intxnRs(currentInteractionTerm))) = [];
+    
     setappdata(handles.figure1,'PrimaryRegressor',PR);
     setappdata(handles.figure1,'SecondaryRegressor',SR);
 
@@ -946,10 +1041,11 @@ SR = getappdata(handles.figure1,'SecondaryRegressor');
 
 
 if get(handles.Ycheck,'value')
-    set(handles.Xcheck,'value',0)
     set(handles.intxnValue,'string','Y')
     SR = unique(cat(2,SR,intxnRs(currentInteractionTerm)));
-    PR(ismember(PR,intxnRs(currentInteractionTerm))) = [];
+
+%     PR(ismember(PR,intxnRs(currentInteractionTerm))) = [];
+%     set(handles.Xcheck,'value',0)
 
     setappdata(handles.figure1,'PrimaryRegressor',PR);
     setappdata(handles.figure1,'SecondaryRegressor',SR);
