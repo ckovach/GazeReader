@@ -380,7 +380,8 @@ for i = 1:length(selected)
     fit = modelFit(trialData,R, 'fullonly',~get(handles.subModelCheck,'value'),...
                     'Firth',get(handles.firthCheck,'value'),...
                     'multassign',get(handles.multiBinCheck,'value'),...
-                    'regularization',modelData(currentDataSet).models(currmodel).Hreg,'binvolume',binvolume,varargin{:},'parallel',use_parallel);
+                    'regularization',modelData(currentDataSet).models(currmodel).Hreg,...
+                    'binvolume',binvolume,varargin{:});
 %     if ishandle(dlg)
 %         delete(dlg)            
 %     end
@@ -412,8 +413,9 @@ if currentDataSet == 0
     return
 end
 
+
 if currentDataSet > length(modelData)
-    modelData(currentDataSet) = makeModelData([]);
+   modelData(currentDataSet) = makeModelData([]);
     modelData(currentDataSet).models(:) = [];
 end
 
