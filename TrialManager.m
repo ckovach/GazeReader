@@ -701,7 +701,7 @@ parent = getappdata(handles.figure1,'parent');
 currentDataSet = getappdata(parent,'CurrentDataSet');
 
 trialData = getappdata(parent,'trialData');
-trcodes = [trialData(currentDataSet).triald.code];
+trcodes = [trialData(currentDataSet).trials.code];
 
 trnum = find(trcodes == trcode);
  

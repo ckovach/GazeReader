@@ -40,8 +40,24 @@ function R = buildpolyreg(x,polyord,varargin)
 %                           polynomials that skip some terms).
 %       Other options as taken by MAKEREGRESSOR including the important options
 %        'noptions' and 'codeincr'.
+%
+% Other notes:
+%  R.function(X1,X2,...) evaluates the polynomial at the given input
+%  values.
+%
+%  R.deriv(X1,X2,...,[n1 n2 ...]), evaluates the n(1)n(2)...'th derivative
+%  of the polynomial, i.e. R.deriv(X1,X2,[0 1]) gives the first partial derivative
+%  with respect to X2 evaluated at (X1,X2). R.deriv(X1,X2, [1 1]) gives the
+%  partial derivative with respect to x1 and x2, etc. R.deriv(X1,X2,[0 0])
+%  is equivalent to R.function(X1,X2).
+%
+%
 % 
 % See also MAKEREGRESSOR and FACT2REG
+
+
+% C. Kovach 2007-2011
+
 
 normconst = 1; 
 label = '';
@@ -60,6 +76,7 @@ center  = false;
 derivfun = [];
 cliplimits = [-Inf Inf];
 premult = 1;
+splitdim = true;
 
 while i <= length(varargin)
     
@@ -86,6 +103,14 @@ while i <= length(varargin)
         case 'codeincr' 
            codeincr = varargin{i+1};
             i = i+1; 
+        case 'keepdc' 
+           keepdc = varargin{i+1};           
+            i = i+1; 
+            if keepdc
+                minord  = 0;
+                subtractdc = false;
+            end
+            
         case 'trig' %Polynomials are trigonometric, that is, sinusoids.
             trig = true;
         case 'dc' %include the "DC" zeroth order term (default is to start at 1st order)
@@ -93,6 +118,11 @@ while i <= length(varargin)
             subtractdc = false;
         case 'center' %Subtract mean value for each polynomial term except DC (if it's included)
             center  = true;
+        case 'splitdim' % If true, dimensions are entered as separate arguments in R.function
+                        % Otherwise, they are entered as columns of a singe matrix. 
+           codeincr = varargin{i+1};
+            i = i+1; 
+
         case 'clip' %for values of the input outside this range, the output is  zero
             cliplimits  = varargin{i+1};
             i = i+1; 
@@ -144,8 +174,8 @@ if ~trig
             derivfun = @(X,n) polyfunsdc(X*premult,subdc*(n==0))*Dmat^n;  %Function which returns the nth order polynomial derivative
         elseif minord == 1
             derivfun = @(X,n) ([(X*premult>cliplimits(1)).*(X*premult<=cliplimits(2)),polyfunsdc(X*premult,subdc*(n==0))]*Dmat^n)*diag(ones(1,polyord),-1)*eye(polyord+1,polyord); 
-        end
-
+         end
+         levmat = poly;
     else
         ind = 1;
         if isscalar(polyord)
@@ -161,7 +191,7 @@ if ~trig
         
         for i = 1:dim
             for j = 1:polyord(i)
-                R(ind) =  buildpolyreg(x(:,i)*premult,j,'polyvec','subtractdc',false,varargin{:});
+                R(ind) =  buildpolyreg(x(:,i)*premult,j,'polyvec','subtractdc',false,'splitdim',false,varargin{:});
                 R(ind).levmat(:) = j;
                 R(ind).info.intxnord = j;
                 R(ind).label = sprintf('x%i^%i',i,j);
@@ -243,11 +273,22 @@ if ~trig
             end
         end
 %         R.factmat = R.code*ones(1,size(R.factmat,2));
+        R.factmat = R.code*ones(size(R.factmat));
 %         R.levmat = 1:size(R.factmat,2);
         
+        if splitdim
+            funstr = strcat({'X'},cellfun(@num2str,num2cell(1:dim),'uniformoutput',false),{','});
+            funstr{end}(end) = [];
+            rfunc = R.function;            
+            R.function = eval(sprintf('@(%s)rfunc([%s])',[funstr{:}],[funstr{:}]));
+            dfunc = R.deriv;
+            R.deriv= eval(sprintf('@(%s,n)dfunc([%s],n)',[funstr{:}],[funstr{:}]));
+        end
+        R.info.functionInputCodes = cat(1,repmat(R.code,1,dim),1:dim);
         return
-    end
         
+    end
+     
 
 else
      mkfarg = {};
@@ -260,6 +301,16 @@ else
 %     ncol = 2*length(poly)-sum(poly==0);
     ncol = length(polyfun(x(1,:)));
     
+    %add levels for frequency
+    for i = 1:size(fr,2)
+        [q,qq,levmat(:,i)] = unique(abs(fr(:,i))*4 + 2*(fr(:,i)<0) + mod( (1:ncol)' + mod(ncol,2)+1 ,2)+1);
+    end
+    % add level for phase
+%     if mod(size(fr,1),2) >0
+%         levmat(1,:) = 1;
+%         levmat(2:end,end) = repmat([1 2]',floor(size(fr,1)/2),1);
+%     end
+    levmat(fr==0) = 1;
 end    
 
 if center
@@ -272,10 +323,24 @@ end
 
 R = makeregressor(regfun(x).*repmat(postmult,1,ncol),'label',label,'normconst',normconst,'noptions',noptions,'codeincr',codeincr);
 
+R.levmat = levmat';
+R.factmat= R.code.*ones(size(levmat'));
+
 R.function = @(X) makeme(X,regfun,polyord);
 if ~isempty(derivfun)
     R.deriv = @(X,n) makeme(X,derivfun,polyord,1,n);
 end
+
+
+if splitdim
+    funstr = strcat({'X'},cellfun(@num2str,num2cell(1:dim),'uniformoutput',false),{','});
+    funstr{end}(end) = [];
+    rfunc = R.function;            
+    R.function = eval(sprintf('@(%s)rfunc([%s])',[funstr{:}],[funstr{:}]));
+    dfunc = R.deriv;
+    R.deriv= eval(sprintf('@(%s,n)dfunc([%s],n)',[funstr{:}],[funstr{:}]));
+end
+        R.info.functionInputCodes = cat(1,repmat(R.code,1,dim),1:dim);
 % R.value = repmat(x,1,length(poly)).^repmat(poly,size(X,1),1);
 % R.normconst = normconst;
 % 
@@ -322,3 +387,5 @@ DM(:,end) =[];
 X(:,end+1) = 1;
 
 DMX = X*DM;
+
+

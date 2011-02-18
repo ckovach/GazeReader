@@ -121,15 +121,17 @@ for i = 1:length(grp)
     end
     
     try
-        Rout(i).function = makefunction(R(grp{i}).function);      
-    catch
+%         Rout(i).function = makefunction(R(grp{i}).function);      
+        [Rout(i).function,terms,Rout(i).deriv] = makePooledFunction(R(grp{i}));      
+        Rout(i).info.functionInputCodes = terms;
+catch
         warning('Unable to generate a function for %s',Rout(i).label)
     end
-    try
-        Rout(i).deriv = makefunction(R(grp{i}).deriv);      
-    catch
-        warning('Unable to generate a function for %s',Rout(i).label)
-    end
+%     try
+%         Rout(i).deriv = makefunction(R(grp{i}).deriv);      
+%     catch
+%         warning('Unable to generate a function for %s',Rout(i).label)
+%     end
     strow = 0;
      Rout(i).info.parentindex=[];
     for j = 1:length(grp{i})
@@ -180,4 +182,53 @@ funstr = [funstr,');'];
 
 fun = eval(funstr);
 
-    
+%--------------------------------------
+function [pooled_function,terms,dpooled] = makePooledFunction(Rs)
+
+
+
+%Create a function which distributes inputs to the appropriate arguments
+
+
+% Get regressor codes
+rcodes = [Rs.code];
+rfunctions = {Rs.function};
+factmats = {Rs.factmat};
+dfunctions = {Rs.deriv};
+
+
+terms= zeros(2,0);
+for i = 1:length(Rs)
+    [unq,q,polyterm] = unique(factmats{i}(:,1));
+     rinputs{i} = [];
+     for j = 1:length(unq)
+         for k = 1:sum(polyterm==j)
+             
+             input = find(terms(1,:) == unq(j) & terms(2,:) == k);
+             if isempty(input)
+                 terms(:,end+1) = [unq(j),k];
+                 rinputs{i}(end+1) = size(terms,2);
+             else
+                 rinputs{i}(end+1) = input;
+             end
+                 
+         end
+     end
+end             
+
+nargs = max([rinputs{:}]);
+args = cellfun(@(n) sprintf('X%i',n),num2cell(1:nargs),'uniformoutput',false);
+args2 = cellfun(@(n) sprintf('%i',n),num2cell(1:nargs),'uniformoutput',false);
+trim = @(a) a(1:end-1);
+genarg = @(X)trim(sprintf('%s,',X{:}));
+funs = cellfun(@(inp,i) sprintf('rfunctions{%i}(%s)',i,genarg(args(inp))),rinputs,num2cell(1:length(rinputs)),'uniformoutput',false);
+
+dfuns = cellfun(@(inp,i) sprintf('dfunctions{%i}(%s,n([%s]))',i,genarg(args(inp)),genarg(args2(inp))),rinputs,num2cell(1:length(rinputs)),'uniformoutput',false);
+
+pooled_function = str2func( sprintf('@(%s) cat(2, %s )',genarg(args),genarg(funs)));
+
+try
+    dpooled = str2func( sprintf('@(%s,n) cat(2, %s )',genarg(args),genarg(dfuns)));
+catch
+    dpooled = [];
+end

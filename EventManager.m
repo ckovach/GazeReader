@@ -71,7 +71,7 @@ evtfuns.updateTrials = @() UpdateTrialData(handles.figure1,[],handles);
 setappdata(parent,'EventManagerFunctions',evtfuns);
 
 if isempty(expEventData)
-   error('There appear to be no events.');
+   errordlg('There appear to be no events. Assign trial onset and end in EventManager first.');
 end
 
 % if ~isfield(expEventData(currentDataSet),'events') || isempty(expEventData(currentDataSet).events)

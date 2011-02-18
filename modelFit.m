@@ -113,6 +113,7 @@ llrtests = [];
 obsfreq = 1;
 discard = 0;
 inittheta = 0; %starting point for numerical maximization
+collapserows = false;  %Improve efficiency by calling collapseX to collapse over like rows
 % parallel = false; %use of parallel toolbox to be implemented
 % maxcpu = 8; %Maximum workers used when using parallel computing
 
@@ -159,13 +160,14 @@ while i <= length(varargin)
             i = i+1;
        case 'obsfreq'     %LOG bin volume
             obsfreq = varargin{i+1};
+            collapserows = false; %Assume already collapsed.
             i = i+1;
        case 'discard'     %LOG bin volume
             discard= varargin{i+1};
             i = i+1;
-%         case 'parallel'     %use parallel computing toolbox if available
-%             parallel = varargin{i+1};
-%             i = i+1;
+        case 'parallel'     %use parallel computing toolbox if available - NOT FUNCTIONAL
+            parallel = varargin{i+1};
+            i = i+1;
         case 'fix'    
             fix = varargin{i+1};
             i = i+1;
@@ -194,7 +196,7 @@ fitstruct = struct('label','','parest',[],'npar',[],'I',[],'badcond',[],'max_ite
                                 'contrast',[],'W',[],'N',[],'obsfreq',[],'firth',[],'Hreg',[],'multassign',[],'blockC',[],...
                                 'discarded',[],'binvolume',[],'singular_design_matrix',[]);
 
-
+%%% Create the response vector
                             
 if isstruct(trialData)
     
@@ -316,14 +318,34 @@ if length(binvolume) > 1
 end
 
 nobs = sum(FB~=0);
+
+if collapserows
+    %%% collapse over like rows if collapserows is true
+    %%% This can make fitting more efficient by converting binary outcomes 
+    %%% to counts
+  
+    
+    [colindx, obsfreq, expindx, nopt] = collapseX(cat(2,W,Rpooled.value),Rpooled.noptions,'discardtrials',discard);
+    
+    Rpooled.value = Rpooled.value(colindx,:);
+    Rpooled.noptions = nopt;
+    
+        
+    Win = W(colindx);
+    
+else 
+    obsfreq = ones(size(Rpooled.noptions));
+    Win = W;
+end
+        
 % [parest,I,LL,badcond] = logitmodelsp(Rpooled,W, [] , Hreg);
 % [parest,I,LL,badcond] = mnlfit(Rpooled,W,0, Hreg, true, [],Firth);
-[parest,I,LL,badcond,lgm,max_iter,design_singular,Nobs] = mnlfit(Rpooled,W,'inittheta',inittheta,'regularization',Hreg, 'runiter',true, 'fix',[],'firth',Firth,...
+[parest,I,LL,badcond,lgm,max_iter,design_singular,Nobs] = mnlfit(Rpooled,Win,'inittheta',inittheta,'regularization',Hreg, 'runiter',true, 'fix',[],'firth',Firth,...
                                 'linearconstraint',LC,'include_null',include_null,'binvolume',binvolume,'checkdesign',true,'discard',discard,'obsfreq',obsfreq,mnlfitopts{:});
 
 %The point estimate corresponding to fixed values and 0 otherwise
 % [parest0,I0,LL0] = mnlfit(Rpooled,W,0, Hreg, false, [],Firth);
-[parest0,I0,LL0] = mnlfit(Rpooled,W,'inittheta',H0theta, 'regularization',Hreg, 'runiter',false, 'fix',[],'firth',Firth,...
+[parest0,I0,LL0] = mnlfit(Rpooled,Win,'inittheta',H0theta, 'regularization',Hreg, 'runiter',false, 'fix',[],'firth',Firth,...
                                 'linearconstraint',LC,'include_null',include_null,'binvolume',binvolume,'discard',discard,'obsfreq',obsfreq,mnlfitopts{:});
 
 npar = length(parest) - rank(LC);
@@ -374,6 +396,26 @@ if length(R)>1 && ~fullOnly
         getreg = ~ismember(regcodes,llrtests{i});
         Rpooled = pool(R(getreg));
         
+
+        if collapserows
+            %%% collapse over like rows if collapserows is true
+            %%% This can make fitting more efficient by converting binary outcomes 
+            %%% to counts
+
+
+            [colindx, obsfreq, expindx, nopt] = collapseX(cat(2,W,Rpooled.value,discard),Rpooled.noptions);
+
+            Rpooled.value = Rpooled.value(colindx,:);
+            Rpooled.noptions = nopt;
+
+
+            Win = W(colindx);
+
+        else 
+            obsfreq = ones(size(Rpooled.noptions));
+            Win = W;
+        end
+        
 %         Rpooled.value(isnan( Rpooled.value)) = 0;
 %         Rpooled.value = Rpooled.value(FBr~=0, any( Rpooled.value(FBr~=0,:)~=0,1) );
 %         Rpooled.noptions = Rpooled.noptions(FB ~= 0);
@@ -411,7 +453,7 @@ if length(R)>1 && ~fullOnly
             fit(i+1).label = sprintf(' | %s ',R(~getreg).label);
         end
         fprintf('\nFitting submodel %i: %s\n',i,fit(i+1).label );
-        [parest,I,LL,badcond,lgm,max_iter] = mnlfit(Rpooled,W,'inittheta',stth, 'regularization',Hreg, 'runiter',true,...
+        [parest,I,LL,badcond,lgm,max_iter] = mnlfit(Rpooled,Win,'inittheta',stth, 'regularization',Hreg, 'runiter',true,...
                                                      'firth',Firth,'linearconstraint',LCsub,'binvolume',binvolume,'discard',discard,'obsfreq',obsfreq,mnlfitopts{:});
 
         npar = length(parest) - rank(LCsub);

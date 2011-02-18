@@ -1,11 +1,11 @@
 
 function R = makeregressor(X,varargin)
 
-%  makeregressor(X,'noptions',nopt)
+%   R = makeregressor(X,'noptions',nopt)
 %
 % 
 %   MAKEREGRESSOR takes input X and puts it into the form of a regressor
-%   structure.
+%   structure, R.
 %   
 %   Nopt is the the number-of-options vector giving the number of outcome options
 %   (bins) for each event. X must have sum(Nopt) rows if Nopt is a vector
@@ -63,6 +63,8 @@ codeincr = 0;
 normconst = 1;
 label = '';
 mkfun = @(X)X;
+% derivfun = @(X,n) X*diag(n==0) + ones(size(X))*diag(n==1);
+
 noptions = [];
 Npar = 0;
 postmult = ones(size(X,1),1);
@@ -95,6 +97,9 @@ while i <= length(varargin)
         case 'function' %Applies specified function the input
             mkfun = varargin{i+1};
             i=i+1;
+%         case 'deriv' %derivative of function
+%            derivfun = varargin{i+1};
+%             i=i+1;
         case 'postmultiply' %after the regressor matrix is computed multiply each column by this vector
             postmult  = varargin{i+1};
             i = i+1; 
@@ -113,7 +118,7 @@ R = struct('value',[],'info',[],'normconst',normconst,'label',label,'noptions',.
             noptions,'Npar',Npar,'code',codeincr+1,'codevec',[],'factmat',[],'levmat',[],...
              'fixed',[],'function',[],'deriv',[]);
 R.info = struct('form',[],'intxnord',[],'COMMAND',[],'hashcode',[],'parent',[],'label',...
-                [],'pooled_labels',{{}},'contrasts',{{}},'parentindex',[]);
+                [],'pooled_labels',{{}},'contrasts',{{}},'parentindex',[],'functionInputCodes',[]);
 R.Npar = 0;
 if isempty(X) %Initializes an empty regressor if X is empty
     return
@@ -178,6 +183,7 @@ catch
 end
 
 R.function = mkfun;
+% R.deriv = derivfun;
 
 
 reseed;
@@ -185,6 +191,9 @@ reseed;
 R.info.hashcode = uint32(rand*intmax('uint32')); %For now a random number will be the hashcode
 
 R.code = codeincr + 1;
+
+R.info.functionInputCodes = cat(1,R.code*ones(1,nargin(R.function)),ones(1,nargin(R.function)));
+
 
 R.factmat = ones(1,npar)*R.code;
 R.levmat  = 1:npar;

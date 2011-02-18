@@ -5,9 +5,10 @@ function [Theta, I, LL, badcond,lgm, max_iterations_reached,design_is_singular, 
 %function [Theta, I] = mnlfit(R,Ysp,'param',value,... )
 %
 %     Fits a multinomial generalized linear model with regressor R and
-%     observation vector Ysp.
+%     observation vector Ysp, using damped Newton-Raphson gradient ascent
+%     on the likelihood function.
 %
-%     R is a regressor structure as returned by makeregresso, where. 
+%     R is a regressor structure as returned by makeregresso, where 
 %     R.value is an N x M matrix.
 %
 %     Ysp is the Mx1 vector of observations.with 1 denoting that the chosen option

@@ -22,7 +22,7 @@ function varargout = RegManager(varargin)
 
 % Edit the above text to modify the response to help RegManager
 
-% Last Modified by GUIDE v2.5 06-Feb-2008 19:41:09
+% Last Modified by GUIDE v2.5 16-Feb-2011 16:22:39
 
 % Begin initialization code - DO NOT EDIT
 gui_Singleton = 1;
@@ -170,11 +170,60 @@ function importFromWorkspaceMenu_Callback(hObject, eventdata, handles)
 % handles    structure with handles and user data (see GUIDATA)
 
 
+%Load variable(s) from main workspace and append as a regressor
+
+parent = getappdata(handles.figure1,'parent');
+var = inputdlg('Which variable?');
+
+assignin('base','grh_handle',parent)
+
+try
+    evalin('base',sprintf('appendReg(grh_handle,%s,[],''label'',''%s'')',var{1},var{1}));
+catch
+    le = lasterror;
+    errordlg(le.message)
+end
+
+
 % --------------------------------------------------------------------
-function importFromTextMenu_Callback(hObject, eventdata, handles)
-% hObject    handle to importFromTextMenu (see GCBO)
+function importFromMatFileMenu_Callback(hObject, eventdata, handles)
+% hObject    handle to importFromMatFileMenu (see GCBO)
 % eventdata  reserved - to be defined in a future version of MATLAB
 % handles    structure with handles and user data (see GUIDATA)
+
+
+%Load variable(s) from a mat file and append as a regressor
+
+parent = getappdata(handles.figure1,'parent');
+
+
+[fname,pth] = uigetfile('*.mat');
+    
+if isnumeric(fname)
+    return
+end
+
+vars = whos('-file',fullfile(pth,fname));
+dims = cellfun(@(a) sprintf( '%i x %i',a),{vars.size},'uniformoutput',false);
+if length(vars) > 1
+    sel = listdlg('PromptString','Which variable(s)?','ListString',strcat({vars.name},{'              '},dims));
+end
+
+ld = load(fullfile(pth,fname),vars(sel).name);
+
+
+for i = sel
+
+    try
+        appendReg(parent,ld.(vars(i).name),[],'label',vars(i).name)
+    catch catcherr       
+        errordlg(sprintf('While loading %s:  %s',vars(i).name,catcherr.message))
+    end
+    
+end
+
+
+
 
 
 % --------------------------------------------------------------------
@@ -334,7 +383,8 @@ CurrentDataSet =  getappdata(parent,'CurrentDataSet');
 trialData =  getappdata(parent,'trialData');
 binData =  getappdata(parent,'binData');
 
-if isempty(currentRegressor) || isequal(currentRegressor,0)  || currentRegressor > length(regData(CurrentDataSet).regressors) 
+if isempty(currentRegressor) || isequal(currentRegressor,0) || isequal(currentRegressorGroup,0)...
+   || currentRegressor > regData(CurrentDataSet).regressors(currentRegressorGroup).Npar 
     return
 end
 if currentTrial > 0 && ~isempty(currentFixation) &&...
@@ -465,6 +515,7 @@ for CurrentDataSet = length(regData)+1:length(trialData)
     logbinvolume = zeros(nrow,1);
     trialIndex = zeros(nrow,1);
     fixationIndex = zeros(nrow,1);
+    binIndex = zeros(nrow,3);
     
     fixnum = zeros(nrow,1);
     fixdt = zeros(nrow,1);
@@ -479,7 +530,7 @@ for CurrentDataSet = length(regData)+1:length(trialData)
         
         
         
-        binIndex = ismember(binGroupCodes,trialData(CurrentDataSet).trials(i).binGroup);
+        binGroupIndex = ismember(binGroupCodes,trialData(CurrentDataSet).trials(i).binGroup);
         nbin = trialData(CurrentDataSet).trials(i).nbin;
         nfix = trialData(CurrentDataSet).trials(i).nfix;
         if ~isempty(fixData) && ~isequal(nfix,0)
@@ -499,7 +550,7 @@ for CurrentDataSet = length(regData)+1:length(trialData)
             crtintvl =  crtintvl+ceil(trialData(CurrentDataSet).trials(i).stopTime./time_intvl);
             
         %     fixpos(assigninds ,:) = allfixpos(fixinds,:); % position of each fixation       
-            bincent = cat(1,binData.groups(binIndex).centers);     
+            bincent = cat(1,binData.groups(binGroupIndex).centers);     
             fm = trialData(CurrentDataSet).trials(i).fixmat';
             fixbinsovlp( assigninds,: ) = fm(:); %cat(1,fixbinsovlp,fm(:));
             
@@ -517,6 +568,9 @@ for CurrentDataSet = length(regData)+1:length(trialData)
             end
             cr = cr + nbin*nfix;
             
+            bindexs = cellfun(@(a,b) cat(2,(1:a)',ones(a,1)*b),{binData.groups(binGroupIndex).nbin},num2cell(binGroupIndex),'uniformoutput',false); 
+            binIndex(assigninds,1) = repmat((1:nbins)',nfix,1);
+            binIndex(assigninds,2:3) = repmat(cat(1,bindexs{:}),nfix,1);
         end
     end
 
@@ -541,6 +595,7 @@ for CurrentDataSet = length(regData)+1:length(trialData)
     if length(regData) < CurrentDataSet || isempty([regData(CurrentDataSet).regressors.code])
         regData(CurrentDataSet).trialIndex = trialIndex(expander);
         regData(CurrentDataSet).fixationIndex = fixationIndex(expander);
+        regData(CurrentDataSet).binIndex = binIndex(expander,:);
         cdi = 0;
         regData(CurrentDataSet).regressors(1) = makeregressor(full(fixbinsovlp(expander) ),'label','BinMembership','noptions',nbinsfx,'codeincr',cdi); cdi = cdi+1;
         regData(CurrentDataSet).codeincr = cdi; 
@@ -557,23 +612,23 @@ for CurrentDataSet = length(regData)+1:length(trialData)
     %                         'FixXY[0]','noptions',nbinsfx,'codeincr',regData(CurrentDataSet).codeincr);
         setappdata(parent,'regData',regData)
         regData(CurrentDataSet).regressors(4) = makeregressor(getShiftedXYFromFixation(hObject, eventdata, handles,-1,expander),...
-                            'label','FixXY[-1]','noptions',nbinsfx(:)','codeincr',regData(CurrentDataSet).codeincr+2);
+                            'label','FixXY[-1]','noptions',nbinsfx(:),'codeincr',regData(CurrentDataSet).codeincr+2);
         regData(CurrentDataSet).regressors(5) = makeregressor(getShiftedXYFromFixation(hObject, eventdata, handles,-2,expander),...
-                            'label','FixXY[-2]','noptions',nbinsfx(:)','codeincr',regData(CurrentDataSet).codeincr+3);
+                            'label','FixXY[-2]','noptions',nbinsfx(:),'codeincr',regData(CurrentDataSet).codeincr+3);
         regData(CurrentDataSet).regressors(6) = makeregressor(getShiftedXYFromFixation(hObject, eventdata, handles,-3,expander),...
-                            'label','FixXY[-3]','noptions',nbinsfx(:)','codeincr',regData(CurrentDataSet).codeincr+4);
+                            'label','FixXY[-3]','noptions',nbinsfx(:),'codeincr',regData(CurrentDataSet).codeincr+4);
 
         regData(CurrentDataSet).regressors(7) = makeregressor(fixnum(expander,:),...
-                            'label','Fixn Number','noptions',nbinsfx(:)','codeincr',regData(CurrentDataSet).codeincr+5);
+                            'label','Fixn Number','noptions',nbinsfx(:),'codeincr',regData(CurrentDataSet).codeincr+5);
         
         if conditional_model
             regData(CurrentDataSet).regressors(8) = makeregressor(fixdt,...
-                            'label','Inter-Fixn T','noptions',nbinsfx(:)','codeincr',regData(CurrentDataSet).codeincr+6);
+                            'label','Inter-Fixn T','noptions',nbinsfx(:),'codeincr',regData(CurrentDataSet).codeincr+6);
             regData(CurrentDataSet).regressors(9) = makeregressor(fixtrt,...
                             'label','Trial T','noptions',nbinsfx,'codeincr',regData(CurrentDataSet).codeincr+7);
         else
             regData(CurrentDataSet).regressors(8) = makeregressor(cat(1,intvl_data.fxtimes),...
-                            'label','Inter-Fixn T','noptions',nbinsfx(:)','codeincr',regData(CurrentDataSet).codeincr+6);
+                            'label','Inter-Fixn T','noptions',nbinsfx(:),'codeincr',regData(CurrentDataSet).codeincr+6);
             regData(CurrentDataSet).regressors(9) = makeregressor(cat(1,intvl_data.trtimes),...
                             'label','Trial T','noptions',nbinsfx,'codeincr',regData(CurrentDataSet).codeincr+7);
         end    
@@ -855,18 +910,6 @@ function SplitMenu_Callback(hObject, eventdata, handles)
 % handles    structure with handles and user data (see GUIDATA)
 
 
-% --------------------------------------------------------------------
-function PolynomialsMenu_Callback(hObject, eventdata, handles)
-% hObject    handle to PolynomialsMenu (see GCBO)
-% eventdata  reserved - to be defined in a future version of MATLAB
-% handles    structure with handles and user data (see GUIDATA)
-
-
-% --------------------------------------------------------------------
-function SinusoidsMenu_Callback(hObject, eventdata, handles)
-% hObject    handle to SinusoidsMenu (see GCBO)
-% eventdata  reserved - to be defined in a future version of MATLAB
-% handles    structure with handles and user data (see GUIDATA)
 
 
 % --------------------------------------------------------------------
@@ -877,13 +920,155 @@ function IneractionMenu_Callback(hObject, eventdata, handles)
 
 
 %----------------------------------------------------
-function resetRegressors(hObject,eventdata,handles)
+function resetRegressors(hObject,eventdata,handles, forDataSets)
+
 
 parent = getappdata(hObject,'parent');
 evh = getappdata(parent,'eyetrackerHeaderData');
 
-for i = 1:length(evh)
+if nargin < 4
+    forDataSets = 1:length(evh);
+end
+
+for i = forDataSets
+    
     setappdata(parent,'CurrentDataSet',i)
     InitializeRegressors(hObject, eventdata, handles)
     
 end
+
+
+% --------------------------------------------------------------------
+function reset_reg_Callback(hObject, eventdata, handles)
+% hObject    handle to reset_reg (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    structure with handles and user data (see GUIDATA)
+
+doit = questdlg('Are you sure you want to discard and reset all regressors?','Reset Regressors','Y','N','N');
+% 
+% if isequal(doit,'N')
+%     return
+% end
+
+parent = getappdata(handles.figure1,'parent');
+forDataSets = getappdata(parent,'CurrentDataSet');
+setappdata(parent,'regData',[]);
+resetRegressors(handles.figure1,eventdata,handles,forDataSets );
+
+
+% --------------------------------------------------------------------
+function make_basis_Callback(hObject, eventdata, handles)
+
+make_basis(hObject, eventdata, handles)
+
+% --------------------------------------------------------------------
+function make_basis(hObject, eventdata, handles)
+% hObject    handle to make_basis (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    structure with handles and user data (see GUIDATA)
+
+
+parent = getappdata(handles.figure1,'parent');
+
+crdat = getappdata(parent,'CurrentDataSet');
+crreg = getappdata(parent,'CurrentRegressorGroup');
+
+if isempty(crdat) || isempty(crreg) || crdat == 0 || crreg == 0
+    fprintf('\nSelect a regressor first.')
+    return
+end
+
+regData = getappdata(parent,'regData');
+
+reg = regData.regressors(crreg);
+
+%%% Second argument is basis set labels
+basish = basisFcnDlg(hObject, {'Polynomial','Sinusoid'});
+
+
+basisSet = 0;
+
+uiwait(basish)
+
+basisSet = getappdata(hObject,'basisSet');
+basisOrd = getappdata(hObject,'basisOrd');
+basisDC = getappdata(hObject,'basisKeepDC');
+keepdc = basisDC == 1;
+if keepdc
+    lblap = ' dc';
+else
+    lblap = '';
+end
+
+cdi = max([regData.regressors.code]);
+%%% Define the basis sets here
+switch basisSet
+    
+    case 1  % polynomial basis functions
+        lbl = sprintf(['%s->Poly %i',lblap],reg.label,basisOrd);
+            
+        polyreg = buildpolyreg(reg.value,basisOrd,'label',lbl,'codeincr',cdi,'keepdc',keepdc);
+        
+    case 2 % sinusoidal basis functions
+        lbl = sprintf(['%s->Sin %i',lblap],reg.label,basisOrd);
+        polyreg = buildpolyreg(reg.value,basisOrd,'trig','label',lbl,'codeincr',cdi,'keepdc',keepdc);
+    case 0
+        return
+        
+    otherwise
+        error('Unrecognized basis set')
+end
+    
+appendReg(parent,polyreg)
+
+
+% --------------------------------------------------------------------
+function make_basis_contextmenu_Callback(hObject, eventdata, handles)
+% hObject    handle to make_basis_contextmenu (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    structure with handles and user data (see GUIDATA)
+
+make_basis(hObject, eventdata, handles)
+
+
+% --------------------------------------------------------------------
+function lin2polar_Callback(hObject, eventdata, handles)
+% hObject    handle to lin2polar (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    structure with handles and user data (see GUIDATA)
+
+
+parent = getappdata(handles.figure1,'parent');
+
+crdat = getappdata(parent,'CurrentDataSet');
+crreg = getappdata(parent,'CurrentRegressorGroup');
+
+if isempty(crdat) || isempty(crreg) || crdat == 0 || crreg == 0
+    fprintf('\nSelect a regressor first.')
+    return
+end
+
+regData = getappdata(parent,'regData');
+
+reg = regData.regressors(crreg);
+
+if reg.Npar ~=2
+    beep
+    fprintf('Polar coordinate transformation requires a 2 column matrix input')
+    return
+end
+
+[R,TH] = lin2rad(reg.value);
+
+appendReg(parent,R,[],'label',sprintf('%s->rad',reg.label));
+appendReg(parent,TH,[],'label',sprintf('%s->angle',reg.label));
+
+
+
+
+
+% --------------------------------------------------------------------
+function import_from_Text_Callback(hObject, eventdata, handles)
+% hObject    handle to import_from_Text (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    structure with handles and user data (see GUIDATA)

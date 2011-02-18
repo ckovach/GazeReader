@@ -1,13 +1,14 @@
 function RX = interaction(varargin)
 
-% function RX = interaction(R1,R2)
 %
 %   Creates a regressor of interaction terms between R1 and R2. 
 % 
-% function RX = interaction(R,'intxnord',intxnord)
+% Usage:  RX = interaction(R1,R2)
+% 
+%         RX = interaction(R,'intxnord',intxnord)
 %
 %   Creates interactions among all the regressors within the regressor
-%   array, R, up to order intxnord.
+%   array, R, up to order intxnord.By default intxnord = 2.
 %
 % function RX = interaction(R)
 %
@@ -16,6 +17,7 @@ function RX = interaction(varargin)
 %
 % See also MAKEREGRESSOR
 
+% C. Kovach 2007 - 20011
 intxnord = 2;
 
 if isstruct(varargin{1})
@@ -71,6 +73,7 @@ end
 if nargin > 1 && isstruct(R2)
     %For two regressor arrays 2nd order interactions between groups
     indx = 1;
+    RX = makeregressor([]); RX(1) = [];
     for i = 1:length(R1)
         for j = 1:length(R2)
 
@@ -201,10 +204,11 @@ for i = 1:length(R1)
         RX(rxind).noptions= R1(i).noptions;
         RX(rxind).Npar = R1(i).Npar*R2(j).Npar;
         RX(rxind).fixed = zeros(1,RX(rxind).Npar);
-        RX(rxind).function = makemefun(R1.function,R2.function,R1.Npar,R2.Npar);
-        if isfield(R1,'deriv') && isfield(R2,'deriv') && ~isempty(R1.deriv)&& ~isempty(R2.deriv)
-            RX(rxind).deriv = @(x,ns) kron(R1.deriv(x,ns(1)),ones(1,R2.Npar)).*repmat(R2.deriv(x,ns(2:end)),1,R1.Npar);
-        end
+        [RX(rxind).function,RX(rxind).deriv,terms] = makemefun([R1,R2]);
+        RX.info.functionInputCodes = terms;
+%         if isfield(R1,'deriv') && isfield(R2,'deriv') && ~isempty(R1.deriv)&& ~isempty(R2.deriv)
+%             RX(rxind).deriv = @(x,ns) kron(R1.deriv(x,ns(1)),ones(1,R2.Npar)).*repmat(R2.deriv(x,ns(2:end)),1,R1.Npar);
+%         end
         
         rxind = rxind+1;
     end
@@ -212,27 +216,66 @@ end
 
 %%%%%%%%%%%%%%%%%
 
-function mkfun = makemefun(R1fun,R2fun,npar1,npar2)
+function [mkfun,mkdfun,terms] = makemefun(Rs)
+
+rcodes = [Rs.code];
+rfunctions = {Rs.function};
+factmats = {Rs.factmat};
+dfunctions = {Rs.deriv};
+
+npar1 = Rs(1).Npar;
+npar2 = Rs(2).Npar;
 
 
-if isempty(R1fun) || isempty(R2fun)
-    mkfun = [];
-    return
-end
+terms= zeros(2,0);
+for i = 1:length(Rs)
+    [unq,q,polyterm] = unique(factmats{i}(:,1));
+     rinputs{i} = [];
+     for j = 1:length(unq)
+         for k = 1:sum(polyterm==j)
+             
+             input = find(terms(1,:) == unq(j) & terms(2,:) == k);
+             if isempty(input)
+                 terms(:,end+1) = [unq(j),k];
+                 rinputs{i}(end+1) = size(terms,2);
+             else
+                 rinputs{i}(end+1) = input;
+             end
+                 
+         end
+     end
+end             
 
-nargs1 = nargin(R1fun);
-nargs2 = nargin(R2fun);
+nargs = max([rinputs{:}]);
 
-argliststr = strcat('X',cellfun(@num2str,num2cell(1:nargs1+nargs2),'uniformOutput',0));
+argnum = cellfun(@(n) sprintf('%i',n),num2cell(1:nargs),'uniformoutput',false);
+args = strcat('X',argnum);
 
-funstr = sprintf('@(%s) kron( R1fun(%s),ones(1,npar2) ).*repmat( R2fun(%s) , 1 , npar1 );',...
-            [sprintf('%s,',argliststr{1:end-1}),argliststr{end}],...
-            [sprintf('%s,',argliststr{1:nargs1-1}),argliststr{nargs1}],...
-            [sprintf('%s,',argliststr{(1:nargs2-1)+nargs1}),argliststr{nargs1+nargs2}]);
+trim = @(a) a(1:end-1);
+genarg = @(X)trim(sprintf('%s,',X{:}));
+funs = cellfun(@(inp,i) sprintf('rfunctions{%i}(%s)',i,genarg(args(inp))),rinputs,num2cell(1:length(rinputs)),'uniformoutput',false);
+
+dfuns = cellfun(@(inp,i) sprintf('dfunctions{%i}(%s,n([%s]))',i,genarg(args(inp)),genarg(argnum(inp))),rinputs,num2cell(1:length(rinputs)),'uniformoutput',false);
+
+funstr = sprintf('@(%s) kron( rfunctions{1}(%s),ones(1,npar2) ).*repmat( rfunctions{2}(%s) , 1 , npar1 );',...
+            genarg(args),...
+            genarg(args(rinputs{1})),...
+            genarg(args(rinputs{2})));
 
 mkfun = eval(funstr);
 
 
+
+try
+    dfunstr = sprintf('@(%s,n) kron( dfunctions{1}(%s,n([%s])),ones(1,npar2) ).*repmat( dfunctions{2}(%s,n([%s])) , 1 , npar1 );',...
+                genarg(args),...
+                genarg(args(rinputs{1})),genarg(argnum(rinputs{1})),...
+                genarg(args(rinputs{2})),genarg(argnum(rinputs{2})));
+
+    mkdfun = eval(dfunstr);
+catch
+    mdfun = [];
+end
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
