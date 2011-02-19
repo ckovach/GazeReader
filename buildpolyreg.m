@@ -323,8 +323,8 @@ end
 
 R = makeregressor(regfun(x).*repmat(postmult,1,ncol),'label',label,'normconst',normconst,'noptions',noptions,'codeincr',codeincr);
 
-R.levmat = levmat';
-R.factmat= R.code.*ones(size(levmat'));
+R.levmat = levmat;
+R.factmat= R.code.*ones(size(levmat));
 
 R.function = @(X) makeme(X,regfun,polyord);
 if ~isempty(derivfun)
