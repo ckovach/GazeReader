@@ -79,7 +79,7 @@ nrows = size(R1(1).value,1);   % Number of rows in the design matrix
 nrows2 = size(R2.value,1);
 
 noptions = R1(1).noptions;
-nbin = unique(noptions);
+nbin = unique([trialData(dataset).trials.nbin]);
 if length(nbin) > 1
     nbin = nan;
 end

@@ -334,7 +334,7 @@ if collapserows
     Win = W(colindx);
     
 else 
-    obsfreq = ones(size(Rpooled.noptions));
+%     obsfreq = ones(size(Rpooled.noptions));
     Win = W;
 end
         
@@ -412,7 +412,6 @@ if length(R)>1 && ~fullOnly
             Win = W(colindx);
 
         else 
-            obsfreq = ones(size(Rpooled.noptions));
             Win = W;
         end
         

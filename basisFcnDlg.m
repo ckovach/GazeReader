@@ -91,7 +91,11 @@ function basis_menu_Callback(hObject, eventdata, handles)
 % Hints: contents = get(hObject,'String') returns basis_menu contents as cell array
 %        contents{get(hObject,'Value')} returns selected item from basis_menu
 
-
+if get(handles.basis_menu,'value') == 3;
+    set(handles.order_num,'enable','off')
+else
+    set(handles.order_num,'enable','on')    
+end
 % --- Executes during object creation, after setting all properties.
 function basis_menu_CreateFcn(hObject, eventdata, handles)
 % hObject    handle to basis_menu (see GCBO)

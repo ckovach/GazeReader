@@ -210,12 +210,14 @@ function intxnList_Callback(hObject, eventdata, handles)
 % Hints: contents = get(hObject,'String') returns intxnList contents as cell array
 %        contents{get(hObject,'Value')} returns selected item from intxnList
 
-selected = get(handles.intxnList,'value');
-intxnindex = [0,getappdata(handles.figure1,'intxnindex')];
+selected = get(handles.intxnList,'value')-1;
+% intxnindex = [0,getappdata(handles.figure1,'intxnindex')];
 
 % selected(selected==0) = [];
-if ~isempty(intxnindex)
-    setappdata(handles.figure1,'CurrentInteractionTerm',intxnindex(selected));
+% if ~isempty(intxnindex)
+if ~isempty(selected)
+%     setappdata(handles.figure1,'CurrentInteractionTerm',intxnindex(selected));
+    setappdata(handles.figure1,'CurrentInteractionTerm',selected);
 end
 
 if isequal(get(handles.figure1,'selectiontype'),'open')
@@ -971,8 +973,9 @@ end
 setappdata(handles.figure1,'RValues',RValues);
 setappdata(handles.figure1,'RFunctions',RFunctions);
 
-[liststr,intxnindex] = unique(strcat(lbls,spaces1,RV),'first');
-setappdata(handles.figure1,'intxnindex',intxnindex);
+% [liststr,intxnindex] = unique(strcat(lbls,spaces1,RV),'first');
+liststr = strcat(lbls,spaces1,RV);
+% setappdata(handles.figure1,'intxnindex',intxnindex);
 
 liststr = cat(2,{'none selected'},liststr);
 setappdata(handles.figure1,'liststr',liststr);
@@ -986,11 +989,12 @@ if currentInteractionTerm~=0  && currentInteractionTerm <= length(currentTerms) 
 %     end
 end
 
-if isempty(currentInteractionTerm ) || ~ismember(currentInteractionTerm ,intxnindex)
+if isempty(currentInteractionTerm ) %|| ~ismember(currentInteractionTerm ,intxnindex)
     currentInteractionTerm = 0;
-    setappdata(handles.figure1,'CurrentInteractionTerm',currentInteractionTerm);
+    setappdata(handles.figure1,'CurrentInteractionTerm',currentInteractionTerm+1);
 end
-set(handles.intxnList,'value',find([0,intxnindex] == currentInteractionTerm));
+% set(handles.intxnList,'value',find([0,intxnindex] == currentInteractionTerm));
+set(handles.intxnList,'value', currentInteractionTerm+1);
 
 if currentInteractionTerm == 0
     return

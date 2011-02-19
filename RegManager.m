@@ -22,7 +22,7 @@ function varargout = RegManager(varargin)
 
 % Edit the above text to modify the response to help RegManager
 
-% Last Modified by GUIDE v2.5 16-Feb-2011 16:22:39
+% Last Modified by GUIDE v2.5 19-Feb-2011 00:38:01
 
 % Begin initialization code - DO NOT EDIT
 gui_Singleton = 1;
@@ -984,7 +984,7 @@ regData = getappdata(parent,'regData');
 reg = regData(crdat).regressors(crreg);
 
 %%% Second argument is basis set labels
-basish = basisFcnDlg(hObject, {'Polynomial','Sinusoid'});
+basish = basisFcnDlg(hObject, {'Polynomial','Sinusoid','Indicator (boxcar)'});
 
 
 
@@ -1012,11 +1012,14 @@ switch basisSet
     case 1  % polynomial basis functions
         lbl = sprintf(['%s->Poly %i',lblap],reg.label,basisOrd);
             
-        polyreg = buildpolyreg(reg.value,basisOrd,'label',lbl,'codeincr',cdi,'keepdc',keepdc);
+        basisreg = buildpolyreg(reg.value,basisOrd,'label',lbl,'codeincr',cdi,'keepdc',keepdc);
         
     case 2 % sinusoidal basis functions
         lbl = sprintf(['%s->Sin %i',lblap],reg.label,basisOrd);
-        polyreg = buildpolyreg(reg.value,basisOrd,'trig','label',lbl,'codeincr',cdi,'keepdc',keepdc);
+         basisreg = buildpolyreg(reg.value,basisOrd,'trig','label',lbl,'codeincr',cdi,'keepdc',keepdc);
+    case 3 % sinusoidal basis functions
+        lbl = sprintf('Bin ID %s',lblap);
+         basisreg = fact2reg(regData.binIndex(:,2),'label',lbl,'center',~keepdc);
     case 0
         return
         
@@ -1024,7 +1027,7 @@ switch basisSet
         error('Unrecognized basis set')
 end
     
-appendReg(parent,polyreg)
+appendReg(parent, basisreg)
 
 
 % --------------------------------------------------------------------
@@ -1077,3 +1080,73 @@ function import_from_Text_Callback(hObject, eventdata, handles)
 % hObject    handle to import_from_Text (see GCBO)
 % eventdata  reserved - to be defined in a future version of MATLAB
 % handles    structure with handles and user data (see GUIDATA)
+
+
+% --------------------------------------------------------------------
+function zscore_Callback(hObject, eventdata, handles)
+% hObject    handle to zscore (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    structure with handles and user data (see GUIDATA)
+
+
+parent = getappdata(handles.figure1,'parent');
+
+crdat = getappdata(parent,'CurrentDataSet');
+crreg = getappdata(parent,'CurrentRegressorGroup');
+
+if isempty(crdat) || isempty(crreg) || crdat == 0 || crreg == 0
+    fprintf('\nSelect a regressor first.')
+    return
+end
+
+regData = getappdata(parent,'regData');
+
+reg = regData(crdat).regressors(crreg);
+
+lbl = sprintf('%s->zscore',reg.label);
+
+appendReg(parent,zscore(reg.value),'label',lbl);
+
+% --------------------------------------------------------------------
+function apply_func_Callback(hObject, eventdata, handles)
+% hObject    handle to apply_func (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    structure with handles and user data (see GUIDATA)
+
+
+parent = getappdata(handles.figure1,'parent');
+
+crdat = getappdata(parent,'CurrentDataSet');
+crreg = getappdata(parent,'CurrentRegressorGroup');
+
+if isempty(crdat) || isempty(crreg) || crdat == 0 || crreg == 0
+    fprintf('\nSelect a regressor first.')
+    return
+end
+
+selected = get(handles.regressorGroupList,'value')-1;
+
+selected(selected==0) = [];
+
+regData = getappdata(parent,'regData');
+regs = regData(crdat).regressors(selected);
+nr = length(regs);
+
+trim = @(a) a(1:end-1);
+genarg = @(b)trim(sprintf(' %s, ',b{:}));
+% if nr > 1
+    genxarg = @(n)strcat('X',cellfun(@num2str,num2cell(n),'uniformoutput',false));
+% else
+%     genxarg = @(n){'X'};
+% end
+numgenarg = @(n) trim(genarg(genxarg(n)));
+
+opt.Resize = 'on';
+opt.WindowStyle = 'normal';
+funcstr = inputdlg(sprintf('Enter the function:%s\n\n@(%s)\n',sprintf(genarg(strcat('\n',genxarg(selected),{': '},{regs.label}))),...
+                numgenarg(selected)),'Enter  Function',3,{' '},opt);
+
+func = str2func(sprintf('@(%s)  %s',numgenarg(selected),funcstr{1}'));
+
+appendReg(parent,func(regs.value),[],'label',funcstr{1});
+
