@@ -994,7 +994,12 @@ if isempty(currentInteractionTerm ) %|| ~ismember(currentInteractionTerm ,intxni
     setappdata(handles.figure1,'CurrentInteractionTerm',currentInteractionTerm+1);
 end
 % set(handles.intxnList,'value',find([0,intxnindex] == currentInteractionTerm));
-set(handles.intxnList,'value', currentInteractionTerm+1);
+if currentInteractionTerm+1 <= length(liststr)
+    set(handles.intxnList,'value', currentInteractionTerm+1);
+else
+    set(handles.intxnList,'value', length(liststr));
+    currentInteractionTerm = length(liststr)-1;
+end    
 
 if currentInteractionTerm == 0
     return

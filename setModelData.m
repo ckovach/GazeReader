@@ -29,7 +29,7 @@ GazeReader('models_menu_Callback',h,[],handles);
 %     tmfun.update();
 % end
 if nargout > 0
-    modeldata = getappdata(h,'modelData');
+    model = getappdata(h,'modelData');
 end
 
 

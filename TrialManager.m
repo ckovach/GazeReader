@@ -811,7 +811,8 @@ for i = 1:length(trdat.trials)  %Eventually change to modify only altered trials
     end  
     fixInTrial = find( fxstarts >= trdat.trials(i).startTime & fxstarts <= trdat.trials(i).stopTime);
     trdat.trials(i).fixations = fixInTrial;
-    trdat.trials(i).fixOnsetTimes = fxstarts( fixInTrial );
+    trdat.trials(i).fixOnsetTimes = fxstarts( fixInTrial ); 
+    trdat.trials(i).fixTrialTimes = fxstarts( fixInTrial ) - trdat.trials(i).startTime;
     
     trialbingrs = binData.groups(ismember(bingroupcodes, trdat.trials(i).binGroup));
     

@@ -457,6 +457,11 @@ if ~isempty(currentModel) && currentModel > 0
 %     modelregs =modelData(currentDataSet).models(currentModel).regressors;
 %     a = ismember([regData(currentDataSet).regressors.code],modelregs);
     lbl = strcat(cellfun(@num2str,num2cell(1:sum(q)),'uniformoutput',0),{'. '},{regData(currentDataSet).regressors(rgindx).label});
+    val = get(handles.regressorGroupList,'value');
+    if val > length(lbl)+1
+         set(handles.regressorGroupList,'value',length(lbl)+1);
+    end    
+    
     set(handles.regressorGroupList,'string',cat(2,liststr,lbl));
 %     set(handles.regressorGroupList,'string',cat(2,liststr,{regData(currentDataSet).regressors(ismember([regData(currentDataSet).regressors.code],modelData(currentDataSet).models(currentModel).regressors)).label}));
     set(handles.label,'string',modelData(currentDataSet).models(currentModel).label);

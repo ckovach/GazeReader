@@ -73,7 +73,7 @@ setappdata(parent,'CurrentBin',0);
 currentBinGroup = getappdata(parent,'CurrentBinGroup');
 binData = getappdata(parent,'binData');
 
-if isempty(currentBinGroup)
+if isempty(currentBinGroup) 
     setappdata(parent,'CurrentBinGroup',0) ;
 end
 
@@ -504,6 +504,12 @@ if currentBinGroup ~=0 && ishandle(handles.figure1)
     else
         set(handles.binList,'String',cat(1,colLabel,stringpos,{'New Bin'}));
     end
+    
+    val = get(handles.binList,'value');
+    if val > length(cat(1,colLabel,stringpos,{'New Bin'}))
+        set(handles.binList,'value',length(cat(1,colLabel,stringpos,{'New Bin'})));
+    end
+    
 elseif ishandle(handles.figure1)
     set(handles.label,'string','none selected')
     set(handles.Position,'string','[ ]')

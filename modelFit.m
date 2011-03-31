@@ -152,7 +152,7 @@ while i <= length(varargin)
         case 'inittheta'     
             inittheta = varargin{i+1};
             i = i+1;
-        case 'H0theta'  %value of the parameters for the null hypothesis in the global test (defaults to 0)   
+        case 'h0theta'  %value of the parameters for the null hypothesis in the global test (defaults to 0)   
             H0theta = varargin{i+1};
             i = i+1;
         case 'binvolume'     %LOG bin volume
@@ -165,8 +165,8 @@ while i <= length(varargin)
        case 'discard'     %LOG bin volume
             discard= varargin{i+1};
             i = i+1;
-        case 'parallel'     %use parallel computing toolbox if available - NOT FUNCTIONAL
-            parallel = varargin{i+1};
+        case 'parallel'     %use parallel computing toolbox if available - NOT CURRENTLY FUNCTIONAL
+%             parallel = varargin{i+1};
             i = i+1;
         case 'fix'    
             fix = varargin{i+1};
@@ -192,7 +192,7 @@ end
 % fitstruct = struct('label','','parest',[],'npar',[],'I',[],'badcond',[],...
 %                                 'LL',[],'AIC',[],'BIC',[],'lBayes',[],'llrpval',[],'regressors',[],'contrast',[],'W',[],'firth',[],'Hreg',[],'multassign',[],'blockC',[]);
 fitstruct = struct('label','','parest',[],'npar',[],'I',[],'badcond',[],'max_iterations_reached',[],...
-                                'LL',[],'LLR',[],'AIC',[],'BIC',[],'llrpval',[],'R',[],'regressors',[],...
+                                'LL',[],'LLR',[],'Dev',[],'deltaDev',[],'df',[],'llrpval',[],'AIC',[],'BIC',[],'R',[],'regressors',[],...
                                 'contrast',[],'W',[],'N',[],'obsfreq',[],'firth',[],'Hreg',[],'multassign',[],'blockC',[],...
                                 'discarded',[],'binvolume',[],'singular_design_matrix',[]);
 
@@ -260,7 +260,9 @@ else
     if length(noptions) == 1;
             noptions = noptions*ones(1,length(W)./noptions);
     end
-    FB = ones(size(noptions));
+    
+%     FB = ones(size(noptions));
+    
     %Get the bin index for each event.
     numvec = zeros(size(W));
     numvec(cumsum(noptions(1:end))) = noptions;
@@ -357,7 +359,10 @@ fit(1).badcond = badcond;
 fit(1).singular_design_matrix = design_singular;
 fit(1).max_iterations_reached = max_iter;
 fit(1).LL = LL;
+fit(1).Dev = -2*LL;
 fit(1).LLR = LL0-LL;
+fit(1).df = npar;
+fit(1).deltaDev = -2*(LL0-LL);
 fit(1).llrpval = 1-chi2cdf(2*(LL - LL0),npar); % log likelihood ratio test against null hypothesis of no effect
 fit(1).R = 1-LL./LL0; % Pseudo R-squared based on the ratio of the deviance of the model and the model with maximum entropy.
 fit(1).npar = npar;
@@ -383,7 +388,8 @@ fit(1).binvolume = binvolume;
 
 fullfit = fit;
 
-regind = 1:length(R);
+% regind = 1:length(R);
+
 if length(R)>1 && ~fullOnly 
     
     fit((1:length(llrtests))+1) = fitstruct;
@@ -433,7 +439,7 @@ if length(R)>1 && ~fullOnly
         if ~isempty(LC)
             invC = eye(size(C))-C;
             LCcontr = invC(:,sum(invC)>0);
-            LCcontr(sum([Npars])+1,:) = 0;
+            LCcontr(sum(Npars)+1,:) = 0;
             LCsub = LCcontr'*LC;
             LCsub(end+1,:) = LC(end,:);
             LCsub(:,sum(LCsub(1:end-1,:))==0)= [];
@@ -456,15 +462,19 @@ if length(R)>1 && ~fullOnly
                                                      'firth',Firth,'linearconstraint',LCsub,'binvolume',binvolume,'discard',discard,'obsfreq',obsfreq,mnlfitopts{:});
 
         npar = length(parest) - rank(LCsub);
-        fit(i+1).parest = parest;
+        fit(i+1).parest = parest; %#ok<*AGROW>
         fit(i+1).I = I;
         fit(i+1).badcond = badcond;
         fit(i+1).max_iterations_reached = max_iter;
         fit(i+1).LL = LL;
+        fit(i+1).Dev = -2*LL;
         fit(i+1).LLR = LL-fullfit.LL;
+        fit(i+1).deltaDev = -2*(LL-fullfit.LL);
         fit(i+1).R = fit(i+1).LLR./LL0; %Pseudo R-squared based on the ratio of the deviance of the model and the model 
                                        %with maximum entropy minus the same for the reduced model.
-
+                                       
+        fit(i+1).df = fullfit.npar-npar;
+        
         fit(i+1).npar= npar;
 %         fit(i+1).AIC = -2*LL + 2*npar;
         fit(i+1).AIC = -2*LL + 2*npar + 2*npar*(npar+1)./(length(Rpooled.noptions) - npar-1); %Akaike Information Criterion

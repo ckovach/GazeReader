@@ -531,7 +531,7 @@ for CurrentDataSet = length(regData)+1:length(trialData)
         
         
         
-        binGroupIndex = ismember(binGroupCodes,trialData(CurrentDataSet).trials(i).binGroup);
+        binGroupIndex = find(ismember(binGroupCodes,trialData(CurrentDataSet).trials(i).binGroup));
         nbin = trialData(CurrentDataSet).trials(i).nbin;
         nfix = trialData(CurrentDataSet).trials(i).nfix;
         if ~isempty(fixData) && ~isequal(nfix,0)
@@ -928,6 +928,7 @@ parent = getappdata(hObject,'parent');
 evh = getappdata(parent,'eyetrackerHeaderData');
 
 if nargin < 4
+    setappdata(parent,'regData',[]);
     forDataSets = 1:length(evh);
 end
 
@@ -1019,7 +1020,7 @@ switch basisSet
          basisreg = buildpolyreg(reg.value,basisOrd,'trig','label',lbl,'codeincr',cdi,'keepdc',keepdc);
     case 3 % sinusoidal basis functions
         lbl = sprintf('Bin ID %s',lblap);
-         basisreg = fact2reg(regData.binIndex(:,2),'label',lbl,'center',~keepdc);
+         basisreg = fact2reg(regData(crdat).binIndex(:,2),'label',lbl,'center',~keepdc);
     case 0
         return
         

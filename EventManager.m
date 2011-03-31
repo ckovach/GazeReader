@@ -321,13 +321,18 @@ trialEndCodeLabels = {expEventData(currentDataSet).events(evttype == 2).label};
 trialEndEvtCode = {expEventData(currentDataSet).events(evttype == 2).code};
 
 if  length(trialOnsets)~=length(trialEnds)
+    warning('Number of trialOnsets does not match the number of trial ends')
     return
 elseif any(trialEnds-trialOnsets < 0)
     warning('Some trials have negative duration. Trial beginnings and ends are likely mismatched.')
 end
 
 if currentDataSet > length(trialData)
-    trialData(currentDataSet).codeincr = 0;
+%     trialData(currentDataSet).codeincr = 0;
+     if isempty(trialData)
+         clear trialData;
+     end
+     trialData(currentDataSet) = makeTrialData([]);
 end
 
 if ~isempty(trialOnsets)    

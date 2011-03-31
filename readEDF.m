@@ -124,7 +124,7 @@ saccs = EDF.FEVENT(endsacc);
 if ~isempty(saccs)
     saceye = double([saccs.eye]);
     saccs = saccs(saceye == eye -1);
-    sact = [saccs.sttime];
+    sact = [saccs.sttime]-startTime;
 end
 
     
@@ -155,14 +155,17 @@ for k = 1:length(fxs)
         FIX.seg.fix(i).shiftvec = diff(cat(1,FIX.seg.fix(i + (-1:0)).meanPos));
         FIX.seg.fix(i).dt = diff(cat(1,FIX.seg.fix(i + (-1:0)).startT)); % difference between fixation onsets of 
     
-        FIX.seg.fix(i).sac = find( sact <= FIX.seg.fix(i).startT,1,'last');
-        
                                                                                          %the current and previous fixation
     else
         FIX.seg.fix(i).shiftvec =[nan nan];
         FIX.seg.fix(i).dt =nan;
     end
-      FIX.units = 'xy Screen';        
+    
+    FIX.seg.fix(i).sac = find( sact <= FIX.seg.fix(i).startT,1,'last');
+    if isempty(FIX.seg.fix(i).sac)
+        FIX.seg.fix(i).sac = nan;
+    end
+     FIX.units = 'xy Screen';        
 end
 
 
@@ -174,7 +177,7 @@ for k = 1:length(saccs)
     end
     i = i+1;
     
-    stt = double(saccs(k).sttime);
+    stt = double(saccs(k).sttime)- double(startTime);
     dfst = fxts - stt;
     lastfix = find(dfst < 0,1,'last'); 
     nextfix = find(dfst > 0,1,'first'); 

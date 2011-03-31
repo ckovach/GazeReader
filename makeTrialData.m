@@ -27,6 +27,7 @@ function trialData = makeTrialData(varargin)
 %         fixmat        -   matrix of fixation x binmembership indicator
 %                           variable
 %         fixOnsetTimes -   fixation onset times for fixations within the trial
+%         fixTrialTimes -   fixation onset times relative to trial onset
 %         fixbin        -   bin numbers which contain the fixations
 %         nfix          -   number of fixations within the trial
 %         nbin          -   number of bins within the trial
@@ -37,7 +38,7 @@ function trialData = makeTrialData(varargin)
 
 newtrials  = struct('number',[],'startTime',[],'stopTime',[],'startCode',[],'startCodeLabel',[],'startEventCode',[],...
                     'stopCode',[],'stopCodeLabel',[],'stopEventCode',[],'samplePts',[],'info',[],'image',[],'binGroup',[],...
-                    'roiIndex',[],'seg',[],'fixations',[],'fixmat',[],'fixOnsetTimes',[],'fixbin',[],'nfix',[],'nbin',[],...
+                    'roiIndex',[],'seg',[],'fixations',[],'fixmat',[],'fixOnsetTimes',[],'fixTrialTimes',[],'fixbin',[],'nfix',[],'nbin',[],...
                     'binareas',[],'code',[]);
 
 

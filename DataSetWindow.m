@@ -63,7 +63,7 @@ setappdata(handles.figure1,'parent',parent);
 
 
 dswfun.pool = @(datasets)Pool_Callback(hObject,[],handles,datasets);
-dswfun.delete = @(datasets)removeDataSet_Callback(hObject,[],handles,datasets);
+dswfun.delete = @(varargin)removeDataSet_Callback(hObject,[],handles,varargin{:});
 
 setappdata(parent,'DataSetWindowFunctions',dswfun);
 
