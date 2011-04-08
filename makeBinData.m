@@ -667,6 +667,10 @@ axlim = axis(ca);
 
 xy = ellipseVertices(binGroup,bins);
 
+if length(Cdata) ==3  %If Cdata has length 3, patch wrongly assumes it's RGB
+ Cdata(end+1) = nan;
+ xy(:,end+(1:3)) = nan;
+end
 out = patch(xy(:,1:3:end), xy(:,2:3:end),Cdata,varargin{:});
 
 axis(ca,axlim);

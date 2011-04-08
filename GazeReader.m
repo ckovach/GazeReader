@@ -1065,7 +1065,7 @@ currentBinGroup = getappdata(handles.figure1,'CurrentBinGroup');
 % currentBin = getappdata(handles.figure1,'CurrentBin');
 
 
-if currentBinGroup == 0
+if isempty(currentBinGroup) ||currentBinGroup == 0 
     return
 elseif strcmp(binData.groups(currentBinGroup).type,'grid')
     gridManagerIsAcctive_ButtonDnFcn(hObject,eventData,handles)

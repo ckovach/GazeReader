@@ -23,7 +23,7 @@ function varargout = BinManager(varargin)
 
 % Edit the above text to modify the response to help BinManager
 
-% Last Modified by GUIDE v2.5 25-Sep-2009 15:20:38
+% Last Modified by GUIDE v2.5 08-Apr-2011 17:02:28
 
 % Begin initialization code - DO NOT EDIT
 gui_Singleton = 1;
@@ -232,7 +232,7 @@ setappdata(parent,'CurrentBin',0);
 set(handles.binList,'value',1);
 currentBinGroup = binval-1;
 setappdata(parent,'CurrentBinGroup',currentBinGroup)    
-if binval == 1 && strcmp(get(handles.figure1,'selectiontype'),'open')
+if strcmp(get(handles.figure1,'selectiontype'),'open') && binval == 1  
     
     currBinGr = length(binData.groups)+1;
     
@@ -978,3 +978,27 @@ function edit_bins_check_Callback(hObject, eventdata, handles)
 % handles    structure with handles and user data (see GUIDATA)
 
 % Hint: get(hObject,'Value') returns toggle state of edit_bins_check
+
+
+% --------------------------------------------------------------------
+function copybingr_Callback(hObject, eventdata, handles)
+% hObject    handle to copybingr (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    structure with handles and user data (see GUIDATA)
+
+
+
+parent = getappdata(handles.figure1,'parent');
+currentBinGroup = getappdata(parent,'CurrentBinGroup');
+% currentBin = getappdata(parent,'CurrentBin');
+binData = getappdata(parent,'binData');
+vals = get(handles.binGroupList,'value');
+vals(vals==1) = [];
+if ~isempty(vals)
+    for i = 1:length(vals)
+        binData.groups(end+1) = binData.groups(vals(i)-1);
+        binData.groups(end).code = binData.codeincr;
+        binData.codeincr = binData.codeincr+1;
+    end
+    setappdata(parent,'binData',binData);
+end
