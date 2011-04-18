@@ -6,6 +6,13 @@ function R = stripfunctions(R)
 % entails saving the entire workspace visible to the function, resulting in
 % unnecessarily large files.
 
+% ----------- SVN REVISION INFO ------------------
+% $URL$
+% $Revision$
+% $Date$
+% $Author$
+% ------------------------------------------------
+
 %C. Kovach 2011
 
 

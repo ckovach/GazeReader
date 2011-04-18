@@ -10,6 +10,13 @@ function [Theta, I, LL, badcond] = logitmodelsp(R,Wsp,InitTheta, Sreg, runiter, 
 %     Wsp is a sparse vector conatining 1 for each row in SpX which corresponds 
 %     to an observed outcome.
 
+% ----------- SVN REVISION INFO ------------------
+% $URL$
+% $Revision$
+% $Date$
+% $Author$
+% ------------------------------------------------
+
 SpX = R.value;
 b = R.noptions;
 Nvar = R.Npar;

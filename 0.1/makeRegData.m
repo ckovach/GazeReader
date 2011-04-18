@@ -1,3 +1,10 @@
+% ----------- SVN REVISION INFO ------------------
+% $URL$
+% $Revision$
+% $Date$
+% $Author$
+% ------------------------------------------------
+
 
 function regData = makeRegData(varargin)
 

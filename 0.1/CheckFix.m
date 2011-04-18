@@ -8,6 +8,13 @@ et2screenfield = 'et2scrn';
 % trialidfield = 'trial';
 % durfield = 'durT';
 
+% ----------- SVN REVISION INFO ------------------
+% $URL$
+% $Revision$
+% $Date$
+% $Author$
+% ------------------------------------------------
+
 %durfield = 'durT';
 showCorrection = true;
 

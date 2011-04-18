@@ -8,6 +8,13 @@ function Rout = pool(varargin)
 % 
 % See also SPLIT, MAKEREGRESSOR
 
+% ----------- SVN REVISION INFO ------------------
+% $URL$
+% $Revision$
+% $Date$
+% $Author$
+% ------------------------------------------------
+
 
 i=1;
 codeincr = 0;

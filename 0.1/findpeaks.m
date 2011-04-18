@@ -19,6 +19,13 @@ function peakdata = findpeaks(dfunc,parest,I, range, density,type,fig)
 %
 % peakdata.eigv contains the corresponding eigenvectors.
 
+% ----------- SVN REVISION INFO ------------------
+% $URL$
+% $Revision$
+% $Date$
+% $Author$
+% ------------------------------------------------
+
 
 % C Kovach 2010
 % 

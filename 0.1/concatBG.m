@@ -3,6 +3,13 @@ function [BG,codemap] = concatBG(varargin)
 %BGcat = concatBG(BG1,BG2,BG3,...)
 %Concatenates multiple binData structures into a single one.
 
+% ----------- SVN REVISION INFO ------------------
+% $URL$
+% $Revision$
+% $Date$
+% $Author$
+% ------------------------------------------------
+
 
 if length(varargin)>1
     BGin = cat(2,varargin{:});

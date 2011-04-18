@@ -4,6 +4,13 @@ function RD = concatRD(lastfxns,lasttrs, varargin)
 %Concatenates multiple regData structures into a single one. This assumes
 %that the corresponding regressors are the same in each case.
 
+% ----------- SVN REVISION INFO ------------------
+% $URL$
+% $Revision$
+% $Date$
+% $Author$
+% ------------------------------------------------
+
 RD = makeRegData([]);
 trind = [];
 lasttr = 0;

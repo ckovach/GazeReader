@@ -17,6 +17,13 @@ function binData = makeBinData(data,varargin)
 %                        'nearest_to_center':  bin with the center nearest to the fixation point wins
 %                        'array_order':   The bin specified earliest in the instances array wins.
 
+% ----------- SVN REVISION INFO ------------------
+% $URL$
+% $Revision$
+% $Date$
+% $Author$
+% ------------------------------------------------
+
 
 
 

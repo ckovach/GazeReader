@@ -35,6 +35,13 @@ function trialData = makeTrialData(varargin)
 %
 % See also SETTRIALDATA
 
+% ----------- SVN REVISION INFO ------------------
+% $URL$
+% $Revision$
+% $Date$
+% $Author$
+% ------------------------------------------------
+
 
 newtrials  = struct('number',[],'startTime',[],'stopTime',[],'startCode',[],'startCodeLabel',[],'startEventCode',[],...
                     'stopCode',[],'stopCodeLabel',[],'stopEventCode',[],'samplePts',[],'info',[],'image',[],'binGroup',[],...

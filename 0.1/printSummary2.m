@@ -2,6 +2,13 @@ function printSummary(model,fname)
 
 % Prints a text file summarizing model fitting results
 
+% ----------- SVN REVISION INFO ------------------
+% $URL$
+% $Revision$
+% $Date$
+% $Author$
+% ------------------------------------------------
+
 getmodel = 2;
 
 if nargin < 2

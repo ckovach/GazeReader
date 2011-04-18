@@ -6,6 +6,13 @@ function [f,frq,fderiv] = makefourier(nfrq,varargin)
 %   the specified point.  nfrq is a vector containing the number frequency 
 %     components to retain for each dimension.
 
+% ----------- SVN REVISION INFO ------------------
+% $URL$
+% $Revision$
+% $Date$
+% $Author$
+% ------------------------------------------------
+
 %C Kovach 2007
 
 

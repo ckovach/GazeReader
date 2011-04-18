@@ -7,6 +7,13 @@ function [FIX,RAW] = readEDF(filename,varargin)
 %
 % See also EDFMEX
 
+% ----------- SVN REVISION INFO ------------------
+% $URL$
+% $Revision$
+% $Date$
+% $Author$
+% ------------------------------------------------
+
 nhist = 2;
 i = 1;
 subtractFirstXdat = false;

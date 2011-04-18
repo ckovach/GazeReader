@@ -3,6 +3,13 @@ function Vcell = cellTable(model, getmodels,subjlabel)
 % Prints a text file summarizing model fitting results
 %
 
+% ----------- SVN REVISION INFO ------------------
+% $URL$
+% $Revision$
+% $Date$
+% $Author$
+% ------------------------------------------------
+
 if nargin < 3
     dosubjlabel = 0;
     subjlabel = 0;

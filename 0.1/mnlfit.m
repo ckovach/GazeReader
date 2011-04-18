@@ -21,6 +21,13 @@ function [Theta, I, LL, badcond,lgm, max_iterations_reached,design_is_singular, 
 %     SEE ALSO makeregressor, modelFit
 %
 
+% ----------- SVN REVISION INFO ------------------
+% $URL$
+% $Revision$
+% $Date$
+% $Author$
+% ------------------------------------------------
+
 % C. Kovach 2008
 
 

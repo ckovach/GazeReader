@@ -2,6 +2,13 @@ function varargout = activefigure(h)
 
 %Makes the specified figure active without stealing focus.
 
+% ----------- SVN REVISION INFO ------------------
+% $URL$
+% $Revision$
+% $Date$
+% $Author$
+% ------------------------------------------------
+
 if nargin < 1
     h = figure(h);
     

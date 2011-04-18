@@ -18,4 +18,11 @@
 % 
 %    See help on sparse matrix representation in the Matlab help documentation for more information. 
 
+% ----------- SVN REVISION INFO ------------------
+% $URL$
+% $Revision$
+% $Date$
+% $Author$
+% ------------------------------------------------
+
 % C Kovach 2007

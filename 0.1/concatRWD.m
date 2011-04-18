@@ -3,6 +3,13 @@ function RWD = concatRWD(lastendts,varargin)
 %RWDcat = concatRWD(RWD1,RWD2,RWD3,...)
 %Concatenates multiple rawGazeData structures into a single one.
 
+% ----------- SVN REVISION INFO ------------------
+% $URL$
+% $Revision$
+% $Date$
+% $Author$
+% ------------------------------------------------
+
 
 if length(varargin)>1
     RWDin = cat(2,varargin{:});

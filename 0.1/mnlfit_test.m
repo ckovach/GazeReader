@@ -13,6 +13,13 @@ function [Theta, I, LL, badcond,lgm] = mnlfit(R,Ysp,varargin)
 %     treated as a weighted combination of the assigned values. In that case 
 %     the value of Y(i) gives the relative weight accorded the corresponding option. 
 
+% ----------- SVN REVISION INFO ------------------
+% $URL$
+% $Revision$
+% $Date$
+% $Author$
+% ------------------------------------------------
+
 % C. Kovach 2008
 
 

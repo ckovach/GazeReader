@@ -20,6 +20,13 @@ function varargout = RegManager(varargin)
 %
 % See also: GUIDE, GUIDATA, GUIHANDLES
 
+% ----------- SVN REVISION INFO ------------------
+% $URL$
+% $Revision$
+% $Date$
+% $Author$
+% ------------------------------------------------
+
 % Edit the above text to modify the response to help RegManager
 
 % Last Modified by GUIDE v2.5 19-Feb-2011 00:38:01

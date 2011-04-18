@@ -7,6 +7,13 @@ function grid = rect2grid(rect)
 % 
 % See also GRID2RECT
 
+% ----------- SVN REVISION INFO ------------------
+% $URL$
+% $Revision$
+% $Date$
+% $Author$
+% ------------------------------------------------
+
 if iscell(rect) || isempty(rect)
     grid = rect;
     return

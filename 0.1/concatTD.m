@@ -3,6 +3,13 @@ function [TD,lasttrs] = concatTD(lastendts,lastfxns,lastBGRs,xdmaps,newxdcodes,e
 %TDcat = concatTD(TD1,TD2,TD3,...)
 %Concatenates multiple trialData structures into a single one.
 
+% ----------- SVN REVISION INFO ------------------
+% $URL$
+% $Revision$
+% $Date$
+% $Author$
+% ------------------------------------------------
+
 
 if length(varargin)>1
     TDin = cat(2,varargin{:});

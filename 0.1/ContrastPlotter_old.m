@@ -20,6 +20,13 @@ function varargout = ContrastPlotter(varargin)
 %
 % See also: GUIDE, GUIDATA, GUIHANDLES
 
+% ----------- SVN REVISION INFO ------------------
+% $URL$
+% $Revision$
+% $Date$
+% $Author$
+% ------------------------------------------------
+
 % Edit the above text to modify the response to help ContrastPlotter
 
 % Last Modified by GUIDE v2.5 17-May-2008 22:31:28

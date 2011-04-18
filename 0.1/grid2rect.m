@@ -7,6 +7,13 @@ function rect = grid2rect(grid)
 % 
 % See also RECT2GRID
 
+% ----------- SVN REVISION INFO ------------------
+% $URL$
+% $Revision$
+% $Date$
+% $Author$
+% ------------------------------------------------
+
 if ~iscell(grid)
     rect = grid;
     return

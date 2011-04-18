@@ -5,6 +5,13 @@ function B = chooseperm(N, k, item, rows)
 %    Returns indices for every unordered combination of k items from a
 %    population of N using a recursive algorithm.
 
+% ----------- SVN REVISION INFO ------------------
+% $URL$
+% $Revision$
+% $Date$
+% $Author$
+% ------------------------------------------------
+
 
 if nargin < 3
     rows = 1;

@@ -9,6 +9,13 @@ function [rfunc,theta] = peak2gmm(peakdata, ij)
 %
 %
 
+% ----------- SVN REVISION INFO ------------------
+% $URL$
+% $Revision$
+% $Date$
+% $Author$
+% ------------------------------------------------
+
 % C. Kovach 2010
 %
 

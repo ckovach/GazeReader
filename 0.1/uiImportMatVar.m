@@ -5,6 +5,13 @@ function matvarout = uiImportMatVar(matfile,classtype)
 %   A simple utility to select a variable from a mat file
 %   and import it based on the users selection.
 
+% ----------- SVN REVISION INFO ------------------
+% $URL$
+% $Revision$
+% $Date$
+% $Author$
+% ------------------------------------------------
+
 
 
 vars = whos('-file',matfile);

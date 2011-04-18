@@ -3,6 +3,13 @@ function [IM,codemap] = concatIM(varargin)
 %IMcat = concatIM(IM1,IM2,IM3,...)
 %Concatenates multiple imageData structures into a single one.
 
+% ----------- SVN REVISION INFO ------------------
+% $URL$
+% $Revision$
+% $Date$
+% $Author$
+% ------------------------------------------------
+
 
 if length(varargin)>1
     IMin = cat(2,varargin{:});

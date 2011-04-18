@@ -8,6 +8,13 @@ function FS = findsep(h,model,data_set)
 % maximum eigenvalue of the information matrix falls below a secified
 % tolerance.
 
+% ----------- SVN REVISION INFO ------------------
+% $URL$
+% $Revision$
+% $Date$
+% $Author$
+% ------------------------------------------------
+
 tol = 1e-10; %tol
 
 regData = getappdata(h,'regData');

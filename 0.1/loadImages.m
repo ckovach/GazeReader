@@ -8,6 +8,13 @@ function imdata = loadImages(h,imagefiles,fpath)
 %
 % See also ImageManager
 
+% ----------- SVN REVISION INFO ------------------
+% $URL$
+% $Revision$
+% $Date$
+% $Author$
+% ------------------------------------------------
+
 
 
 if nargin < 1 || isempty(h) || ~ishandle(h)    

@@ -20,6 +20,13 @@ function varargout = GridManager(varargin)
 %
 % See also: GUIDE, GUIDATA, GUIHANDLES
 
+% ----------- SVN REVISION INFO ------------------
+% $URL$
+% $Revision$
+% $Date$
+% $Author$
+% ------------------------------------------------
+
 % Edit the above text to modify the response to help GridManager
 
 % Last Modified by GUIDE v2.5 16-Dec-2007 15:28:31

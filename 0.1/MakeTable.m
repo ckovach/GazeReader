@@ -3,6 +3,13 @@ function MakeTable(varargin)
 
 %Generates a latex table
 
+% ----------- SVN REVISION INFO ------------------
+% $URL$
+% $Revision$
+% $Date$
+% $Author$
+% ------------------------------------------------
+
 X = varargin{1};
 Head = {};
 FileName = 'Table.tex';

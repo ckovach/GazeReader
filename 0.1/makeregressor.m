@@ -50,6 +50,13 @@ function R = makeregressor(X,varargin)
 %
 % See also INTERACTION, SPLIT, POOL, BUILDPOLYREG, FACT2REG
 
+% ----------- SVN REVISION INFO ------------------
+% $URL$
+% $Revision$
+% $Date$
+% $Author$
+% ------------------------------------------------
+
 %
 % C. Kovach 2007
 % 

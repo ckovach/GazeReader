@@ -3,6 +3,13 @@ function LL = loglinspect(N,T,boxord)
 
 % Computes the log linear spectrum with likelihood maximization
 
+% ----------- SVN REVISION INFO ------------------
+% $URL$
+% $Revision$
+% $Date$
+% $Author$
+% ------------------------------------------------
+
 % sinord = 100; %Number of points in the 
 if nargin == 1 || isempty(T)
     T = find(N);

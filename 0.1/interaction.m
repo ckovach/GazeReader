@@ -17,6 +17,13 @@ function RX = interaction(varargin)
 %
 % See also MAKEREGRESSOR
 
+% ----------- SVN REVISION INFO ------------------
+% $URL$
+% $Revision$
+% $Date$
+% $Author$
+% ------------------------------------------------
+
 % C. Kovach 2007 - 20011
 intxnord = 2;
 

@@ -99,6 +99,13 @@ function fit = modelFit(trialData ,R,varargin)
 %
 % SEE MAKEREGRESSOR, MNLFIT
 
+% ----------- SVN REVISION INFO ------------------
+% $URL$
+% $Revision$
+% $Date$
+% $Author$
+% ------------------------------------------------
+
 %C Kovach 2008
 
 i=1;

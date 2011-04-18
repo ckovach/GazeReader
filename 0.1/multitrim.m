@@ -4,6 +4,13 @@ function [X,disc] = multitrim(X,trim,exvar);
 % [X,Disc] = multitrim(X);
 %Removes outliers from X using Multivariate iterative trimming of extreme data points. See Rencher p. 29.
 
+% ----------- SVN REVISION INFO ------------------
+% $URL$
+% $Revision$
+% $Date$
+% $Author$
+% ------------------------------------------------
+
 if nargin < 2
     trim = .2;
 end

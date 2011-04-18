@@ -3,6 +3,13 @@ function S = logfilescan(logfilename)
 %Scans a Presentation(R) log file and returns structure containing the
 %times and data associated with events.
 
+% ----------- SVN REVISION INFO ------------------
+% $URL$
+% $Revision$
+% $Date$
+% $Author$
+% ------------------------------------------------
+
 %C. Kovach 2007
 
 S = struct('Picture',struct([]),'Response',struct([]),'Sound',struct([]));

@@ -9,6 +9,13 @@ function regdata = setRegData(h,regdata)
 % regdata.regressors(i) are structures returned by makeregressor
 %
 
+% ----------- SVN REVISION INFO ------------------
+% $URL$
+% $Revision$
+% $Date$
+% $Author$
+% ------------------------------------------------
+
 
 
 if nargin < 1 || isempty(h) || ~ishandle(h)    

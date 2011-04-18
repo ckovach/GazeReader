@@ -13,6 +13,13 @@ function [Theta, I, LL, badcond,lgm, max_iterations_reached,design_is_singular] 
 %     treated as a weighted combination of the assigned values. In that case 
 %     the value of Y(i) gives the relative weight accorded the corresponding option. 
 
+% ----------- SVN REVISION INFO ------------------
+% $URL$
+% $Revision$
+% $Date$
+% $Author$
+% ------------------------------------------------
+
 % C. Kovach 2008
 
 

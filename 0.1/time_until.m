@@ -3,6 +3,13 @@ function tuntil = time_until(delta_train)
 % Takes as input a train of delta functions and returns a vector with the time
 % lag until the following delta in sampling units
 
+% ----------- SVN REVISION INFO ------------------
+% $URL$
+% $Revision$
+% $Date$
+% $Author$
+% ------------------------------------------------
+
 
 delt = find(delta_train);
 

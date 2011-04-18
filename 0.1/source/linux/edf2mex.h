@@ -1,4 +1,12 @@
 
+/*
+ * ----------- SVN REVISION INFO ------------------
+ * $URL$     
+ * $Revision$
+ * $Date$
+ * $Author$
+ * ------------------------------------------------
+ */
 
 char *  build_version = "3.0 Linux Dec  1 2008";
 

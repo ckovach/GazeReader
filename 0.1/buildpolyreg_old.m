@@ -13,6 +13,13 @@ function R = buildpolyreg(x,polyord,varargin)
 % 
 %   R = [sin(x), cos(x), sin(2*x), cos(2*x),...,sin(nx),cos(nx)]
 
+% ----------- SVN REVISION INFO ------------------
+% $URL$
+% $Revision$
+% $Date$
+% $Author$
+% ------------------------------------------------
+
 
 normconst = 1; 
 label = '';

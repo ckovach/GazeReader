@@ -2,6 +2,13 @@ function FIX = convertfix(FIX, et2scrn);
 
 %converts data in FIX to screen units from eyetracker and vice versa
 
+% ----------- SVN REVISION INFO ------------------
+% $URL$
+% $Revision$
+% $Date$
+% $Author$
+% ------------------------------------------------
+
 default_starting_units = 'xy Eyetracker';
 if nargin < 2
     et2scrn = FIX.et2scrn;

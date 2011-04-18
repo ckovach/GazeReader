@@ -6,6 +6,13 @@ loss or corruption of data, damage to hardware, personal injury,
 marital discord or any other disaster arising from the use of 
 this software. Feel free to modify as needed. 
 Questions can be sent to christopher-kovach@uiowa.edu.  
+ 
+  ----------- SVN REVISION INFO ------------------
+  $URL$     
+  $Revision$
+  $Date$
+  $Author$
+  ------------------------------------------------
 */
 
 //#pragma once

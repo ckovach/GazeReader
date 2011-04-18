@@ -23,6 +23,13 @@ function [lodds, loddserr,loddserrmat,C] = logoddserror(phis1,theta,S,phis2)
 % See also ModelFit, mnlfit, logperror
 %
 
+% ----------- SVN REVISION INFO ------------------
+% $URL$
+% $Revision$
+% $Date$
+% $Author$
+% ------------------------------------------------
+
 % C. Kovach 2011
 
 

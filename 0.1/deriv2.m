@@ -18,6 +18,13 @@ function [eigs,eigv, wald,D2s] =deriv2(dfunc,parest,Imat,range, density)
 % see also FINDPEAKS
 %
 
+% ----------- SVN REVISION INFO ------------------
+% $URL$
+% $Revision$
+% $Date$
+% $Author$
+% ------------------------------------------------
+
 % C. Kovach 2010
 
 

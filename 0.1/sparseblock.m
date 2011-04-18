@@ -37,6 +37,13 @@ function SpX = sparseblock(X,b, varargin)
 %   
 %See also UNSPARSIFY
 
+% ----------- SVN REVISION INFO ------------------
+% $URL$
+% $Revision$
+% $Date$
+% $Author$
+% ------------------------------------------------
+
 %
 % Written by C. Kovach 2007
 %

@@ -3,6 +3,13 @@ function FixDat = fixtract(ASL,segment,trialStartTs,trialEndTs,trialIdentifier,p
 %function FixDat = fixtract(ASL,segment,trialStartT,paramStruc)
 %Extracts fixations from ASL data sctructure using velocity criterion
 
+% ----------- SVN REVISION INFO ------------------
+% $URL$
+% $Revision$
+% $Date$
+% $Author$
+% ------------------------------------------------
+
 
 %######### PARAMETERS ############
 PixelRes = [1024 768];

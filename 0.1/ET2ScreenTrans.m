@@ -9,6 +9,13 @@ function ET2SCRN = ET2ScreenTrans(eydfile, calibPts,varargin)
 % and screen center (bottom row) for a rectangular 9 point calibration with 
 % ordering top left to bottom right.
 
+% ----------- SVN REVISION INFO ------------------
+% $URL$
+% $Revision$
+% $Date$
+% $Author$
+% ------------------------------------------------
+
 
 
 

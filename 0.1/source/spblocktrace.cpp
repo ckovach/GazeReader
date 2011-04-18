@@ -12,6 +12,13 @@
  *
  *  Weights each block by the corresponding element in w.
  *
+ *
+ * ----------- SVN REVISION INFO ------------------
+ * $URL$     
+ * $Revision$
+ * $Date$
+ * $Author$
+ * ------------------------------------------------
  */
 
 

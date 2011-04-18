@@ -18,6 +18,13 @@ function [X,b] = unsparsify( SpX , varargin)
 % 
 %     See also SPARSEBLOCK.
 
+% ----------- SVN REVISION INFO ------------------
+% $URL$
+% $Revision$
+% $Date$
+% $Author$
+% ------------------------------------------------
+
 %
 % Written by C. Kovach 2007
 %

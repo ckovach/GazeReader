@@ -24,6 +24,13 @@ function q = nzrowdiff(X)
 %      0     0     0     1
 %      3     0     2     0
 
+% ----------- SVN REVISION INFO ------------------
+% $URL$
+% $Revision$
+% $Date$
+% $Author$
+% ------------------------------------------------
+
 
 fm = sparse(X~=0);
 q = zeros(size(fm));

@@ -2,6 +2,13 @@ function c = bullseyeContour(x,y,z, rs, ths, varargin)
 
 %Plot polar patch data with a supermiposed target
 
+% ----------- SVN REVISION INFO ------------------
+% $URL$
+% $Revision$
+% $Date$
+% $Author$
+% ------------------------------------------------
+
 
 plotargs = {'k'};
 textargs = {};

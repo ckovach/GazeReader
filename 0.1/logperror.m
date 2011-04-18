@@ -24,6 +24,13 @@ function [lp, lperr,lperrmat,C] = logperror(phis1,theta,S,phis2)
 % See also ModelFit, mnlfit, logoddserror
 %
 
+% ----------- SVN REVISION INFO ------------------
+% $URL$
+% $Revision$
+% $Date$
+% $Author$
+% ------------------------------------------------
+
 % C. Kovach 2010
 
 

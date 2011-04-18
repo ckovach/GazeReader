@@ -76,6 +76,13 @@ function [binData, binfunctions] = makeBinData(varargin)
 %           .inputData  -  data argument passed to makeBinData
 %           .code       - unique identifying code
 
+% ----------- SVN REVISION INFO ------------------
+% $URL$
+% $Revision$
+% $Date$
+% $Author$
+% ------------------------------------------------
+
 
 if nargin > 0 && (~isstruct(varargin{1}) || isfield(varargin{1},'vert'))
     data = varargin{1};

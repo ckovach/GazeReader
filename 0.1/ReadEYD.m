@@ -7,6 +7,13 @@ function ASLdat = ReadEYD( fname, varargin)
 %Reads data from specified segment.
 %
 
+% ----------- SVN REVISION INFO ------------------
+% $URL$
+% $Revision$
+% $Date$
+% $Author$
+% ------------------------------------------------
+
 %Modified 10/21 to handle xml parts
 
 headerOnly = false;

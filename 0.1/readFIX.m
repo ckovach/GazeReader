@@ -2,6 +2,13 @@ function FX = readFIX(fname,varargin)
 
 %Reads data from an ASL FIX file
 
+% ----------- SVN REVISION INFO ------------------
+% $URL$
+% $Revision$
+% $Date$
+% $Author$
+% ------------------------------------------------
+
 % modified 6/7 to allow for error in the sequential position of the xdat signal
 
 

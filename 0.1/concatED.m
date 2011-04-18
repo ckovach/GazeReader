@@ -3,6 +3,13 @@ function [ED,evtcodemaps] = concatED(lastendts,xdmaps,newxdcodes,varargin)
 %EDcat = concatED(lastendts,xdmaps, ED1,ED2,ED3,...)
 %Concatenates multiple eventsationData structures into a single one.
 
+% ----------- SVN REVISION INFO ------------------
+% $URL$
+% $Revision$
+% $Date$
+% $Author$
+% ------------------------------------------------
+
 
 if length(varargin)>1
     EDin = cat(2,varargin{:});

@@ -10,6 +10,13 @@ function [Theta, I, LL, badcond] = logitmodelsp(R,Ysp,InitTheta, Sreg, runiter, 
 %     Ysp is a sparse vector conatining 1 for each row in X which corresponds 
 %     to an observed outcome.
 
+% ----------- SVN REVISION INFO ------------------
+% $URL$
+% $Revision$
+% $Date$
+% $Author$
+% ------------------------------------------------
+
 % C. Kovach 2008
 
 

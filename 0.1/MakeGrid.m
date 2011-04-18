@@ -4,6 +4,13 @@ function [FixBin,EQ,BinPos,gridedges] = MakeGrid( FixPos, gridsize, gridRange)
 
 %Creates a grid of specified size and identifies bin for each observation
 
+% ----------- SVN REVISION INFO ------------------
+% $URL$
+% $Revision$
+% $Date$
+% $Author$
+% ------------------------------------------------
+
 
 if nargin < 2 || isempty(gridsize)
     gridsize = [16 16];

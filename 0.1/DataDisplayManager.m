@@ -20,6 +20,13 @@ function varargout = DataDisplayManager(varargin)
 %
 % See also: GUIDE, GUIDATA, GUIHANDLES
 
+% ----------- SVN REVISION INFO ------------------
+% $URL$
+% $Revision$
+% $Date$
+% $Author$
+% ------------------------------------------------
+
 % Edit the above text to modify the response to help DataDisplayManager
 
 % Last Modified by GUIDE v2.5 12-Jan-2008 01:55:24

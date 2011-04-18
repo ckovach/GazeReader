@@ -6,6 +6,13 @@
  * [Ir,Jc] = sparseij( S ); Simply returns the Ir and Jc
  *  elements of sparse matrix S. 
  *
+ *
+ * ----------- SVN REVISION INFO ------------------
+ * $URL$     
+ * $Revision$
+ * $Date$
+ * $Author$
+ * ------------------------------------------------
  */
 
 

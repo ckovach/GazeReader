@@ -3,6 +3,13 @@ function [FD, lastendts, lastfxns,xdmaps] = concatFD(varargin)
 %FDcat = concatFD(FD1,FD2,FD3,...)
 %Concatenates multiple fixationData structures into a single one.
 
+% ----------- SVN REVISION INFO ------------------
+% $URL$
+% $Revision$
+% $Date$
+% $Author$
+% ------------------------------------------------
+
 
 if length(varargin)>1
     FDin = cat(2,varargin{:});

@@ -9,6 +9,13 @@ function R = buildbinreg(x,b,varargin)
 %   b(end+1) = Inf.
 % 
 
+% ----------- SVN REVISION INFO ------------------
+% $URL$
+% $Revision$
+% $Date$
+% $Author$
+% ------------------------------------------------
+
 normconst = 1; 
 label = '';
 

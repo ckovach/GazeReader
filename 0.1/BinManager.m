@@ -21,6 +21,13 @@ function varargout = BinManager(varargin)
 %
 % See also: GUIDE, GUIDATA, GUIHANDLES
 
+% ----------- SVN REVISION INFO ------------------
+% $URL$
+% $Revision$
+% $Date$
+% $Author$
+% ------------------------------------------------
+
 % Edit the above text to modify the response to help BinManager
 
 % Last Modified by GUIDE v2.5 08-Apr-2011 17:02:28

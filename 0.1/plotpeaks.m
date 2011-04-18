@@ -2,6 +2,13 @@
 function pl = plotpeaks(peakdata,fig,xyscale,varargin)
 % function pl = plotpeaks(peakdata,fig,ij,varargin)
 
+% ----------- SVN REVISION INFO ------------------
+% $URL$
+% $Revision$
+% $Date$
+% $Author$
+% ------------------------------------------------
+
 % plotpeaks(peakdata,fig,ij,varargin)
 %
 %Plots a standard error ellipse at peak locations.

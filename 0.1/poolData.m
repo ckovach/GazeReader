@@ -6,6 +6,13 @@ function poolData(h,dataindices)
 %
 % See also REMOVEDATA
 
+% ----------- SVN REVISION INFO ------------------
+% $URL$
+% $Revision$
+% $Date$
+% $Author$
+% ------------------------------------------------
+
 
 
 if nargin < 1 || isempty(h) || ~ishandle(h)    

@@ -5,6 +5,13 @@ function importData(h,datafiles,fpath)
 % Imports eye-tracker data files. Currently supported file types are Eyelink (*.edf) and ASL (*.asl).
 %
 
+% ----------- SVN REVISION INFO ------------------
+% $URL$
+% $Revision$
+% $Date$
+% $Author$
+% ------------------------------------------------
+
 if nargin < 1 || isempty(h) || ~ishandle(h)    
     h = GazeReader;
 end

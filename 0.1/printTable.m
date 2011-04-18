@@ -2,6 +2,13 @@ function printTable(model,texfname)
 
 % Prints a text file summarizing model fitting results
 
+% ----------- SVN REVISION INFO ------------------
+% $URL$
+% $Revision$
+% $Date$
+% $Author$
+% ------------------------------------------------
+
 getmodels = 10;
 % getmodels =[ 1     2     1     3     2     2     3]
 if nargin < 2

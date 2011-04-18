@@ -9,6 +9,13 @@ function [dbingr1,dbingr2] = bindifference(bingr1,bingr2)
 %
 % See also MAKEBINDATA and BINUNION
 
+% ----------- SVN REVISION INFO ------------------
+% $URL$
+% $Revision$
+% $Date$
+% $Author$
+% ------------------------------------------------
+
 for j = 1:length(bingr2)
     dbingr2{j} =1;
 end

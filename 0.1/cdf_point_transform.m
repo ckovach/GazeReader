@@ -1,3 +1,10 @@
+% ----------- SVN REVISION INFO ------------------
+% $URL$
+% $Revision$
+% $Date$
+% $Author$
+% ------------------------------------------------
+
 
 function Xtrans = pdf_point_transform(PDF,X)
 

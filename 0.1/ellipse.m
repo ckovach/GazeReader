@@ -4,6 +4,13 @@ function pl = ellipse(cent,trans,fig,varargin)
 %Plots an ellipse centered at cent and with axes tranformed by matrix
 %trans.
 
+% ----------- SVN REVISION INFO ------------------
+% $URL$
+% $Revision$
+% $Date$
+% $Author$
+% ------------------------------------------------
+
 %Kovach 2008 
 
 

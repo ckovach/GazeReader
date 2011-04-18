@@ -4,6 +4,13 @@ function [PC,lc,AIC,BIC] = mlpca(X,varargin)
 %Maximum likelihood pca with dimensionality chosen based on AIC or BIC
 %See Tipping 1999
 
+% ----------- SVN REVISION INFO ------------------
+% $URL$
+% $Revision$
+% $Date$
+% $Author$
+% ------------------------------------------------
+
 
 i = 1;
 

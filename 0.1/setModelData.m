@@ -9,6 +9,13 @@ function model = setModelData(h,modeldata)
 % modeldata.models(i) are structures returned by makeModel
 %
 
+% ----------- SVN REVISION INFO ------------------
+% $URL$
+% $Revision$
+% $Date$
+% $Author$
+% ------------------------------------------------
+
 
 
 if nargin < 1 || isempty(h) || ~ishandle(h)    

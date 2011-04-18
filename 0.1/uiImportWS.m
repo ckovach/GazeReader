@@ -5,6 +5,13 @@ function matvarout = uiImportWS(classtype)
 %   A simple utility to select a variable from the base workspace
 %   and import to the gui workspace according to the users selection.
 
+% ----------- SVN REVISION INFO ------------------
+% $URL$
+% $Revision$
+% $Date$
+% $Author$
+% ------------------------------------------------
+
 
 
 vars = evalin('base','whos');

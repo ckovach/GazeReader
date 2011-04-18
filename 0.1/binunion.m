@@ -8,6 +8,13 @@ function [ubingr1,ubingr2] = binunion(bingr1,bingr2)
 %
 % See also MAKEBINDATA and BINDIFFERENCE
 
+% ----------- SVN REVISION INFO ------------------
+% $URL$
+% $Revision$
+% $Date$
+% $Author$
+% ------------------------------------------------
+
 for i = 1: length(bingr1)
     dbingr1{i} = 0;
     for j = 1:length(bingr2)

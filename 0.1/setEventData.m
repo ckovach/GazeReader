@@ -10,6 +10,13 @@ function eventdata = setEventData(h,eventdata)
 %
 % See also MAKEEVENTDATA
 
+% ----------- SVN REVISION INFO ------------------
+% $URL$
+% $Revision$
+% $Date$
+% $Author$
+% ------------------------------------------------
+
 
 
 if nargin < 1 || isempty(h) || ~ishandle(h)    

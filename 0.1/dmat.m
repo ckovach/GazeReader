@@ -8,6 +8,13 @@ function [D,Drank] = dmat(X,r)
 %   Uses Lr norm with parameter r. r=1 is city block distance, r=2 is Euclidean
 %
 
+% ----------- SVN REVISION INFO ------------------
+% $URL$
+% $Revision$
+% $Date$
+% $Author$
+% ------------------------------------------------
+
 %C. Kovach 2008
 
 if nargin < 2

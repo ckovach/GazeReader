@@ -3,6 +3,13 @@ function Vcell = printTable2(model,texfname, getmodels)
 % Prints a text file summarizing model fitting results
 %
 
+% ----------- SVN REVISION INFO ------------------
+% $URL$
+% $Revision$
+% $Date$
+% $Author$
+% ------------------------------------------------
+
 if nargin < 3
     getmodels = 1:length(model(1).models);
 end

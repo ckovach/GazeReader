@@ -7,6 +7,13 @@ function Rout = split(R,grps,codeincr)
 %
 % See also POOL, MAKEREGRESSOR
 
+% ----------- SVN REVISION INFO ------------------
+% $URL$
+% $Revision$
+% $Date$
+% $Author$
+% ------------------------------------------------
+
 
 Rout = makeregressor([]);
 

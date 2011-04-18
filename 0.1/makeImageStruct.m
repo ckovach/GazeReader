@@ -1,3 +1,10 @@
+% ----------- SVN REVISION INFO ------------------
+% $URL$
+% $Revision$
+% $Date$
+% $Author$
+% ------------------------------------------------
+
 
 function imstruct = makeImageStruct(pths,imgs)
 

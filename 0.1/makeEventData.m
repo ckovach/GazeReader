@@ -20,6 +20,13 @@ function EventData = makeEventData(varargin)
 %       .info - miscellaneous info.
 %       .code - unique identifying code
 
+% ----------- SVN REVISION INFO ------------------
+% $URL$
+% $Revision$
+% $Date$
+% $Author$
+% ------------------------------------------------
+
 
 
 EventData.events = struct('label',[],'time',[],'type',[],'xdatcode',[],'info',[],'code',[]);

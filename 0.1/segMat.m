@@ -4,6 +4,13 @@ function varargout = segMat(ts,rg,fs)
 %Create a matrix to segmant a signal sampled at fs round times ts over
 %range rg.
 
+% ----------- SVN REVISION INFO ------------------
+% $URL$
+% $Revision$
+% $Date$
+% $Author$
+% ------------------------------------------------
+
 if nargin < 3
     fs = 1;
 end

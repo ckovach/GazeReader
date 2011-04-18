@@ -55,6 +55,13 @@ function R = buildpolyreg(x,polyord,varargin)
 % 
 % See also MAKEREGRESSOR and FACT2REG
 
+% ----------- SVN REVISION INFO ------------------
+% $URL$
+% $Revision$
+% $Date$
+% $Author$
+% ------------------------------------------------
+
 
 % C. Kovach 2007-2011
 

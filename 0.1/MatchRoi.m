@@ -10,6 +10,13 @@ function [RoiDat,FixRoi] = matchRoi(FixDat,imdat,varargin)
 % RoiDat - Region of interest location and stimulus number with respect to data in imdat.
 % FixRoi - Fixation with respect to regions of interest and the classification of the Roi.
 
+% ----------- SVN REVISION INFO ------------------
+% $URL$
+% $Revision$
+% $Date$
+% $Author$
+% ------------------------------------------------
+
 RoiUnits = 'ij'; %Is roi position expressed in xy or ij units?
 
 roi_center_offset = [0 0];

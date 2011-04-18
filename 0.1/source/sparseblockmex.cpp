@@ -6,6 +6,13 @@
  *  SpX = sparseblockmex(X,Ir,Jc, nrows);
  * 
  *  Assigns the data in X to sparse matrix SpX with Ir and Jc as given in arguments.
+ *
+ * ----------- SVN REVISION INFO ------------------
+ * $URL$     
+ * $Revision$
+ * $Date$
+ * $Author$
+ * ------------------------------------------------
  */
 
 

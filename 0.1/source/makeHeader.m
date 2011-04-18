@@ -5,6 +5,13 @@
 % mxArray structures.
 %
 
+% ----------- SVN REVISION INFO ------------------
+% $URL$
+% $Revision$
+% $Date$
+% $Author$
+% ------------------------------------------------
+
 
 %RecTypes contains information about which structure type definitions to
 %search for in the edf_data.h header. 

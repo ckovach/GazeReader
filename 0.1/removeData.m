@@ -6,6 +6,13 @@ function removeData(h,datindices)
 %
 % See also importMatData and importData
 
+% ----------- SVN REVISION INFO ------------------
+% $URL$
+% $Revision$
+% $Date$
+% $Author$
+% ------------------------------------------------
+
 
 
 if nargin < 1 || isempty(h) || ~ishandle(h)    

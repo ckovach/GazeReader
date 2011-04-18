@@ -5,6 +5,13 @@ function selectedLines = uiImportText(txtfile)
 %   A simple utility to display the contents of a text file in a list box
 %   and to import the user selected lines.
 
+% ----------- SVN REVISION INFO ------------------
+% $URL$
+% $Revision$
+% $Date$
+% $Author$
+% ------------------------------------------------
+
 
 fig = figure;
 set(fig,'menubar','none');

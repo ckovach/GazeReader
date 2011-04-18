@@ -2,6 +2,13 @@ function ptch = pcolor_radial(TH,R,C,ax)
 
 %Makes radial surface plot
 
+% ----------- SVN REVISION INFO ------------------
+% $URL$
+% $Revision$
+% $Date$
+% $Author$
+% ------------------------------------------------
+
 if nargin < 4
     ax = gca;
 end

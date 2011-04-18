@@ -6,6 +6,13 @@ function importMatData(h,datafiles,fpath)
 %
 % See also READEDF
 
+% ----------- SVN REVISION INFO ------------------
+% $URL$
+% $Revision$
+% $Date$
+% $Author$
+% ------------------------------------------------
+
 if nargin < 1 || isempty(h) || ~ishandle(h)    
     h = GazeReader;
 end

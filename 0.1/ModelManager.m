@@ -21,6 +21,13 @@ function varargout = ModelManager(varargin)
 %
 % See also: GUIDE, GUIDATA, GUIHANDLES
 
+% ----------- SVN REVISION INFO ------------------
+% $URL$
+% $Revision$
+% $Date$
+% $Author$
+% ------------------------------------------------
+
 % Edit the above text to modify the response to help ModelManager
 
 % Last Modified by GUIDE v2.5 01-Feb-2008 15:58:47

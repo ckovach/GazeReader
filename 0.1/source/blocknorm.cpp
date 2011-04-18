@@ -7,7 +7,15 @@
  *  SpX = blocknorm(E,b);
  * 
  *  Computes the sum of terms within each block and copies to the whole block.
- */
+ *
+ *
+ * ----------- SVN REVISION INFO ------------------
+ * $URL$     
+ * $Revision$
+ * $Date$
+ * $Author$
+ * ------------------------------------------------
+*/
 
 
 #include "mex.h"

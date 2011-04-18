@@ -20,6 +20,13 @@ function varargout = DataSetWindow(varargin)
 %
 % See also: GUIDE, GUIDATA, GUIHANDLES
 
+% ----------- SVN REVISION INFO ------------------
+% $URL$
+% $Revision$
+% $Date$
+% $Author$
+% ------------------------------------------------
+
 % Edit the above text to modify the response to help DataSetWindow
 
 % Last Modified by GUIDE v2.5 21-Apr-2008 11:06:49

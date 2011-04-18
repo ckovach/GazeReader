@@ -31,6 +31,13 @@ function RF  = fact2reg(F,varargin)
 %
 %   For remaining options see also MAKEREGRESSOR 
 
+% ----------- SVN REVISION INFO ------------------
+% $URL$
+% $Revision$
+% $Date$
+% $Author$
+% ------------------------------------------------
+
 % C Kovach 2008
 
 intxnord = 1;

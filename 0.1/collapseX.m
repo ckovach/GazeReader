@@ -9,6 +9,13 @@ function [ Iout, nrows, uindxout,bout, varargout] = collapseX(X,b,varargin)
 % succesive block.
 %
 
+% ----------- SVN REVISION INFO ------------------
+% $URL$
+% $Revision$
+% $Date$
+% $Author$
+% ------------------------------------------------
+
 % C. Kovach 2011
 
 

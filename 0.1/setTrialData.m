@@ -10,6 +10,13 @@ function trialdata = setTrialData(h,trialdata)
 %
 % See also makeTrialData
 
+% ----------- SVN REVISION INFO ------------------
+% $URL$
+% $Revision$
+% $Date$
+% $Author$
+% ------------------------------------------------
+
 
 
 if nargin < 1 || isempty(h) || ~ishandle(h)    

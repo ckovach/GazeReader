@@ -8,6 +8,13 @@ function [Rout,interleaver] = interleave(varargin)
 %
 % See also MAKEREGRESSOR, POOL, SPLIT
 
+% ----------- SVN REVISION INFO ------------------
+% $URL$
+% $Revision$
+% $Date$
+% $Author$
+% ------------------------------------------------
+
 
 
 

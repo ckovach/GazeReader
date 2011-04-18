@@ -15,6 +15,13 @@ function [FX,trend] =  CorrectFixationDrift(FX, crossintvlmarks, fclocation, pri
 % epoch. Allows correction of calibration drift.
 %
 
+% ----------- SVN REVISION INFO ------------------
+% $URL$
+% $Revision$
+% $Date$
+% $Author$
+% ------------------------------------------------
+
 if nargin < 6 || isempty(porder)
     porder = 4; %Order of drift polynomial
 end

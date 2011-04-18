@@ -20,6 +20,13 @@ function varargout = GazeReader(varargin)
 %
 % See also: GUIDE, GUIDATA, GUIHANDLES
 
+% ----------- SVN REVISION INFO ------------------
+% $URL$
+% $Revision$
+% $Date$
+% $Author$
+% ------------------------------------------------
+
 % Edit the above text to modify the response to help GazeReader
 
 % Last Modified by GUIDE v2.5 17-Aug-2010 02:48:01

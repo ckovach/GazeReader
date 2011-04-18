@@ -22,6 +22,13 @@ while i <= length(varargin)
         
         case 'label' %label
             label  = varargin{i+1};
+% ----------- SVN REVISION INFO ------------------
+% $URL$
+% $Revision$
+% $Date$
+% $Author$
+% ------------------------------------------------
+
             i = i+1; 
         case 'codeincr' %codeincrement
            codeincr = varargin{i+1};

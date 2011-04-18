@@ -3,6 +3,13 @@ function tsince= time_since(delta_train)
 % Takes as input a train of delta functions and returns a vector with the time
 % since the preceding delta in sampling units
 
+% ----------- SVN REVISION INFO ------------------
+% $URL$
+% $Revision$
+% $Date$
+% $Author$
+% ------------------------------------------------
+
 
 delt = find(delta_train);
 

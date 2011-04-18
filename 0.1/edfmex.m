@@ -59,6 +59,13 @@
 %        mex edfmex.cpp edfapi.lib
 % 
 
+% ----------- SVN REVISION INFO ------------------
+% $URL$
+% $Revision$
+% $Date$
+% $Author$
+% ------------------------------------------------
+
 
 % Written by C. Kovach 2007 and released for non-commercial use 
 % without any gaurantee whatsoever. I am not responsible for any 

@@ -7,6 +7,13 @@
  *  containing the non-zero data in block diagonal sparse matrix SpX 
  *  as well as the Ir and Jc of SpX.
  *
+ *
+ * ----------- SVN REVISION INFO ------------------
+ * $URL$     
+ * $Revision$
+ * $Date$
+ * $Author$
+ * ------------------------------------------------
  */
 
 

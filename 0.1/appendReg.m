@@ -32,6 +32,13 @@ function varargout = appendReg(h,R2,dataset,varargin)
 %
 % See also MAKEREGRESSOR
 
+% ----------- SVN REVISION INFO ------------------
+% $URL$
+% $Revision$
+% $Date$
+% $Author$
+% ------------------------------------------------
+
 % C Kovach 2011
 
 

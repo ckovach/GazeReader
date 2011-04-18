@@ -6,6 +6,13 @@ function reseed
 %
 % See also: RAND, RANDN, NOW.
 
+% ----------- SVN REVISION INFO ------------------
+% $URL$
+% $Revision$
+% $Date$
+% $Author$
+% ------------------------------------------------
+
 umethod = 'twister';
 nmethod = 'state';
 
