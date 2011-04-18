@@ -32,7 +32,8 @@ function [Theta, I, LL, badcond,lgm, max_iterations_reached,design_is_singular, 
 
 
 InitTheta = [];
-Hreg= [];
+Hreg= 0;
+Lreg = 0;
 runiter=true;
 fix = [];
 firth = false;
@@ -51,13 +52,19 @@ obsfreq = 1;
 discard = [];
 % LC = 0;
 i=1;
+
+%%%% Options are described below %%%%
 while i <= length(varargin)
     
     switch lower(varargin{i})
-        case 'regularization'   %Specify gaussian regularization (ridge)
+        case {'gaussreg','regularization'}   %Specify gaussian regularization (ridge)
             Hreg = varargin{i+1};
             i = i+1;            
-        case 'firth'    %Use Jeffrey's prior as described by Firth
+        case {'laplreg'}   %Specify laplacian regularization
+            Lreg = varargin{i+1};
+            i = i+1;            
+        case 'firth'    %Use Jeffrey's prior as described by Firth: currently 
+                        % works only for logisitic regresion normalized to 2nd option!
             firth = varargin{i+1};
             i = i+1;
         case 'runiter'    %do not run iterations (ie only compute likelihood at InitTheta) if false
@@ -110,7 +117,7 @@ while i <= length(varargin)
     i = i+1;
     
 end
-
+%%%%%%%%%%%%%%%%%%
 
 if isempty(binvolume)
     binvolume = 0;
@@ -213,10 +220,17 @@ elseif length(InitTheta ) < Npar
     InitTheta(end+1:Npar) = 0;
 end
 
-if  isempty(Hreg)
-    Hreg = 0; %Regularization term
-elseif length(Hreg) == 1
+if length(Hreg) == 1  %Gaussian prior
     Hreg = eye(Npar).*Hreg;
+elseif isvector(Hreg)
+    Hreg = diag(Hreg);
+end
+    
+
+if length(Lreg) == 1  %Laplace prior
+    Lreg = eye(Npar).*Lreg;
+elseif isvector(Lreg)
+    Lreg = diag(Lreg);
 end
 
 % if any(fixed~=0)      %Check Regressor structure to see if any values are to remain fixed.
@@ -397,17 +411,16 @@ while dstep + sqrt( damp*sum(del.^2)./sum(Theta.^2)) > tol  && runiter   ; %Adde
     end
     
     % Newton's method
-    
+    RegMat = ( Hreg - Lreg./sqrt(sum(Theta.^2)) );
     if ~LevMar  
         if ~constraint
-            del = -D2L^-1 * (DL - Hreg*Theta);
-%             del(fix) = 0;
+            del = -D2L^-1 * (DL - RegMat*Theta ); %Hreg and Lreg are Gaussian and Laplacian priors, respectively.
         else
             %Updating with lagrange multiplier
             Q = cat(2,D2L,LC(1:end-1,:));
             Q = cat(1,Q,[LC(1:end-1)',zeros(nlgm)]);
             
-            del = -Q^-1 * ( cat(1,DL,Dlgm) - cat(Hreg*Theta,zeros(nlgm,1)));
+            del = -Q^-1 * ( cat(1,DL,Dlgm) - cat(RegMat*Theta,zeros(nlgm,1)));
             dellgm = del([1:nlgm]+Npar);
             del = del(1:Npar);
 %             del(fix) = 0;
@@ -420,9 +433,9 @@ while dstep + sqrt( damp*sum(del.^2)./sum(Theta.^2)) > tol  && runiter   ; %Adde
         
 %         del1 = -(D2L - Hreg*lmnu)^-1 * DL;
         if ~constraint
-            del1 = -(D2L - Slev - Hreg)^-1  * (DL - Hreg*Theta);
+            del1 = -(D2L - Slev - Hreg)^-1  * (DL - RegMat*Theta);
 %             del1(fix) = 0;
-            del2 = -(D2L - Slev./lmnu - Hreg)^-1 * (DL - Hreg*Theta);
+            del2 = -(D2L - Slev./lmnu - Hreg)^-1 * (DL - RegMat*Theta);
 %             del2(fix) = 0;
             Theta1 = Theta + del1;
             Theta2 = Theta + del2;
@@ -434,12 +447,12 @@ while dstep + sqrt( damp*sum(del.^2)./sum(Theta.^2)) > tol  && runiter   ; %Adde
             Q2 = cat(2,D2L - Slev./lmnu - Hreg,LC(1:end-1,:));
             Q2 = cat(1,Q2,[LC(1:end-1,:)',zeros(nlgm)]);
             
-            del1 = -Q1^-1 * ( cat(1,DL,Dlgm(:)) - cat(1,Hreg*Theta,zeros(nlgm,1)));
+            del1 = -Q1^-1 * ( cat(1,DL,Dlgm(:)) - cat(1,RegMat*Theta,zeros(nlgm,1)));
             dellgm1 = del1([1:nlgm]+Npar);
             del1 = del1(1:Npar);
 %             del1(fix) = 0;
 
-            del2 = -Q2^-1 * ( cat(1,DL,Dlgm(:)) - cat(1,Hreg*Theta,zeros(nlgm,1)));
+            del2 = -Q2^-1 * ( cat(1,DL,Dlgm(:)) - cat(1,RegMat*Theta,zeros(nlgm,1)));
             dellgm2 = del2([1:nlgm]+Npar);
             del2 = del2(1:Npar);
 %             del2(fix) = 0;
