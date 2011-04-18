@@ -14,8 +14,9 @@ function [ Iout, nrows, uindxout,bout, varargout] = collapseX(X,b,varargin)
 
 
 moreX = {};
-discardtrials = false;
+% discardtrials = false;
 i = 1;
+discard = false;
 while i <= length(varargin)
     
     if isstruct(varargin{i})
