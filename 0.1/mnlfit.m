@@ -101,9 +101,9 @@ while i <= length(varargin)
               i = i+1;              %  the parameters and a*C - C(end,:) = 0
                                     %  if it is longer by 1. Lagrange
                                     %  multipliers are appended to the
-                                    %  parameter vector.
+                                     parameter vector.
         case 'include_null'     %Doesn't do anything now
-            const = varargin{i+1};
+            const = varargin{i+1}; %#ok<NASGU>
             i = i+1;
         case 'show_progress' 
             showprog = varargin{i+1};
@@ -126,7 +126,7 @@ end
 X = R.value;
 b = R.noptions;
 Npar = R.Npar;
-fixed = R.fixed;
+% fixed = R.fixed;
 if size(X,1) ~= length(Ysp)
     error('X must have the same number of rows as elements in Y')
 end
@@ -185,7 +185,7 @@ end
 
 %Create constraint matrix for fixed parameters
 if any(fix)
-    constraint = true;
+%     constraint = true;
     fixed = find(fix);
     LC = zeros(Npar,1);
     for i = 1:length(fixed)
@@ -248,7 +248,7 @@ if LevMar
     Slev = damp*eye(length(InitTheta));
 
 else 
-    damp = 0;
+    damp = 0; %#ok<UNRCH>
 end
 
 if transposeSpx 
@@ -421,7 +421,7 @@ while dstep + sqrt( damp*sum(del.^2)./sum(Theta.^2)) > tol  && runiter   ; %Adde
             Q = cat(1,Q,[LC(1:end-1)',zeros(nlgm)]);
             
             del = -Q^-1 * ( cat(1,DL,Dlgm) - cat(RegMat*Theta,zeros(nlgm,1)));
-            dellgm = del([1:nlgm]+Npar);
+            dellgm = del((1:nlgm)+Npar);
             del = del(1:Npar);
 %             del(fix) = 0;
             
@@ -448,12 +448,12 @@ while dstep + sqrt( damp*sum(del.^2)./sum(Theta.^2)) > tol  && runiter   ; %Adde
             Q2 = cat(1,Q2,[LC(1:end-1,:)',zeros(nlgm)]);
             
             del1 = -Q1^-1 * ( cat(1,DL,Dlgm(:)) - cat(1,RegMat*Theta,zeros(nlgm,1)));
-            dellgm1 = del1([1:nlgm]+Npar);
+            dellgm1 = del1((1:nlgm)+Npar);
             del1 = del1(1:Npar);
 %             del1(fix) = 0;
 
             del2 = -Q2^-1 * ( cat(1,DL,Dlgm(:)) - cat(1,RegMat*Theta,zeros(nlgm,1)));
-            dellgm2 = del2([1:nlgm]+Npar);
+            dellgm2 = del2((1:nlgm)+Npar);
             del2 = del2(1:Npar);
 %             del2(fix) = 0;
             Theta1 = Theta + del1;
@@ -547,17 +547,16 @@ while dstep + sqrt( damp*sum(del.^2)./sum(Theta.^2)) > tol  && runiter   ; %Adde
     end        
         count = count+1;
 
-         dsteps(count) = dstep;
-         
-         llhist(count) = LL;
-        
-         Thetas(:,count) = Theta;
+%          dsteps(count) = dstep;         
+%          llhist(count) = LL;        
+%          Thetas(:,count) = Theta;
+
 %          if length(llhist)> 1 && LL-llhist(end-1) <0, keyboard; end
          
              
          if count > maxcount % && std(llhist(end-50:end))./diff(llhist([1,end])) < 1e6 
             
-             warning('Failed to converge after %i iterations. Estimate may be unbounded.',maxcount)
+             warning('GazeReader:NoConvergence','Failed to converge after %i iterations. Estimate may be unbounded.',maxcount)
              pause(1)
              max_iterations_reached = 1;
 %              badcond = 1;

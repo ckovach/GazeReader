@@ -133,8 +133,11 @@ mnlfitopts = {};
 while i <= length(varargin)
     
     switch lower(varargin{i})
-        case 'regularization'   %Specify gaussian regularization (ridge)
+        case {'gaussreg','regularization'}   %Specify gaussian prior  (eqv. to ridge regularization)
             Hreg = varargin{i+1};
+            i = i+1;            
+        case 'laplreg'  %Specify laplacian prior
+            Lreg = varargin{i+1};
             i = i+1;            
         case 'firth'    %Use Jeffrey's prior as described by Firth -- this currently works only for dichotomous logistic regression with one 
             Firth = varargin{i+1};
@@ -200,7 +203,7 @@ end
 %                                 'LL',[],'AIC',[],'BIC',[],'lBayes',[],'llrpval',[],'regressors',[],'contrast',[],'W',[],'firth',[],'Hreg',[],'multassign',[],'blockC',[]);
 fitstruct = struct('label','','parest',[],'npar',[],'I',[],'badcond',[],'max_iterations_reached',[],...
                                 'LL',[],'LLR',[],'Dev',[],'deltaDev',[],'df',[],'llrpval',[],'AIC',[],'BIC',[],'R',[],'regressors',[],...
-                                'contrast',[],'W',[],'N',[],'obsfreq',[],'firth',[],'Hreg',[],'multassign',[],'blockC',[],...
+                                'contrast',[],'W',[],'N',[],'obsfreq',[],'firth',[],'Hreg',[],'Lreg',[],'multassign',[],'blockC',[],...
                                 'discarded',[],'binvolume',[],'singular_design_matrix',[]);
 
 %%% Create the response vector
@@ -349,12 +352,12 @@ end
         
 % [parest,I,LL,badcond] = logitmodelsp(Rpooled,W, [] , Hreg);
 % [parest,I,LL,badcond] = mnlfit(Rpooled,W,0, Hreg, true, [],Firth);
-[parest,I,LL,badcond,lgm,max_iter,design_singular,Nobs] = mnlfit(Rpooled,Win,'inittheta',inittheta,'regularization',Hreg, 'runiter',true, 'fix',[],'firth',Firth,...
+[parest,I,LL,badcond,lgm,max_iter,design_singular,Nobs] = mnlfit(Rpooled,Win,'inittheta',inittheta,'gaussreg',Hreg,'laplreg',Lreg, 'runiter',true, 'fix',[],'firth',Firth,...
                                 'linearconstraint',LC,'include_null',include_null,'binvolume',binvolume,'checkdesign',true,'discard',discard,'obsfreq',obsfreq,mnlfitopts{:});
 
 %The point estimate corresponding to fixed values and 0 otherwise
 % [parest0,I0,LL0] = mnlfit(Rpooled,W,0, Hreg, false, [],Firth);
-[parest0,I0,LL0] = mnlfit(Rpooled,Win,'inittheta',H0theta, 'regularization',Hreg, 'runiter',false, 'fix',[],'firth',Firth,...
+[parest0,I0,LL0] = mnlfit(Rpooled,Win,'inittheta',H0theta, 'gaussreg',Hreg,'laplreg',Lreg, 'runiter',false, 'fix',[],'firth',Firth,...
                                 'linearconstraint',LC,'include_null',include_null,'binvolume',binvolume,'discard',discard,'obsfreq',obsfreq,mnlfitopts{:});
 
 npar = length(parest) - rank(LC);
@@ -386,6 +389,7 @@ fit(1).blockC = blockC;
 fit(1).firth = Firth;
 fit(1).multassign= multassign;
 fit(1).Hreg = Hreg;
+fit(1).Lreg = Lreg;
 % fit(1).N = length(Rpooled.noptions);
 fit(1).N = full(Nobs);
 fit(1).obsfreq = obsfreq;
