@@ -92,16 +92,22 @@ if ~iscell(labels)
     labels = {labels};
 end
 
+if iscell(F)  %Allow for cell arrays as well as numeric vectors
+    eqfun = @(a,b) cellfun(@(a) isequal(a, b{1}),a);
+else
+    eqfun = @(a,b) isequal(a,b);
+end
+
 for f = 1:size(F,2)
 
 %     ufs = unique(F(:,f));
-      ufs = unique(F(~ignore,f));
+      ufs = unique(F(~ignore,f));  % Get unique values in the factor
 
     XF = zeros(size(F,1),length(ufs));
-
+    
     for l = 1:length(ufs)
-
-        XF(:,l) = (F(:,f) == ufs(l)).*~ignore;
+        
+        XF(:,l) = eqfun(F(:,f) , ufs(l) ).*~ignore;
 
     end
 
@@ -123,7 +129,7 @@ for f = 1:size(F,2)
     end
 
     RF(f) = makeregressor(XF,'noptions',noptions,'label',labels{f},'codeincr',codeincr,'postmultiply',postmult);
-
+    RF(f).info.factorlabels = ufs;
 end
 
 if intxnord>1
