@@ -95,7 +95,7 @@ end
 if iscell(F)  %Allow for cell arrays as well as numeric vectors
     eqfun = @(a,b) cellfun(@(a) isequal(a, b{1}),a);
 else
-    eqfun = @(a,b) isequal(a,b);
+    eqfun = @(a,b) a==b;
 end
 
 for f = 1:size(F,2)
