@@ -378,6 +378,13 @@ vx = cat(2,pos(bins,[1,2]),pos(bins ,[2,1]))';
 
 vy = pos(bins ,[3,3,4,4])';
 
+
+if length(Cdata) ==3  %If Cdata has length 3, patch wrongly assumes it's RGB
+     Cdata(end+1) = nan;
+    vx(end+1,:) = nan;
+    vy(end+1,:) = nan;
+end
+
 %%%%
 % ph = patch(vx*screenres(1),vy*screenres(2),Cdata,varargin{:});
 ph = patch(vx,vy,Cdata,varargin{:});
@@ -675,9 +682,10 @@ axlim = axis(ca);
 xy = ellipseVertices(binGroup,bins);
 
 if length(Cdata) ==3  %If Cdata has length 3, patch wrongly assumes it's RGB
- Cdata(end+1) = nan;
- xy(:,end+(1:3)) = nan;
+     Cdata(end+1) = nan;
+    xy(:,end+(1:3)) = nan;
 end
+
 out = patch(xy(:,1:3:end), xy(:,2:3:end),Cdata,varargin{:});
 
 axis(ca,axlim);
@@ -762,8 +770,15 @@ axlim = axis(ca);
 
 varargout = cell(1,nargout);
 
+pos = BinGroups.pos;
+
+if length(Cdata) ==3  %If Cdata has length 3, patch wrongly assumes it's RGB
+     Cdata(end+1) = nan;
+     pos(end+1,:) = nan;
+end
+
 % [varargout{:}] = plot(axlim(2)*BinGroups.pos(:,1),axlim(2)*BinGroups.pos(:,2),varargin{:});
-[varargout{:}] = patch(BinGroups.pos(:,1),BinGroups.pos(:,2),Cdata,varargin{:});
+[varargout{:}] = patch(pos(:,1),pos(:,2),Cdata,varargin{:});
 
 axis(ca,axlim);
 
@@ -880,9 +895,16 @@ varargout = cell(1,nargout);
 vert = BinGroups.pos.vert;
 tri = BinGroups.pos.tri;
 
+
+
+if length(Cdata) ==3  %If Cdata has length 3, patch wrongly assumes it's RGB
+    vert(end+(1:3)) = nan;
+    tri(end+(1:3)) = size(vert,1) + (-2:0);
+     Cdata(end+1) = nan;
+end
+
 v1 = vert(:,1);
 v2 = vert(:,2);
-
 % [varargout{:}] = plot(axlim(2)*BinGroups.pos(:,1),axlim(2)*BinGroups.pos(:,2),varargin{:});
 [varargout{:}] = patch(v1(tri(bins,:))',v2(tri(bins,:))',Cdata,varargin{:});
 

@@ -670,15 +670,12 @@ end
 
 MakeActive(hObject, eventdata, handles)
 
-% parent = getappdata(handles.figure1,'parent');
-% 
-% imageData = getappdata(parent,'imageData');
-% currentImage = getappdata(parent,'CurrentImage'); 
-% 
-% imageData.images(currentImage).pos = [0 1 0 1];
-% setappdata(parent,'imageData',imageData);
 
-UpdatePosition(hObject,eventdata,handles);
+activeim = getappdata(handles.imageList,'activeImages');
+
+for i = 1:length(activeim)
+    UpdatePosition(hObject,eventdata,handles,activeim(i));    % Apply to all selected images
+end
 
 UpdateImage(hObject,eventdata,handles);
 activefigure(handles.figure1)
@@ -696,40 +693,33 @@ if get(handles.pixelScaleCheckBox,'value')
     set(handles.scaleCheckBox,'value',0)
 end
 
+activeim = getappdata(handles.imageList,'activeImages');
 
-% parent = getappdata(handles.figure1,'parent');
-% imageData = getappdata(parent,'imageData');
-% currentImage = getappdata(parent,'CurrentImage');
-% 
-% pos = imageData.images(currentImage).position;    
-% 
-% screenres = imageData.images(currentImage).screenres;  
-% xysize = imageData.images(currentImage).xySize./screenres;
-% 
-% xycenter = ( pos([1 3]) +pos([2 4]))./2;
-% newpos = [0 xysize(1) 0 xysize(2)] + xycenter([1 1 2 2]) - .5*xysize([1 1 2 2]);    
-% 
-% imageData.images(currentImage).pos = newpos;
-% setappdata(parent,'imageData',imageData);
+for i = 1:length(activeim)
+    UpdatePosition(hObject,eventdata,handles,activeim(i));    % Apply to all selected images
+end
 
-UpdatePosition(hObject,eventdata,handles);
 
 UpdateImage(hObject,eventdata,handles);
 activefigure(handles.figure1)
 
 
 
-function UpdatePosition(hObject, eventdata, handles)
+function UpdatePosition(hObject, eventdata, handles,currentImage)
 % hObject    handle to scaleCheckBox (see GCBO)
 % eventdata  reserved - to be defined in a future version of MATLAB
 % handles    structure with handles and user data (see GUIDATA)
 
+%Set image position and scaling
 
 MakeActive(hObject, eventdata, handles)
 
 parent = getappdata(handles.figure1,'parent');
 
-currentImage = getappdata(parent,'CurrentImage');
+if nargin < 4
+    currentImage = getappdata(parent,'CurrentImage');
+end
+
 if currentImage == 0
     return
 end

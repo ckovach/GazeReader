@@ -346,47 +346,6 @@ parent = getappdata(handles.figure1,'parent');
 setappdata(parent,'activeControl','binManager');
 
 
-% function updatePlot(hObject,eventdata,roiInstance,pivot,btnDownPt,axh)
-% function updatePlot(hObject,eventdata,handles)
-%    
-% plottype = 'g'; %arguments to plot for drawing bin lines
-% 
-% % Simply calls the plotting function handle associated with this bin group
-% 
-% parent = getappdata(handles.figure1,'parent');
-% phandles = guidata(parent);
-% axes(phandles.axes2)
-% gridData = getappdata(parent,'gridData');
-% % currim = getappdata(parent,'CurrentImage');
-% % trialData = getappdata(parent,'trialData');
-% % screenData = getappdata(parent,'screenData');
-% 
-% 
-% currentgr = getappdata(parent,'CurrentBinGroup');
-% 
-% phandles = guidata(parent); %handles of the parent GUI
-% 
-% 
-% plothandles = getappdata(handles.figure1,'plotHandles');
-% 
-% delete(plothandles(ishandle(plothandles(:))));
-% 
-% axes(phandles.axes2)
-% 
-% axis(phandles.axes2,axis(phandles.axes1));
-% ax1 = get(phandles.axes1);
-% set(phandles.axes2,'units',ax1.Units,'position',ax1.Position,'Ydir',ax1.YDir)
-% 
-% hold off
-% plothandles = gridData.groups(currentgr).plot(gridData.groups(currentgr),plottype);
-% % hold off
-% axis off
-% % axes(phandles.axes1)
-% 
-% setappdata(handles.figure1,'plotHandles',plothandles)
-
-
-
 
 % --- Executes during object deletion, before destroying properties.
 function figure1_DeleteFcn(hObject, eventdata, handles)

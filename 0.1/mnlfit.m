@@ -101,7 +101,7 @@ while i <= length(varargin)
               i = i+1;              %  the parameters and a*C - C(end,:) = 0
                                     %  if it is longer by 1. Lagrange
                                     %  multipliers are appended to the
-                                     parameter vector.
+                                    % parameter vector.
         case 'include_null'     %Doesn't do anything now
             const = varargin{i+1}; %#ok<NASGU>
             i = i+1;
@@ -179,7 +179,7 @@ if checkdesign
     if design_is_singular
        beep
        fprintf('Design Matrix is singular or poorly conditioned! Press Ctrl-C to stop, or wait to continue')
-       pause(10)
+       pause(5)
     end
 end
 
@@ -311,12 +311,23 @@ nlgm = size(LC,2);
 
 blockn = blocknorm(ones(1,size(X,2)),b);
 
+RegMat = @(theta,a) ( a*Hreg + Lreg./sqrt(sum(theta.^2)+eps) )*theta;  %Compute a matrix to adjust 1st and 2nd derivatives by the prior distirbution.
+
+%%% Functions to compute log likelihood and outcome probability
+lrrfun = @(theta) theta' * X + binvolume; %compute the log weight
+nlrrfun = @(theta) lrrfun(theta) - blocknorm(lrrfun(theta),b)./blockn; %subtract mean to improve numerical stability
+Pfun =  @(theta) exp( nlrrfun(theta) )./  (blocknorm(exp( nlrrfun(theta) ) ,b)); %Proabability of each outcome
+LLfun = @(theta) sum(log(Pfun(theta)*Yblocksum)*OF) - theta'*RegMat(theta,1); %Log Likelihood
+
 while dstep + sqrt( damp*sum(del.^2)./sum(Theta.^2)) > tol  && runiter   ; %Added damping dependent term to avoid premature halting when damping is high
 % while dstep > tol  && runiter   
 
-    lrr = Theta' * X + binvolume;
-    lrr = lrr - blocknorm(lrr,b)./blockn; %subtract mean to improve numerical stability
-    P =  exp( lrr )./  (blocknorm(exp( lrr ) ,b)); %Proabability of each outcome
+%     lrr = Theta' * X + binvolume;
+%     lrr = lrr - blocknorm(lrr,b)./blockn; %subtract mean to improve numerical stability
+%     P =  exp( lrr )./  (blocknorm(exp( lrr ) ,b)); %Proabability of each outcome
+
+    P =  Pfun(Theta); %Proabability of each outcome
+    
 %     P =  exp( Theta' * X + binvolume)./  (blocknorm(exp( Theta' * X + binvolume ) ,b)+eps); %Proabability of each outcome
 
     Pnorm = blocknorm(P.*Y',b);
@@ -324,7 +335,7 @@ while dstep + sqrt( damp*sum(del.^2)./sum(Theta.^2)) > tol  && runiter   ; %Adde
     
     % Derivative of the log likelihood
     
-    DL = X*OFlarge*(P2 - P)';
+    DL = X*OFlarge*(P2 - P)' - RegMat(Theta,2);
     
     if constraint 
         DL = DL + LC(1:end-1,:)*lgm; %Derivative of parameters under linear constraint
@@ -356,7 +367,7 @@ while dstep + sqrt( damp*sum(del.^2)./sum(Theta.^2)) > tol  && runiter   ; %Adde
             
             W = sparseblockmex(P.*(1-P),0:length(P), 0:length(P),length(P))*OFlarge; %Equivalent to but faster than diag(P) or diag(sparse(P))
             S1 = - X*W*X';
-            D2L = S2 + S1;        
+            D2L = S2 + S1 - Hreg;        
         else 
            dgP = sparseblockmex(P,0:length(P), 0:length(P),length(P)); %Equivalent to but faster than diag(P) or diag(sparse(P))      
            spP = sparseblock(P,b);
@@ -365,13 +376,13 @@ while dstep + sqrt( damp*sum(del.^2)./sum(Theta.^2)) > tol  && runiter   ; %Adde
 %            S1 = full( - X*dgP*X'  + spblocktrace( q*q', Npar ));
 %            clear q;
            S1 = full( - X*dgP*OFlarge*X'  + spblocktrace( (spX*spP')*OF*(spP*spX'), Npar));
-           D2L = S2 + S1;        
+           D2L = S2 + S1 - Hreg;        
 
         end
 %         D2Linv = (D2L-Hreg)^-1;
     end
     
-    if firth
+    if firth  %This has very limited functionality in the current version.
 
         %Modified to account for multiple assignment. This needs to be
         %double checked!! This still needs to be modified to accomodate
@@ -399,7 +410,8 @@ while dstep + sqrt( damp*sum(del.^2)./sum(Theta.^2)) > tol  && runiter   ; %Adde
 %         S1 = full( - X*dgP*X'  + spblocktrace( (spX*spP')*(spP*spX'), Npar ));
 %         D2L =  S1; % + S2;        
 
-        LL = sum(log(P*Yblocksum)*OF) + .5*log(det(-D2L));         
+%         LL = sum(log(P*Yblocksum)*OF) + .5*log(det(-D2L));         
+        LL = LLfun(Theta) + .5*log(det(-D2L));     
     else
         
         %Redundant. 
@@ -407,72 +419,90 @@ while dstep + sqrt( damp*sum(del.^2)./sum(Theta.^2)) > tol  && runiter   ; %Adde
 %         lrr = lrr - blocknorm(lrr,b)./blockn; %subtract mean to improve numerical stability
 %         P =  exp( lrr )./  (blocknorm(exp( lrr ) ,b)); %Proabability of each outcome
 
-        LL = sum(log(P*Yblocksum)*OF);
+%         LL = sum(log(P*Yblocksum)*OF);
+        LL = LLfun(Theta);
     end
     
     % Newton's method
-    RegMat = ( Hreg - Lreg./sqrt(sum(Theta.^2)) );
     if ~LevMar  
         if ~constraint
-            del = -D2L^-1 * (DL - RegMat*Theta ); %Hreg and Lreg are Gaussian and Laplacian priors, respectively.
+%             del = -D2L^-1 * (DL - RegMat(Theta,2) ); %Hreg and Lreg are Gaussian and Laplacian priors, respectively.
+            del = -D2L^-1 * DL; %Hreg and Lreg are Gaussian and Laplacian priors, respectively.
         else
             %Updating with lagrange multiplier
             Q = cat(2,D2L,LC(1:end-1,:));
             Q = cat(1,Q,[LC(1:end-1)',zeros(nlgm)]);
             
-            del = -Q^-1 * ( cat(1,DL,Dlgm) - cat(RegMat*Theta,zeros(nlgm,1)));
+%             del = -Q^-1 * ( cat(1,DL,Dlgm) - cat(RegMat(Theta,2),zeros(nlgm,1)));
+            del = -Q^-1 *  cat(1,DL,Dlgm) ;
             dellgm = del((1:nlgm)+Npar);
             del = del(1:Npar);
 %             del(fix) = 0;
             
             lgm = lgm + dellgm;
         end            
-        Theta = Theta + del;
+        Theta = Theta + del;  %New Theta
 
     else    %if ~surrogate
         
-%         del1 = -(D2L - Hreg*lmnu)^-1 * DL;
         if ~constraint
-            del1 = -(D2L - Slev - Hreg)^-1  * (DL - RegMat*Theta);
-%             del1(fix) = 0;
-            del2 = -(D2L - Slev./lmnu - Hreg)^-1 * (DL - RegMat*Theta);
-%             del2(fix) = 0;
+%             del1 = -(D2L - Slev)^-1  * (DL - RegMat(Theta,2));
+%             del2 = -(D2L - Slev./lmnu)^-1 * (DL - RegMat(Theta,2));
+            del1 = -(D2L - Slev)^-1  * DL ;
+            del2 = -(D2L - Slev./lmnu)^-1 * DL;
+            
             Theta1 = Theta + del1;
             Theta2 = Theta + del2;
             
         else
             
-            Q1 = cat(2,D2L - Slev - Hreg,LC(1:end-1,:));
-            Q1 = cat(1,Q1,[LC(1:end-1,:)',zeros(nlgm)]);
-            Q2 = cat(2,D2L - Slev./lmnu - Hreg,LC(1:end-1,:));
-            Q2 = cat(1,Q2,[LC(1:end-1,:)',zeros(nlgm)]);
+            Qfun = @(nm) cat(1, cat( 2 , D2L - Slev/nm ,LC(1:end-1,:) ),...
+                       [ LC(1:end-1,:)' , zeros(nlgm) ]  );
+                   
+%             Q1 = cat(2,D2L - Slev,LC(1:end-1,:));
+%             Q1 = cat(1,Q1,[LC(1:end-1,:)',zeros(nlgm)]);
+%             Q2 = cat(2,D2L - Slev./lmnu,LC(1:end-1,:));
+%             Q2 = cat(1,Q2,[LC(1:end-1,:)',zeros(nlgm)]);
+
+%             Q1 = Qfun(1);
+%             Q2 = Qfun(lmnu);
             
-            del1 = -Q1^-1 * ( cat(1,DL,Dlgm(:)) - cat(1,RegMat*Theta,zeros(nlgm,1)));
+%             delfun = @(mn) -Qfun(mn)^-1 * ( cat(1,DL,Dlgm(:)) - cat(1,RegMat(Theta,2),zeros(nlgm,1)));
+            delfun = @(mn) -Qfun(mn)^-1 *  cat(1,DL,Dlgm(:));
+            
+%             del1 = -Q1^-1 * ( cat(1,DL,Dlgm(:)) - cat(1,RegMat(Theta,2),zeros(nlgm,1)));
+            del1 = delfun(1);
             dellgm1 = del1((1:nlgm)+Npar);
             del1 = del1(1:Npar);
-%             del1(fix) = 0;
 
-            del2 = -Q2^-1 * ( cat(1,DL,Dlgm(:)) - cat(1,RegMat*Theta,zeros(nlgm,1)));
+            
+%             del2 = -Q2^-1 * ( cat(1,DL,Dlgm(:)) - cat(1,RegMat(Theta,2),zeros(nlgm,1)));
+            del2 = delfun(lmnu);          
             dellgm2 = del2((1:nlgm)+Npar);
             del2 = del2(1:Npar);
-%             del2(fix) = 0;
+            
             Theta1 = Theta + del1;
             Theta2 = Theta + del2;
             
         end            
 
         if ~firth
-            lrr = Theta1' * X + binvolume;
-            lrr = lrr - blocknorm(lrr,b)./blockn; %subtract mean to improve numerical stability
-            P =  exp( lrr )./  (blocknorm(exp( lrr ) ,b)); %Proabability of each outcome
-%             P =  exp( Theta1' * X + binvolume)./  (blocknorm(exp( Theta1' * X+ binvolume ) ,b) + eps); 
-            LL1 = sum(log(P*Yblocksum)*OF);
+%             lrr = Theta1' * X + binvolume;
+%             lrr = lrr - blocknorm(lrr,b)./blockn; %subtract mean to improve numerical stability
+            
+        
+%             P =  exp( lrr )./  (blocknorm(exp( lrr ) ,b)); %Proabability of each outcome
+%             LL1 = sum(log(P*Yblocksum)*OF) - Theta1'*RegMat(Theta1,1);
 
-           lrr = Theta2' * X + binvolume;
-            lrr = lrr - blocknorm(lrr,b)./blockn; %subtract mean to improve numerical stability
-            P =  exp( lrr )./  (blocknorm(exp( lrr ) ,b)); %Proabability of each outcome
-%      P =  exp( Theta2' * X + binvolume )./  (blocknorm(exp( Theta2' * X + binvolume) ,b) + eps); 
-            LL2  = sum(log(P*Yblocksum)*OF);
+            LL1 = LLfun(Theta1);
+            LL2 = LLfun(Theta2);
+
+%            lrr = Theta2' * X + binvolume;
+%             lrr = lrr - blocknorm(lrr,b)./blockn; %subtract mean to improve numerical stability
+%             P =  exp( lrr )./  (blocknorm(exp( lrr ) ,b)); %Proabability of each outcome
+% %      P =  exp( Theta2' * X + binvolume )./  (blocknorm(exp( Theta2' * X + binvolume) ,b) + eps); 
+% %             LL2  = sum(log(P*Yblocksum)*OF);
+%             LL2  = sum(log(P*Yblocksum)*OF) - Theta2'*RegMat(Theta2);
 
         else
 
@@ -485,7 +515,7 @@ while dstep + sqrt( damp*sum(del.^2)./sum(Theta.^2)) > tol  && runiter   ; %Adde
             S1 = full( - X*dgP*OFlarge*X'  + spblocktrace( (spX*spP')*OF*(spP*spX'), Npar ));
             D2L =  S1; % + S2;        
 
-            LL1 = sum(log(P*Yblocksum)*OF) + .5*log(det(-D2L));                     
+            LL1 = sum(log(P*Yblocksum)*OF) + .5*log(det(-D2L)) - Theta1'*RegMat(Theta1,2);                     
 
             lrr = Theta2' * X + binvolume;
             lrr = lrr - blocknorm(lrr,b)./blockn; %subtract mean to improve numerical stability
@@ -497,7 +527,7 @@ while dstep + sqrt( damp*sum(del.^2)./sum(Theta.^2)) > tol  && runiter   ; %Adde
             D2L =  S1; % + S2;        
 
             
-            LL2 = sum(log(P*Yblocksum)*OF) + .5*log(det(-D2L));                     
+            LL2 = sum(log(P*Yblocksum)*OF) + .5*log(det(-D2L)) - Theta2'*RegMat(Theta2,2);                     
 
         end            
 
@@ -567,11 +597,15 @@ end
 if showprog, fprintf('\n');end
 
 %One more pass to Compute final value of everyting and observed Fisher information 
-lrr = Theta' * X + binvolume;
-lrr = lrr - blocknorm(lrr,b)./blockn; %subtract mean to improve numerical stability
-P =  exp( lrr )./  (blocknorm(exp( lrr ) ,b)); %Proabability of each outcome
-% P =  exp( Theta' * X + binvolume )./  blocknorm(exp( Theta' * X + binvolume ) ,b); %Proabability of each outcome
-LL = sum(log(P*Yblocksum+eps)*OF);
+% lrr = Theta' * X + binvolume;
+% lrr = lrr - blocknorm(lrr,b)./blockn; %subtract mean to improve numerical stability
+% P =  exp( lrr )./  (blocknorm(exp( lrr ) ,b)); %Proabability of each outcome
+% LL = sum(log(P*Yblocksum+eps)*OF);
+% LL = sum(log(P*Yblocksum+eps)*OF) - Theta'*RegMat*Theta;
+
+P = Pfun(Theta);
+LL = LLfun(Theta);
+
 Pnorm = blocknorm(P.*Y',b);
 P2 = P.*Y'./Pnorm;
 X2 = X(:,b2bl.*Y' > 1);

@@ -124,6 +124,7 @@ collapserows = false;  %Improve efficiency by calling collapseX to collapse over
 % parallel = false; %use of parallel toolbox to be implemented
 % maxcpu = 8; %Maximum workers used when using parallel computing
 
+Lreg = 0;
 
 H0theta = 0;
 
