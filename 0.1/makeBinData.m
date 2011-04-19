@@ -381,8 +381,8 @@ vy = pos(bins ,[3,3,4,4])';
 
 if length(Cdata) ==3  %If Cdata has length 3, patch wrongly assumes it's RGB
      Cdata(end+1) = nan;
-    vx(end+1,:) = nan;
-    vy(end+1,:) = nan;
+    vx(:,end+1) = nan;
+    vy(:,end+1) = nan;
 end
 
 %%%%

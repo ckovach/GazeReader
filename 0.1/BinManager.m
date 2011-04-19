@@ -963,7 +963,7 @@ vals(vals==1) = [];
 if ~isempty(vals)
     for i = 1:length(vals)
         binData.groups(end+1) = binData.groups(vals(i)-1);
-        binData.groups(end).code = binData.codeincr;
+        binData.groups(end).code = binData.codeincr+1;
         binData.codeincr = binData.codeincr+1;
     end
     setappdata(parent,'binData',binData);
