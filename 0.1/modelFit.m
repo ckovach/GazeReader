@@ -109,7 +109,8 @@ function fit = modelFit(trialData ,R,varargin)
 %C Kovach 2008
 
 i=1;
-Hreg = 0; %Default regularization
+Hreg = 0; %Default gaussian regularization
+Lreg = 0;  % Default Laplacian Regularization
 Firth = false;
 fullOnly = false;
 multassign =true;
@@ -470,7 +471,7 @@ if length(R)>1 && ~fullOnly
             fit(i+1).label = sprintf(' | %s ',R(~getreg).label);
         end
         fprintf('\nFitting submodel %i: %s\n',i,fit(i+1).label );
-        [parest,I,LL,badcond,lgm,max_iter] = mnlfit(Rpooled,Win,'inittheta',stth, 'regularization',Hreg, 'runiter',true,...
+        [parest,I,LL,badcond,lgm,max_iter] = mnlfit(Rpooled,Win,'inittheta',stth, 'gaussreg',Hreg,'laplreg',Lreg, 'runiter',true,...
                                                      'firth',Firth,'linearconstraint',LCsub,'binvolume',binvolume,'discard',discard,'obsfreq',obsfreq,mnlfitopts{:});
 
         npar = length(parest) - rank(LCsub);
