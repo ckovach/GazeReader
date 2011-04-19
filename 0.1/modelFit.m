@@ -304,7 +304,7 @@ Rpooled = pool(R);
 Npars = [R.Npar];
 
 blockC = full(sparseblock(ones(1,Rpooled.Npar),Npars)');
-Rpooled.value(isnan(Rpooled.value)) = eps;
+Rpooled.value(isnan(Rpooled.value),:) = eps;
 
 
 if any(fix)
@@ -414,7 +414,9 @@ if length(R)>1 && ~fullOnly
         
         getreg = ~ismember(regcodes,llrtests{i});
         Rpooled = pool(R(getreg));
-        
+        Rpooled.value = Rpooled.value(:, any( Rpooled.value(FBr~=0,:)~=0,1) );
+        Rpooled.value(isnan(Rpooled.value),:) = eps;
+
 
         if collapserows
             %%% collapse over like rows if collapserows is true
