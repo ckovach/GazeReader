@@ -75,6 +75,7 @@ expEventData = getappdata(parent,'expEventData');
 
 evtfuns.update = @() Update(handles.figure1,[],handles);
 evtfuns.updateTrials = @() UpdateTrialData(handles.figure1,[],handles);
+evtfuns.updateAllTrials = @() UpdateTrialDataAll(handles.figure1,[],handles);
 setappdata(parent,'EventManagerFunctions',evtfuns);
 
 if isempty(expEventData)
@@ -363,6 +364,24 @@ tmhandle = getappdata(parent,'trialManager');
 if ishandle(tmhandle)
     tmfuns.update;
 end
+
+%%%%%%%
+
+function UpdateTrialDataAll(hObject,eventData,handles)
+
+
+parent = getappdata(handles.figure1,'parent');
+
+crd = getappdata(parent,'CurrentDataSet');
+
+datasets = getappdata(parent,'expEventData');
+
+for i = 1:length(datasets)
+    setappdata(parent,'CurrentDataSet',i);
+    UpdateTrialData(hObject,eventData,handles)
+end
+
+setappdata(parent,'CurrentDataSet',crd);
 
 
 % --- Executes on selection change in eventTypeMenu.

@@ -39,9 +39,9 @@ emfun = getappdata(h,'EventManagerFunctions');
 tmfun = getappdata(h,'trialManagerFunctions');
 
 if ~isempty(emfun)
-    emfun.updateTrials();
+    emfun.updateAllTrials();
 end
 
 if ~isempty(tmfun)
-    tmfun.update();
+    tmfun.updateAllDataSets();
 end
