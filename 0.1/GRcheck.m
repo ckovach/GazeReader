@@ -6,10 +6,10 @@ function gr_present = GRcheck
 % a value of 1 if GR is present or successfully installed and 0 otherwise.
 
 % ----------- SVN REVISION INFO ------------------
-% $URL: file:///home/svn/Tasks/Neuroecon/intracranial/AttentionValue/Incentive_Salience/GRcheck.m $
-% $Revision: 35 $
-% $Date: 2011-04-20 13:13:10 -0500 (Wed, 20 Apr 2011) $
-% $Author: ckovach $
+% $URL$
+% $Revision$
+% $Date$
+% $Author$
 % ------------------------------------------------
 
 %C Kovach 2011
