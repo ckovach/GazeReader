@@ -1,8 +1,7 @@
 function gr_present = GRcheck
 
 % This function checks if GazeReader (GR) is present in the current path. If
-% not, it offers to attempt a fresh installation through svn. Installation only works
-% if a command-line implementation of svn is installed on the system. It returns
+% not, it offers to attempt a fresh installation through svn. It returns
 % a value of 1 if GR is present or successfully installed and 0 otherwise.
 
 % ----------- SVN REVISION INFO ------------------
@@ -12,7 +11,7 @@ function gr_present = GRcheck
 % $Author$
 % ------------------------------------------------
 
-%C Kovach 2011
+
 
 if ~exist('GazeReader.m','file')
     beep
@@ -31,8 +30,17 @@ if ~exist('GazeReader.m','file')
         [stat,res] = system(com);
         if stat >0
             beep
-            fprintf(['\n Installation failed with error \n\n\t%s.\nIf this happened because you don''t have a working',...
-                     'copy of SVN, download at \n\thttp://subversion.apache.org/packages.html\n\n'],res)
+            if ispc                  
+                    url = sprintf('download a free version at\n\n\t\thttp://www.sliksvn.com/en/download');
+            elseif ismac 
+                    url = sprintf('download a free version at\n\n\t\thttp://www.open.collab.net/downloads/community/');
+            elseif isunix
+                    url = sprintf('install it from your \nrepository (eg run  ''sudo apt-get install svn'')');
+            else
+                    url = sprintf('find\na version suitable for your system at\n\n\thttp://subversion.apache.org/packages.html');                    
+            end
+            fprintf(['\n Installation failed with error \n\n\t%s.\n\nIf this happened because you don''t have a working',...
+                     ' copy of SVN, you can %s\n\n'],res,url)
         end
         
     else
