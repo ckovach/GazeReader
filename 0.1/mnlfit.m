@@ -615,7 +615,9 @@ spP2 = sparseblock(P2,b2);
 S2 = full( X2*dgP2*X2'  - spblocktrace( (spX2*spP2')*(spP2*spX2'), Npar  ));
 dgP = sparseblockmex(P,0:length(P), 0:length(P),length(P)); %Equivalent to but faster than diag(P) or diag(sparse(P))      
 spP = sparseblock(P,b);
-D2L = full( S2 - X*dgP*OFlarge*X'  + spblocktrace( (spX*spP')*OF*(spP*spX'), Npar ));
+D2L = full( S2 - X*dgP*OFlarge*X'  + spblocktrace( (spX*spP')*OF*(spP*spX'), Npar ))- Hreg;
+
+
 if firth
     LL = LL + .5*log(det(-D2L));         
 end
