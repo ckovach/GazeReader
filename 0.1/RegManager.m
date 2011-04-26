@@ -1027,7 +1027,7 @@ switch basisSet
          basisreg = buildpolyreg(reg.value,basisOrd,'trig','label',lbl,'codeincr',cdi,'keepdc',keepdc);
     case 3 % sinusoidal basis functions
         lbl = sprintf('Bin ID %s',lblap);
-         basisreg = fact2reg(regData(crdat).binIndex(:,2),'label',lbl,'center',~keepdc);
+         basisreg = fact2reg(regData(crdat).binIndex(:,1),'label',lbl,'center',~keepdc);
     case 0
         return
         
