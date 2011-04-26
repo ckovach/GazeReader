@@ -29,7 +29,7 @@ function varargout = RegManager(varargin)
 
 % Edit the above text to modify the response to help RegManager
 
-% Last Modified by GUIDE v2.5 19-Feb-2011 00:38:01
+% Last Modified by GUIDE v2.5 26-Apr-2011 14:14:25
 
 % Begin initialization code - DO NOT EDIT
 gui_Singleton = 1;
@@ -311,6 +311,29 @@ function regRemoveMenu_Callback(hObject, eventdata, handles)
 % 
 % Update(hObject, eventdata, handles)
 
+
+parent = getappdata(handles.figure1,'parent');
+
+regData = getappdata(parent,'regData');
+CurrentDataSet = getappdata(parent,'CurrentDataSet');
+CurrentRegressorGroup = getappdata(parent,'CurrentRegressorGroup');
+selected = get(handles.regList,'value')-1;
+selected(selected==0) =[];
+
+regData(CurrentDataSet).regressors(CurrentRegressorGroup).value(:,selected) = [];
+regData(CurrentDataSet).regressors(CurrentRegressorGroup).codevec(:,selected) = [];
+regData(CurrentDataSet).regressors(CurrentRegressorGroup).factmat(:,selected) = [];
+regData(CurrentDataSet).regressors(CurrentRegressorGroup).levmat(:,selected) = [];
+regData(CurrentDataSet).regressors(CurrentRegressorGroup).fixed(:,selected) = [];
+regData(CurrentDataSet).regressors(CurrentRegressorGroup).Npar = ...
+    size(regData(CurrentDataSet).regressors(CurrentRegressorGroup).value,2);
+
+
+setappdata(parent,'CurrentRegressor',selected(1)-1);
+setappdata(parent,'regData',regData);
+
+UpdateFields(hObject, eventdata, handles)
+
 % --------------------------------------------------------------------
 function Untitled_1_Callback(hObject, eventdata, handles)
 % hObject    handle to Untitled_1 (see GCBO)
@@ -392,7 +415,7 @@ trialData =  getappdata(parent,'trialData');
 binData =  getappdata(parent,'binData');
 
 if isempty(currentRegressor) || isequal(currentRegressor,0) || isequal(currentRegressorGroup,0)...
-   || currentRegressor > regData(CurrentDataSet).regressors(currentRegressorGroup).Npar 
+   || max(currentRegressor) > regData(CurrentDataSet).regressors(currentRegressorGroup).Npar 
     return
 end
 if currentTrial > 0 && ~isempty(currentFixation) &&...
@@ -422,7 +445,7 @@ bincodes = [binData.groups.code];
 
 bindex = find(ismember(bincodes,trbincode));
 
-Zdata = mat2cell(Zdata,cat(1,binData.groups(bindex).nbin),1);
+Zdata = num2cell(Zdata,cat(1,binData.groups(bindex).nbin));
 
 bmfuns = getappdata(parent,'binManagerFunctions');
 
@@ -1158,3 +1181,63 @@ func = str2func(sprintf('@(%s)  %s',numgenarg(selected),funcstr{1}'));
 
 appendReg(parent,func(regs.value),[],'label',funcstr{1});
 
+
+
+% --------------------------------------------------------------------
+function copyRegGroup_Callback(hObject, eventdata, handles)
+% hObject    handle to copyRegGroup (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    structure with handles and user data (see GUIDATA)
+
+
+parent = getappdata(handles.figure1,'parent');
+
+regData = getappdata(parent,'regData');
+CurrentDataSet = getappdata(parent,'CurrentDataSet');
+CurrentRegressorGroup = getappdata(parent,'CurrentRegressorGroup');
+selected = get(handles.regressorGroupList,'value')-1;
+selected(selected==0) =[];
+
+rcopy = regData(CurrentDataSet).regressors(selected);
+cdi = max([regData(CurrentDataSet).regressors.code]);
+
+for i = 1:length(rcopy)
+    rcopy.label = sprintf('Copy of %s',rcopy.label);
+    rcopy.code = cdi+i;
+    rcopy.codevec(:) = cdi+i;
+end
+
+regData(CurrentDataSet).regressors = cat(2, regData(CurrentDataSet).regressors,rcopy);
+
+setappdata(parent,'CurrentRegressorGroup',selected(1)-1);
+setappdata(parent,'regData',regData);
+
+UpdateFields(hObject, eventdata, handles)
+
+% --------------------------------------------------------------------
+function relabelRegGroup_Callback(hObject, eventdata, handles)
+% hObject    handle to relabelRegGroup (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    structure with handles and user data (see GUIDATA)
+
+
+
+parent = getappdata(handles.figure1,'parent');
+
+regData = getappdata(parent,'regData');
+CurrentDataSet = getappdata(parent,'CurrentDataSet');
+CurrentRegressorGroup = getappdata(parent,'CurrentRegressorGroup');
+
+inp = inputdlg('New label: ','Enter Label',1,...
+       {regData(CurrentDataSet).regressors(CurrentRegressorGroup).label});
+
+if ~isempty(inp)
+    regData(CurrentDataSet).regressors(CurrentRegressorGroup).label = inp{1};
+end
+
+
+setappdata(parent,'regData',regData);
+UpdateFields(hObject, eventdata, handles)
+
+
+ 
