@@ -445,7 +445,7 @@ bincodes = [binData.groups.code];
 
 bindex = find(ismember(bincodes,trbincode));
 
-Zdata = num2cell(Zdata,cat(1,binData.groups(bindex).nbin));
+Zdata = mat2cell(Zdata,cat(1,binData.groups(bindex).nbin),1);
 
 bmfuns = getappdata(parent,'binManagerFunctions');
 
