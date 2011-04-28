@@ -52,7 +52,10 @@ end
 
 if ishandle(codeincr) && isstruct(getappdata(codeincr,'expEventData')) 
     h = codeincr;
-    binData = makeBinData(getappdata(h,'binData'));
+    binData = getappdata(h,'binData');
+    if isempty(binData)
+        binData = makeBinData([]);
+    end
     codeincr = binData.codeincr;
 else
     binData = makeBinData([],'codeincr',codeincr);
@@ -76,7 +79,7 @@ for i = 1:length(fnames)
                 xydata = regexp(line,'(\d+)\s+(\d+)\s+(\d+)\s+(\d+)\s+(\d+)\s*(\w*)','tokens','once');
                 lbl = xydata{end};
                 xydata = cellfun(@str2num,xydata,'uniformoutput',false);
-                data = [xydata{:}]./screendim([1 1 2 2]);
+                data = [xydata{[2 4 3 5]}]./screendim([1 1 2 2]);
                 bintype = 'rect';
                 
 %                 iasdata = regexp(line,'(?<id>\d+)\s+(?<left>\d+)\s+(?<top>\d+)\s+(?<right>\d+)\s+(?<bottom>\d+)\s+(?<label>\w*','tokens');
@@ -86,8 +89,8 @@ for i = 1:length(fnames)
                 xydata = regexp(line,'(\d+)\s+(\d+)\s+(\d+)\s+(\d+)\s+(\d+)\s*(\w*)','tokens','once');
                 lbl = xydata{end};
                 xydata = cellfun(@str2num,xydata,'uniformoutput',false);
-                xydata = [xydata{:}];
-                eldat = xydata([ 2 3 4 5])./screendim([1 2 1 2]);
+                xydata = [xydata{2:end}];
+                eldat = xydata([ 1 2 3 4])./screendim([1 2 1 2]);
                 data = [mean(eldat([1 3;2 4]')), diff(eldat([1 3;2 4]'))/2];
                 bintype = 'ellipse';
             case 'FREEHAND'
