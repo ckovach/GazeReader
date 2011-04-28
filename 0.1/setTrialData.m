@@ -37,7 +37,8 @@ GazeReader('Trial_Manager_Callback',h,[],handles);
 tmfun = getappdata(h,'trialManagerFunctions');
 
 if ~isempty(tmfun)
-    tmfun.update();
+      tmfun.updateAllDataSets();
+ %   tmfun.update();
 end
 
 

@@ -435,6 +435,9 @@ if length(tr) > 1
     error('A fixation appears to be associated with multiple trials.')
 end
 
+if length(currentRegressor)>3
+    return
+end
 Zdata = R(:,currentRegressor);
 
 if isempty(tr)
@@ -444,6 +447,9 @@ trbincode = trialData(CurrentDataSet).trials(tr).binGroup;
 bincodes = [binData.groups.code];
 
 bindex = find(ismember(bincodes,trbincode));
+% if length(bindex)>1
+%     return
+% end
 
 Zdata = mat2cell(Zdata,cat(1,binData.groups(bindex).nbin),1);
 

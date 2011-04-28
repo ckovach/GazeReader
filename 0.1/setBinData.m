@@ -33,3 +33,15 @@ handles = guidata(h);
 
 GazeReader('binManagerMenu_Callback',h,[],handles);
 
+
+
+emfun = getappdata(h,'EventManagerFunctions');
+tmfun = getappdata(h,'trialManagerFunctions');
+
+if ~isempty(emfun)
+    emfun.updateAllTrials();
+end
+
+if ~isempty(tmfun)
+    tmfun.updateAllDataSets();
+end
