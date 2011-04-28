@@ -753,7 +753,10 @@ trialData = getappdata(parent,'trialData');
 currentDataSet = getappdata(parent,'CurrentDataSet');
 binData = getappdata(parent,'binData');
 
-if isempty([trialData(currentDataSet).trials.number]) || isempty(binData)
+if currentDataSet == 0
+    fprintf('\nNo data set selected...')
+    
+elseif isempty([trialData(currentDataSet).trials.number]) || isempty(binData)
     return
 end
 
