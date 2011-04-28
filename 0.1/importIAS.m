@@ -96,14 +96,14 @@ for i = 1:length(fnames)
                 coord = cellfun(@str2num,[coord{:}],'uniformoutput',false);
                 data = cat(1,coord{:})*diag(screendim.^-1);
                 lbl = regexp(line,'(\w+)\s*$','tokens','stringanchors');
-                lbl = lbl{1};
+                lbl = lbl{1}{1};
                 bintype = 'poly';
             otherwise
                 continue
         end
         
         [pth,fn] = fileparts(fnames{i});
-        label =  sprintf('%s: %s',fn,lbl{1});
+        label =  sprintf('%s: %s',fn,lbl);
         binData = makeBinData(binData,data,'type',bintype,'label',label,'codeincr',codeincr);
         
                 
