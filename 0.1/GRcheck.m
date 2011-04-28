@@ -3,6 +3,9 @@ function gr_present = GRcheck
 % This function checks if GazeReader (GR) is present in the current path. If
 % not, it offers to attempt a fresh installation through svn. It returns
 % a value of 1 if GR is present or successfully installed and 0 otherwise.
+%
+% Subversion can be downloaded at http://subversion.apache.org/packages.html
+%
 
 % ----------- SVN REVISION INFO ------------------
 % $URL$
@@ -41,6 +44,7 @@ if ~exist('GazeReader.m','file')
             end
             fprintf(['\n Installation failed with error \n\n\t%s.\n\nIf this happened because you don''t have a working',...
                      ' copy of SVN, you can %s\n\n'],res,url)
+
         end
         
     else

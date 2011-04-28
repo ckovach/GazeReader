@@ -365,6 +365,8 @@ end
 
 function    SetFields(hObject, eventdata, handles, varargin)
 
+%%% Sets the listbox and text window displays for the current bin group 
+
 if ishandle(handles.figure1)
     parent = getappdata(handles.figure1,'parent');
 else
@@ -720,7 +722,7 @@ end
 phandles = guidata(parent);
 hold(phandles.axes2,'on')
 
-   
+plotincr = 0;   
 for i = 1:length(currentBinGroups) 
     bingr = binData.groups(currentBinGroups(i));
 
@@ -737,6 +739,8 @@ for i = 1:length(currentBinGroups)
     if isequal(getBins , 0 )
         if ismember(bingr.type,{'tri','simplex'})
             getBin = 1:size(pos.tri,1);
+        elseif ismember(bingr.type,{'poly'})
+            getBin = 1;
         else
             getBin = 1:size(pos,1);
         end
@@ -749,8 +753,8 @@ for i = 1:length(currentBinGroups)
         continue
     end
     if isempty(varargin) 
-        C = (1:length(getBin))./length(getBin);
-        crange = [min(C), max(C)];
+        C = ((1:length(getBin)) + plotincr)./length(getBin);
+        crange(i,:) = [min(C), max(C)];
     else
         C = varargin{1}{i}(:)';
         ccat = cat(1,varargin{1}{:});
@@ -764,11 +768,14 @@ for i = 1:length(currentBinGroups)
     if diff(crange) < 1e-10
         crange = [0 1];
     end
-    caxis(phandles.axes2, crange)
 %     ph = cat(2,phold,patch(vx*screenres(1),vy*screenres(2),C,'FaceAlpha',defaultAlpha,'parent',phandles.axes2));
 %     axis(phandles.axes2,[0 screenres(1) 0 screenres(2)])
     setappdata(parent,'patchHandles',ph);
+    
+    plotincr = plotincr+length(getBin);
 end
+
+caxis(phandles.axes2, [min(crange(:,1)) max(crange(:,2))])
 
 shading(phandles.axes2,defaultShading)
 

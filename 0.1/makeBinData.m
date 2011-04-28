@@ -26,7 +26,7 @@ function [binData, binfunctions] = makeBinData(varargin)
 % 
 %         bintype = 'rect' creates a set of rectangular bins
 % 
-%             data is a Nx4 matrix of rectangles.
+%             data is a Nx4 matrix of rectangles in the form [xmin xmax  ymin ymax]
 %       
 % 
 %         bintype = 'ellipse' creates a set of elliptical bins
@@ -37,7 +37,7 @@ function [binData, binfunctions] = makeBinData(varargin)
 %                 Nx4 matrix of centers and distance for the x and y
 %                axes, then data is a Nx4 matrix of centers and distance for the x and y
 %                axes. If data is Nx5, then the 5th dimension gives the angle of rotation 
-%                of one semi-axis counterclockwise with respect to the x axis.
+%                of the semi-axes counterclockwise with respect to the x- and y-axes.
 % 
 %         bintype = 'poly' creates a single polygonal bin
 % 
@@ -84,6 +84,13 @@ function [binData, binfunctions] = makeBinData(varargin)
 % ------------------------------------------------
 
 
+
+
+codeincr = 0;
+concat =false;
+i = 2;
+append = false;
+data = [];
 if nargin > 0 && (~isstruct(varargin{1}) || isfield(varargin{1},'vert'))
     data = varargin{1};
     i = 2;   
@@ -95,6 +102,7 @@ elseif nargin > 1 &&~isstruct(varargin{2})
     i = 3;
     append = 1;
     concat= 0;
+    codeincr = binData.codeincr;
 elseif nargin > 1
     binData = varargin{1};
     binData2 = varargin{2};
@@ -102,6 +110,7 @@ elseif nargin > 1
     i = 4;
     append = 1;
     concat= 1;
+    codeincr = binData.codeincr;
 end
 
 if concat
@@ -124,6 +133,7 @@ ntrials = 0;
 label = '';
 % precedence = 'nearest_to_center';
 precedence = 'group_order';
+
 while i <= length(varargin)
    switch lower(varargin{i})
        case 'type'
@@ -134,6 +144,9 @@ while i <= length(varargin)
           i = i+1;
        case 'code'
           code = varargin{i+1};
+          i = i+1;
+       case 'codeincr'
+          codeincr = varargin{i+1};
           i = i+1;
        case 'gaps'  %codes of bingroups that are treated as gaps
           gaps = varargin{i+1};
@@ -160,7 +173,7 @@ end
 if ~append
         % binData = struct('groups',[],'activeTrials',[],'precedence','nearest_to_center');
     binData = struct('groups',BinGroupsTemplate,'precedence',precedence);
-    binData.codeincr = 0;
+    binData.codeincr = codeincr;
     grpind = 1;
 else
     grpind = length(binData.groups)+1;
@@ -174,12 +187,14 @@ binData.groups(grpind).label = label;
 binData.groups(grpind).type= type;
 binData.groups(grpind).nbin = 0;
 if isempty(data)
-    if isempty(varargin(2:end));
-        binData.groups = binData.groups([]);
-    else
-        binData.groups(grpind).code = binData.codeincr+1;
-        binData.codeincr = max([binData.groups(grpind).code]);
-    end
+        binData.groups = binData.groups(1:grpind-1);
+        binData.codeincr = codeincr;
+%     if isempty(varargin(2:end));
+%         binData.groups = binData.groups([]);
+%     else
+%         binData.groups(grpind).code = binData.codeincr+1;
+%         binData.codeincr = max([binData.groups(grpind).code]);
+%     end
     return
 end
 

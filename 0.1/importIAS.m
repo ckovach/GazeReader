@@ -11,7 +11,17 @@ function binData  = importIAS(fnames,codeincr,varargin)
 %
 %  binData  = importIAS(filename(s),gr_handle)
 %
-%  Appends bin data to existing instance of gazeReader;
+%        Appends bin data to existing instance of gazeReader.
+%
+%
+
+% ----------- SVN REVISION INFO ------------------
+% $URL$
+% $Revision$
+% $Date$
+% $Author$
+% ------------------------------------------------
+
 
 screendim = [1 1];
 i = 1;
