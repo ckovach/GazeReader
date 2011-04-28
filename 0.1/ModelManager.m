@@ -30,7 +30,7 @@ function varargout = ModelManager(varargin)
 
 % Edit the above text to modify the response to help ModelManager
 
-% Last Modified by GUIDE v2.5 01-Feb-2008 15:58:47
+% Last Modified by GUIDE v2.5 28-Apr-2011 13:30:57
 
 % Begin initialization code - DO NOT EDIT
 gui_Singleton = 1;
@@ -585,5 +585,3 @@ modelData(currentDataSet).codeincr = modelData(currentDataSet).codeincr + 1;
 setappdata(parent,'modelData',modelData);
 
 Update(hObject, eventdata, handles)
-
-
