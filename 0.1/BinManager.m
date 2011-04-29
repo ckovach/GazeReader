@@ -405,7 +405,7 @@ end
 
 if currentBinGroup ~=0 && ishandle(handles.figure1)
     
-    %update the bin manager windo if it exists
+    %update the bin manager window if it exists
     
 	label = binData.groups(currentBinGroup).label;
     
@@ -481,6 +481,7 @@ if currentBinGroup ~=0 && ishandle(handles.figure1)
 elseif ishandle(handles.figure1)
     set(handles.label,'string','none selected')
     set(handles.Position,'string','[ ]')
+    set(handles.binList,'string','')
 %     set(handles.Position,'string','[ ]')
 end
 
@@ -711,6 +712,7 @@ binData = getappdata(parent,'binData');
 
 if (length(binData.groups) == 1 &&   ~isequal(currentBinGroups,0) && binData.groups(currentBinGroups).nbin==0 )||...
         ( ~isequal(currentBinGroups,0) && all(cellfun(@isempty, {binData.groups.pos})))
+    fprintf('\nSelected bin groups are empty...')
     return
 end
 % screenData = getappdata(parent,'screenData');
@@ -719,6 +721,13 @@ end
 if isequal(currentBinGroups,0)
     currentBinGroups = 1:length(binData.groups);
 end
+
+
+if isempty(currentBinGroups)
+    fprintf('\nNo active bin groups to plot...')
+    return
+end
+
 phandles = guidata(parent);
 hold(phandles.axes2,'on')
 

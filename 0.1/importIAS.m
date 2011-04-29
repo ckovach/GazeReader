@@ -25,6 +25,7 @@ function binData  = importIAS(fnames,codeincr,varargin)
 
 screendim = [1 1];
 i = 1;
+path = '';
 while i <= length(varargin)
    switch lower(varargin{i})
        case 'type'
@@ -32,6 +33,9 @@ while i <= length(varargin)
           i = i+1;
        case 'screendim'
           screendim = varargin{i+1};
+          i = i+1;
+       case 'path'
+          path = varargin{i+1};
           i = i+1;
        otherwise
            error([varargin{i},' is not a valid option.']);
@@ -65,7 +69,7 @@ end
     
 for i = 1:length(fnames)
     
-    fid = fopen(fnames{i},'r');
+    fid = fopen(fullfile(path,fnames{i}),'r');
     
     while ~feof(fid)
         

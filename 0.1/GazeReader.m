@@ -29,7 +29,7 @@ function varargout = GazeReader(varargin)
 
 % Edit the above text to modify the response to help GazeReader
 
-% Last Modified by GUIDE v2.5 17-Aug-2010 02:48:01
+% Last Modified by GUIDE v2.5 29-Apr-2011 10:12:14
 
 % Begin initialization code - DO NOT EDIT
 gui_Singleton = 1;
@@ -1889,3 +1889,43 @@ return
 
 
 % --------------------------------------------------------------------
+
+
+% --------------------------------------------------------------------
+function Untitled_13_Callback(hObject, eventdata, handles)
+% hObject    handle to Untitled_13 (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    structure with handles and user data (see GUIDATA)
+
+
+% --------------------------------------------------------------------
+function import_edf_Callback(hObject, eventdata, handles)
+% hObject    handle to import_edf (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    structure with handles and user data (see GUIDATA)
+
+importEyetrackerData_menu_Callback(hObject, eventData, handles)
+
+% --------------------------------------------------------------------
+function import_ias_Callback(hObject, eventdata, handles)
+% hObject    handle to import_ias (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    structure with handles and user data (see GUIDATA)
+
+parent = handles.figure1;
+
+supported_file_types = {'ias'};
+
+dataFileDir = getappdata(handles.figure1,'dataFileDir');
+
+if nargin < 4 || isempty(filenames)
+    [filenames,fpath] = uigetfile({sprintf('*.%s;',supported_file_types{:})},'Select a Data File', dataFileDir ,'multiselect','on');
+elseif nargin < 5
+    fpath = cd;
+end
+
+scrdat = getappdata(parent,'screenData');
+
+importIAS(filenames,parent,'path',fpath,'screendim',scrdat(1).res);
+
+
