@@ -755,6 +755,7 @@ binData = getappdata(parent,'binData');
 
 if currentDataSet == 0
     fprintf('\nNo data set selected...')
+    return
     
 elseif isempty([trialData(currentDataSet).trials.number]) || isempty(binData)
     return

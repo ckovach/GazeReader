@@ -16,6 +16,7 @@ end
 
 regressors = [];
 Hreg = 0;
+Lreg = 0;
 while i <= length(varargin)
     
     switch lower(varargin{i})
@@ -36,7 +37,10 @@ while i <= length(varargin)
         case 'regressors' %codeincrement
            regressors = varargin{i+1};
             i = i+1; 
-        case 'regularization' %codeincrement
+        case {'regularization','gaussreg'} %codeincrement
+           Hreg = varargin{i+1};
+            i = i+1; 
+        case {'laplreg'}
            Hreg = varargin{i+1};
             i = i+1; 
         otherwise
@@ -48,7 +52,7 @@ end
 
 % mdstruct = struct('label',label,'submodels',[],'parameterFit',[],'I',[],'badcond',[],...
 %                                 'LL',[],'AIC',[],'BIC',[],'llrpval',[],'regressors',[],'contrasts',[],'code',codeincr+1);
-mdstruct = struct('label',label,'fit',[],'regressors',regressors,'contrasts',[],'code',codeincr+1,'regLabels',[],'Hreg',Hreg);
+mdstruct = struct('label',label,'fit',[],'regressors',regressors,'contrasts',[],'code',codeincr+1,'regLabels',[],'Hreg',Hreg,'Lreg',Lreg);
 
 if nargin == 0 || ~isstruct(varargin{1})   
     modelDat = struct('models',[],'Y',[],'codeincr',0);

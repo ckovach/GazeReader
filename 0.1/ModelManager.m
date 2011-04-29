@@ -78,7 +78,7 @@ setappdata(parent,'currentRegressorGroup',0);
 
 modelManagerFunctions.update = @()Update([],[],handles);
 
-modelManagerFunctions.fit_response = @(Y,varargin) FitButton_Callback(hObject, eventdata, handles,Y,varargin{:});
+modelManagerFunctions.fit_response = @(varargin) FitButton_Callback(hObject, eventdata, handles,varargin{:});
 
 setappdata(parent,'modelManagerFunctions',modelManagerFunctions);
 
@@ -376,6 +376,10 @@ end
 
 use_parallel = true; %Uses parallel computing toolbox if available (not yet implemented)
 
+if isempty(selected)
+    selected = currentModel; 
+end
+
 for i = 1:length(selected)
     currmodel = selected(i);
     regs = ismember([regData(currentDataSet).regressors.code],modelData(currentDataSet).models(currmodel).regressors);
@@ -387,7 +391,8 @@ for i = 1:length(selected)
     fit = modelFit(trialData,R, 'fullonly',~get(handles.subModelCheck,'value'),...
                     'Firth',get(handles.firthCheck,'value'),...
                     'multassign',get(handles.multiBinCheck,'value'),...
-                    'regularization',modelData(currentDataSet).models(currmodel).Hreg,...
+                    'gaussreg',modelData(currentDataSet).models(currmodel).Hreg,...
+                    'laplreg',modelData(currentDataSet).models(currmodel).Lreg,...
                     'binvolume',binvolume,varargin{:});
 %     if ishandle(dlg)
 %         delete(dlg)            
