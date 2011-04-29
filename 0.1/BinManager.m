@@ -482,6 +482,7 @@ elseif ishandle(handles.figure1)
     set(handles.label,'string','none selected')
     set(handles.Position,'string','[ ]')
     set(handles.binList,'string','')
+    set(handles.binList,'value',0)
 %     set(handles.Position,'string','[ ]')
 end
 
