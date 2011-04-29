@@ -40,7 +40,7 @@ if ~exist('GazeReader.m','file')
         end
                 
         installdir = uigetdir(installdir,'Choose where to install GazeReader.');
-        while exist(fullfile(installdir,'.svn'),'dir') > 0  && exist(fullfile(installdir,'GazeReader.m'),'file')
+        while exist(fullfile(installdir,'.svn'),'dir') > 0  && ~exist(fullfile(installdir,'GazeReader.m'),'file')
             warndlg('Selected directory must not be a working copy of a subversion repository. Please choose another.')
             installdir = uigetdir(installdir,'Selected directory must not be a subversion repository.');        
             if installdir == 0
