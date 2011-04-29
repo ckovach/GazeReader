@@ -731,7 +731,7 @@ BinGroups.centers = mean(data);
 BinGroups.binnums = 1;
 BinGroups.nbin = 1;
 
-BinGroups.isinside = @(BinGroups,FixLoc,tol)insidePolyBin(BinGroups,FixLoc,tol);
+BinGroups.isinside = @(BinGroups,FixLoc,varargin)insidePolyBin(BinGroups,FixLoc,varargin{:});
 % BinGroups.isinside = @(BinGroups,varargin) isinside(BinGroups,varargin{:});
 BinGroups.plot = @(BinGroups,varargin) plotPolyBin(BinGroups,varargin{:});
 BinGroups.patch= @(BinGroups,varargin) DrawPolyPatch(BinGroups,varargin{:});

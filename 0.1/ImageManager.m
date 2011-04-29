@@ -741,12 +741,11 @@ elseif get(handles.pixelScaleCheckBox,'value')
     imrangenorm = imrange./screenres([1 1 2 2]);
 
 else
-    imrangenorm = imageData.images(currentImage).position;
-%     imrangenorm = GetImagePosition(hObject,eventdata,handles);
-    set(handles.xpos1,'Enable','on')
-    set(handles.xpos2,'Enable','on')
-    set(handles.ypos1,'Enable','on')
-    set(handles.ypos2,'Enable','on')   
+    scrdim = getappdata(parent,'screenData');
+%     xrange = str2num([get(handles.xpos1,'string'),' ',get(handles.xpos2,'string')]);
+%     yrange = str2num([get(handles.ypos1,'string'),' ',get(handles.ypos2,'string')]);
+%     imrangenorm = imageData.images(currentImage).position;
+     imrangenorm = GetImagePosition(hObject,eventdata,handles);
 end
 
 imageData.images(currentImage).position = imrangenorm ;
