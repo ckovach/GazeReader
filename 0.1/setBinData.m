@@ -33,9 +33,6 @@ if nargout > 0
     varargout{1} = getappdata(h,'binData');
 end
 
-if nargout > 1
-    varargout{2} = getappdata(h,'binManagerFunctions');
-end
 
 
 handles = guidata(h);
@@ -54,3 +51,8 @@ end
 if ~isempty(tmfun)
     tmfun.updateAllDataSets();
 end
+
+if nargout > 1
+    varargout{2} = getappdata(h,'binManagerFunctions');
+end
+
