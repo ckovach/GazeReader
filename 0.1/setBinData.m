@@ -1,4 +1,4 @@
-function setBinData(h,bindata)
+function varargout = setBinData(h,bindata)
 
 
 %  setBinData(h,bindata)
@@ -28,6 +28,15 @@ end
 if nargin > 1
     setappdata(h,'binData',bindata);
 end
+    
+if nargout > 0
+    varargout{1} = getappdata(h,'binData');
+end
+
+if nargout > 1
+    varargout{2} = getappdata(h,'binManagerFunctions');
+end
+
 
 handles = guidata(h);
 
