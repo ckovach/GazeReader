@@ -302,7 +302,7 @@ label = get(handles.label,'string');
 %     return
 % end
 
-if currentBinGroup ~=0 && ~isempty(binnum(1)) && binnum(1)  <= binData.groups(currentBinGroup).nbin
+if currentBinGroup ~=0 && ~isempty(binnum) && binnum(1)  <= binData.groups(currentBinGroup).nbin
     setappdata(parent,'CurrentBin',binnum(1))
     UpdateBins(hObject, eventdata, handles,[],false)
 elseif strcmp(get(handles.figure1,'selectiontype'),'open') && currentBinGroup ~=0 && binnum(1)  ==  binData.groups(currentBinGroup).nbin+1 
