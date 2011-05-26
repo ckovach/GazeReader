@@ -4,29 +4,20 @@
 %to read data from C structures defined in edf_data.h and load them into similarly organized
 % mxArray structures.
 %
+% To use this, make sure that the edf header files edf.h, edftypes.h, edf_data.h are in the same
+% directory, then type 'makeHeader' at the matlab command line. Make sure these are for the same
+% version of edfapi.dll you intend to use. The output is a C header file, edf2mex.h.
 
-% ----------- SVN REVISION INFO ------------------
-% $URL$
-% $Revision$
-% $Date$
-% $Author$
-% ------------------------------------------------
+%Kovach 2009
 
+ 
 
 %RecTypes contains information about which structure type definitions to
 %search for in the edf_data.h header. 
 
-arch = computer;
-
-if isunix
-    libname = 'libedfapi';
-else
-    libname = 'edfapi';
-end
-
-loadlibrary(libname,'edf.h')
-edfapi_version = calllib(libname,'edf_get_version');
- unloadlibrary(libname)
+loadlibrary('edfapi','edf.h')
+edfapi_version = calllib('edfapi','edf_get_version');
+ unloadlibrary('edfapi')
 %FSAMPLE type
 RecTypes.FSAMPLE.codes = {'SAMPLE_TYPE'} ;                  %Constants which code for an event type that uses this structure
 RecTypes.FSAMPLE.allf_code= 'fs';                       %field of ALLF_DATA union corresponding to this structure
