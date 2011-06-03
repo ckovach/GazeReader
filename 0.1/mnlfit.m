@@ -233,10 +233,6 @@ elseif isvector(Lreg)
     Lreg = diag(Lreg);
 end
 
-% if any(fixed~=0)      %Check Regressor structure to see if any values are to remain fixed.
-%     fix = fixed~=0;
-%     InitTheta(fix) = fixed(fix);
-% end
 
 if isempty(X)
     runiter = false;
@@ -246,7 +242,6 @@ end
 if LevMar
     damp = .1;
     Slev = damp*eye(length(InitTheta));
-
 else 
     damp = 0; %#ok<UNRCH>
 end
@@ -311,7 +306,12 @@ nlgm = size(LC,2);
 
 blockn = blocknorm(ones(1,size(X,2)),b);
 
-RegMat = @(theta,a) ( a*Hreg + Lreg./sqrt(sum(theta.^2)+eps) )*theta;  %Compute a matrix to adjust 1st and 2nd derivatives by the prior distirbution.
+%%% weighted length of a vector
+wleng = @(x, M ) sqrt(sum(x'*M*x)+eps);
+
+%%% A matrix which will be used to compute 0th and 1st  derivatives of
+%%% the prior
+RegMat = @(theta,a) ( a*Hreg + Lreg./wleng(theta,Lreg) )*theta; 
 
 %%% Functions to compute log likelihood and outcome probability
 lrrfun = @(theta) theta' * X + binvolume; %compute the log weight
@@ -319,21 +319,26 @@ nlrrfun = @(theta) lrrfun(theta) - blocknorm(lrrfun(theta),b)./blockn; %subtract
 Pfun =  @(theta) exp( nlrrfun(theta) )./  (blocknorm(exp( nlrrfun(theta) ) ,b)); %Proabability of each outcome
 LLfun = @(theta) sum(log(Pfun(theta)*Yblocksum)*OF) - theta'*RegMat(theta,1); %Log Likelihood
 
+%%% Function to compute the second derivatie of the prior distribution
+
+if Lreg == 0
+    D2Regfun =@(theta) Hreg; %%% Gaussian prior only
+else
+    D2Regfun =@(theta)  Lreg/wleng(theta,Lreg) - theta'*Lreg'*Lreg*theta/wleng(theta,Lreg)^3   + Hreg; %%% Gaussian and laplace prior 
+end
+
+
 while dstep + sqrt( damp*sum(del.^2)./sum(Theta.^2)) > tol  && runiter   ; %Added damping dependent term to avoid premature halting when damping is high
 % while dstep > tol  && runiter   
 
-%     lrr = Theta' * X + binvolume;
-%     lrr = lrr - blocknorm(lrr,b)./blockn; %subtract mean to improve numerical stability
-%     P =  exp( lrr )./  (blocknorm(exp( lrr ) ,b)); %Proabability of each outcome
 
     P =  Pfun(Theta); %Proabability of each outcome
     
-%     P =  exp( Theta' * X + binvolume)./  (blocknorm(exp( Theta' * X + binvolume ) ,b)+eps); %Proabability of each outcome
 
     Pnorm = blocknorm(P.*Y',b);
     P2 = P.*Y'./Pnorm;
     
-    % Derivative of the log likelihood
+    %%% Derivative of the log likelihood
     
     DL = X*OFlarge*(P2 - P)' - RegMat(Theta,2);
     
@@ -361,22 +366,21 @@ while dstep + sqrt( damp*sum(del.^2)./sum(Theta.^2)) > tol  && runiter   ; %Adde
 
         end
 
-        % Computing the second derivative
+        %%% Computing the second derivative
 
         if diagsonly 
             
             W = sparseblockmex(P.*(1-P),0:length(P), 0:length(P),length(P))*OFlarge; %Equivalent to but faster than diag(P) or diag(sparse(P))
             S1 = - X*W*X';
-            D2L = S2 + S1 - Hreg;        
+%             D2L = S2 + S1 - Hreg;        
+            D2L = S2 + S1 - D2Regfun(Theta);        
         else 
            dgP = sparseblockmex(P,0:length(P), 0:length(P),length(P)); %Equivalent to but faster than diag(P) or diag(sparse(P))      
            spP = sparseblock(P,b);
            
-%            q = spX*spP'; %faster but uses more memory
-%            S1 = full( - X*dgP*X'  + spblocktrace( q*q', Npar ));
-%            clear q;
            S1 = full( - X*dgP*OFlarge*X'  + spblocktrace( (spX*spP')*OF*(spP*spX'), Npar));
-           D2L = S2 + S1 - Hreg;        
+%             D2L = S2 + S1 - Hreg;        
+            D2L = S2 + S1 - D2Regfun(Theta);        
 
         end
 %         D2Linv = (D2L-Hreg)^-1;
@@ -388,56 +392,33 @@ while dstep + sqrt( damp*sum(del.^2)./sum(Theta.^2)) > tol  && runiter   ; %Adde
         %double checked!! This still needs to be modified to accomodate
         %constraints!
 
-%         Iinv = -(D2L - Hreg)^-1; 
         Iinv1 = -(S1 - Hreg)^-1; 
         
         
         DI1 = Cxx*(repmat((1-2*P).*P.*(1-P),Npar,1).*X)';
         
-%         if ~isempty(P2)
-%             Iinv2 = -(S2)^-1; 
-%             DI2 = Cxx2*(repmat((1-2*P2).*P2.*(1-P2),Npar,1).*X2)';
-%         else
-%             Iinv2 = 0;
-%             DI2 = 0;
-%         end
         
         % For now, ignoring the second term in I related to multiple assignment
         DL = DL + .5*DI1'*Iinv1(:) ;% + .5*DI2'*Iinv2(:); %Modified score function by Jeffreys prior (see Firth 1993)
         
-%         dgP = sparseblockmex(P,0:length(P), 0:length(P),length(P)); %Equivalent to but faster than diag(P) or diag(sparse(P))      
-%         spP = sparseblock(P,b);
-%         S1 = full( - X*dgP*X'  + spblocktrace( (spX*spP')*(spP*spX'), Npar ));
-%         D2L =  S1; % + S2;        
-
-%         LL = sum(log(P*Yblocksum)*OF) + .5*log(det(-D2L));         
         LL = LLfun(Theta) + .5*log(det(-D2L));     
     else
         
-        %Redundant. 
-%         lrr = Theta' * X + binvolume;
-%         lrr = lrr - blocknorm(lrr,b)./blockn; %subtract mean to improve numerical stability
-%         P =  exp( lrr )./  (blocknorm(exp( lrr ) ,b)); %Proabability of each outcome
-
-%         LL = sum(log(P*Yblocksum)*OF);
         LL = LLfun(Theta);
     end
     
     % Newton's method
     if ~LevMar  
         if ~constraint
-%             del = -D2L^-1 * (DL - RegMat(Theta,2) ); %Hreg and Lreg are Gaussian and Laplacian priors, respectively.
             del = -D2L^-1 * DL; %Hreg and Lreg are Gaussian and Laplacian priors, respectively.
         else
             %Updating with lagrange multiplier
             Q = cat(2,D2L,LC(1:end-1,:));
             Q = cat(1,Q,[LC(1:end-1)',zeros(nlgm)]);
             
-%             del = -Q^-1 * ( cat(1,DL,Dlgm) - cat(RegMat(Theta,2),zeros(nlgm,1)));
             del = -Q^-1 *  cat(1,DL,Dlgm) ;
             dellgm = del((1:nlgm)+Npar);
             del = del(1:Npar);
-%             del(fix) = 0;
             
             lgm = lgm + dellgm;
         end            
@@ -446,8 +427,6 @@ while dstep + sqrt( damp*sum(del.^2)./sum(Theta.^2)) > tol  && runiter   ; %Adde
     else    %if ~surrogate
         
         if ~constraint
-%             del1 = -(D2L - Slev)^-1  * (DL - RegMat(Theta,2));
-%             del2 = -(D2L - Slev./lmnu)^-1 * (DL - RegMat(Theta,2));
             del1 = -(D2L - Slev)^-1  * DL ;
             del2 = -(D2L - Slev./lmnu)^-1 * DL;
             
@@ -459,24 +438,13 @@ while dstep + sqrt( damp*sum(del.^2)./sum(Theta.^2)) > tol  && runiter   ; %Adde
             Qfun = @(nm) cat(1, cat( 2 , D2L - Slev/nm ,LC(1:end-1,:) ),...
                        [ LC(1:end-1,:)' , zeros(nlgm) ]  );
                    
-%             Q1 = cat(2,D2L - Slev,LC(1:end-1,:));
-%             Q1 = cat(1,Q1,[LC(1:end-1,:)',zeros(nlgm)]);
-%             Q2 = cat(2,D2L - Slev./lmnu,LC(1:end-1,:));
-%             Q2 = cat(1,Q2,[LC(1:end-1,:)',zeros(nlgm)]);
-
-%             Q1 = Qfun(1);
-%             Q2 = Qfun(lmnu);
-            
-%             delfun = @(mn) -Qfun(mn)^-1 * ( cat(1,DL,Dlgm(:)) - cat(1,RegMat(Theta,2),zeros(nlgm,1)));
             delfun = @(mn) -Qfun(mn)^-1 *  cat(1,DL,Dlgm(:));
             
-%             del1 = -Q1^-1 * ( cat(1,DL,Dlgm(:)) - cat(1,RegMat(Theta,2),zeros(nlgm,1)));
             del1 = delfun(1);
             dellgm1 = del1((1:nlgm)+Npar);
             del1 = del1(1:Npar);
 
             
-%             del2 = -Q2^-1 * ( cat(1,DL,Dlgm(:)) - cat(1,RegMat(Theta,2),zeros(nlgm,1)));
             del2 = delfun(lmnu);          
             dellgm2 = del2((1:nlgm)+Npar);
             del2 = del2(1:Npar);
@@ -487,22 +455,10 @@ while dstep + sqrt( damp*sum(del.^2)./sum(Theta.^2)) > tol  && runiter   ; %Adde
         end            
 
         if ~firth
-%             lrr = Theta1' * X + binvolume;
-%             lrr = lrr - blocknorm(lrr,b)./blockn; %subtract mean to improve numerical stability
-            
-        
-%             P =  exp( lrr )./  (blocknorm(exp( lrr ) ,b)); %Proabability of each outcome
-%             LL1 = sum(log(P*Yblocksum)*OF) - Theta1'*RegMat(Theta1,1);
 
             LL1 = LLfun(Theta1);
             LL2 = LLfun(Theta2);
 
-%            lrr = Theta2' * X + binvolume;
-%             lrr = lrr - blocknorm(lrr,b)./blockn; %subtract mean to improve numerical stability
-%             P =  exp( lrr )./  (blocknorm(exp( lrr ) ,b)); %Proabability of each outcome
-% %      P =  exp( Theta2' * X + binvolume )./  (blocknorm(exp( Theta2' * X + binvolume) ,b) + eps); 
-% %             LL2  = sum(log(P*Yblocksum)*OF);
-%             LL2  = sum(log(P*Yblocksum)*OF) - Theta2'*RegMat(Theta2);
 
         else
 
@@ -515,7 +471,7 @@ while dstep + sqrt( damp*sum(del.^2)./sum(Theta.^2)) > tol  && runiter   ; %Adde
             S1 = full( - X*dgP*OFlarge*X'  + spblocktrace( (spX*spP')*OF*(spP*spX'), Npar ));
             D2L =  S1; % + S2;        
 
-            LL1 = sum(log(P*Yblocksum)*OF) + .5*log(det(-D2L)) - Theta1'*RegMat(Theta1,2);                     
+            LL1 = sum(log(P*Yblocksum)*OF) + .5*log(det(-D2L)) - Theta1'*RegMat(Theta1,1);                     
 
             lrr = Theta2' * X + binvolume;
             lrr = lrr - blocknorm(lrr,b)./blockn; %subtract mean to improve numerical stability
@@ -527,7 +483,7 @@ while dstep + sqrt( damp*sum(del.^2)./sum(Theta.^2)) > tol  && runiter   ; %Adde
             D2L =  S1; % + S2;        
 
             
-            LL2 = sum(log(P*Yblocksum)*OF) + .5*log(det(-D2L)) - Theta2'*RegMat(Theta2,2);                     
+            LL2 = sum(log(P*Yblocksum)*OF) + .5*log(det(-D2L)) - Theta2'*RegMat(Theta2,1);                     
 
         end            
 
@@ -577,11 +533,6 @@ while dstep + sqrt( damp*sum(del.^2)./sum(Theta.^2)) > tol  && runiter   ; %Adde
     end        
         count = count+1;
 
-%          dsteps(count) = dstep;         
-%          llhist(count) = LL;        
-%          Thetas(:,count) = Theta;
-
-%          if length(llhist)> 1 && LL-llhist(end-1) <0, keyboard; end
          
              
          if count > maxcount % && std(llhist(end-50:end))./diff(llhist([1,end])) < 1e6 
@@ -589,7 +540,6 @@ while dstep + sqrt( damp*sum(del.^2)./sum(Theta.^2)) > tol  && runiter   ; %Adde
              warning('GazeReader:NoConvergence','Failed to converge after %i iterations. Estimate may be unbounded.',maxcount)
              pause(1)
              max_iterations_reached = 1;
-%              badcond = 1;
              break
          end
 end
@@ -615,7 +565,7 @@ spP2 = sparseblock(P2,b2);
 S2 = full( X2*dgP2*X2'  - spblocktrace( (spX2*spP2')*(spP2*spX2'), Npar  ));
 dgP = sparseblockmex(P,0:length(P), 0:length(P),length(P)); %Equivalent to but faster than diag(P) or diag(sparse(P))      
 spP = sparseblock(P,b);
-D2L = full( S2 - X*dgP*OFlarge*X'  + spblocktrace( (spX*spP')*OF*(spP*spX'), Npar ))- Hreg;
+D2L = full( S2 - X*dgP*OFlarge*X'  + spblocktrace( (spX*spP')*OF*(spP*spX'), Npar ))- D2Regfun(Theta);
 
 
 if firth
