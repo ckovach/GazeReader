@@ -132,11 +132,12 @@ end
 msgts = [FIX.seg.xdat.startT];
 
 inpt = diff(EDF.FSAMPLE.input);
-inptT = find(inpt);
+inpti = find(inpt);
+inptT = EDF.FSAMPLE.time(inpti);
 FIX.seg.inpt = struct('startT',{},'id',{});
 for i = 1:length(inptT)
      FIX.seg.input(i).startT = double(inptT(i)) - double(startTime);    
-     FIX.seg.input(i).id = double(inpt(inptT(i)));     
+     FIX.seg.input(i).id = double(inpt(inpti(i)));     
 end
 
 saccs = EDF.FEVENT(endsacc);
