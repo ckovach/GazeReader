@@ -96,6 +96,7 @@ if nargout > 1
     RAW.seg.horz = double(EDF.FSAMPLE.gx(eye,:));
     RAW.seg.vert = double(EDF.FSAMPLE.gy(eye,:));
     RAW.seg.pupil = double(EDF.FSAMPLE.pa(eye,:));
+    RAW.seg.input = double(EDF.FSAMPLE.input); % Parallel port input
     RAW.seg.xdat = xdatraw;
     RAW.seg.degConversion(:,1) = double(EDF.FSAMPLE.rx);
     RAW.seg.degConversion(:,2) = double(EDF.FSAMPLE.ry);
@@ -109,6 +110,7 @@ endfix = strcmp(code,'ENDFIX');
 endsacc = strcmp(code,'ENDSACC');
 
 
+
 fxs = EDF.FEVENT(endfix);
 
 if length(msgevnt) ~= length(msgcodes)
@@ -120,12 +122,22 @@ if length(msgevnt) ~= length(msgcodes)
 
 end
 
+
+FIX.seg.xdat= struct('startT',{},'id',{},'code',{});
 for i = 1:length(msgmap)
     FIX.seg.xdat(i).startT = double(msgevnt(i).sttime) - double(startTime);
     FIX.seg.xdat(i).id = msgmap(i);
     FIX.seg.xdat(i).code= msgcodes{i};    
 end
 msgts = [FIX.seg.xdat.startT];
+
+inpt = diff(EDF.FSAMPLE.input);
+inptT = find(inpt);
+FIX.seg.inpt = struct('startT',{},'id',{});
+for i = 1:length(inptT)
+     FIX.seg.input(i).startT = double(inptT(i)) - double(startTime);    
+     FIX.seg.input(i).id = double(inpt(inptT(i)));     
+end
 
 saccs = EDF.FEVENT(endsacc);
 if ~isempty(saccs)
