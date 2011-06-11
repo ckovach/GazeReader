@@ -324,7 +324,7 @@ LLfun = @(theta) sum(log(Pfun(theta)*Yblocksum)*OF) - theta'*RegMat(theta,1); %L
 if Lreg == 0
     D2Regfun =@(theta) Hreg; %%% Gaussian prior only
 else
-    D2Regfun =@(theta)  Lreg/wleng(theta,Lreg) - theta'*Lreg'*Lreg*theta/wleng(theta,Lreg)^3   + Hreg; %%% Gaussian and laplace prior 
+    D2Regfun =@(theta)  Lreg/wleng(theta,Lreg) - (Lreg*theta*theta'*Lreg')/wleng(theta,Lreg)^3   + Hreg; %%% Gaussian and laplace prior 
 end
 
 

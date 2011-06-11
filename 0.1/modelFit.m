@@ -122,6 +122,7 @@ obsfreq = 1;
 discard = 0;
 inittheta = 0; %starting point for numerical maximization
 collapserows = false;  %Improve efficiency by calling collapseX to collapse over like rows
+testcond = true; 
 % parallel = false; %use of parallel toolbox to be implemented
 % maxcpu = 8; %Maximum workers used when using parallel computing
 
@@ -135,55 +136,58 @@ mnlfitopts = {};
 while i <= length(varargin)
     
     switch lower(varargin{i})
-        case {'gaussreg','regularization'}   %Specify gaussian prior  (eqv. to ridge regularization)
+        case {'gaussreg','regularization'}   %%% Specify gaussian prior  (eqv. to ridge regularization)
             Hreg = varargin{i+1};
             i = i+1;            
-        case 'laplreg'  %Specify laplacian prior
+        case 'laplreg'  %%% Specify laplacian prior
             Lreg = varargin{i+1};
             i = i+1;            
-        case 'firth'    %Use Jeffrey's prior as described by Firth -- this currently works only for dichotomous logistic regression with one 
+        case 'firth'    %%%% Use Jeffrey's prior as described by Firth -- this currently works only for dichotomous logistic regression with one 
             Firth = varargin{i+1};
             i = i+1;
-       case 'include_null'    %Include a constant term for a "null" option not explicitly represented 
-                              % in the outcome vector and regressor matrix.
+       case 'include_null'    %%% Include a constant term for a "null" option not explicitly represented 
+                              %%% in the outcome vector and regressor matrix.
             include_null  = varargin{i+1} ;
             i = i+1;
-        case 'fullonly'     %Only fits the full model (no LLR statistic on submodels
+        case 'fullonly'     %%% Only fits the full model (no LLR statistic on submodels
             fullOnly = varargin{i+1};
             i = i+1;
-        case 'llrtests'     %groups of regressors on which to conduct log-likelihood ratio tests.
+        case 'llrtests'     %%% groups of regressors on which to conduct log-likelihood ratio tests.
             llrtests = varargin{i+1};
             i = i+1;
             fullOnly = false;
-        case 'multassign'     %Allow multiple assignment to bins ( mixture models )
+        case 'multassign'     %%%% Allow multiple assignment to bins ( mixture models )
             multassign = varargin{i+1};
             i = i+1;
-        case 'linearconstraint'     %A matrix of linear constraints on maximization
+        case 'linearconstraint'     %%% A matrix of linear constraints on maximization
             LC = varargin{i+1};
             i = i+1;
         case 'inittheta'     
             inittheta = varargin{i+1};
             i = i+1;
-        case 'h0theta'  %value of the parameters for the null hypothesis in the global test (defaults to 0)   
+        case 'testcond'      %%% Give a warning when the design matrix is poorly conditioned
+            testcond = varargin{i+1};
+            i = i+1;
+        case 'h0theta'  %%% value of the parameters for the null hypothesis in the global test (defaults to 0)   
             H0theta = varargin{i+1};
             i = i+1;
-        case 'binvolume'     %LOG bin volume
+        case 'binvolume'     %%%LOG bin volume
             binvolume = varargin{i+1};
             i = i+1;
-       case 'obsfreq'     %LOG bin volume
+       case 'obsfreq'     %%%LOG bin volume
             obsfreq = varargin{i+1};
-            collapserows = false; %Assume already collapsed.
+            collapserows = false; %%%Assume already collapsed.
             i = i+1;
-       case 'discard'     %LOG bin volume
+       case 'discard'     %%%LOG bin volume
             discard= varargin{i+1};
             i = i+1;
-        case 'parallel'     %use parallel computing toolbox if available - NOT CURRENTLY FUNCTIONAL
+        case 'parallel'     %%%use parallel computing toolbox if available - NOT CURRENTLY FUNCTIONAL
 %             parallel = varargin{i+1};
             i = i+1;
         case 'fix'    
             fix = varargin{i+1};
             i = i+1;
-        case {'diagsonly','show_progress','maxiter'}     %Other options passed to mnlfit
+        case {'diagsonly','show_progress','maxiter','checkdesign'}     %%%Other options passed to mnlfit
             mnlfitopts(end+(1:2)) = varargin(i+(0:1)); 
             i = i+1;
         otherwise
