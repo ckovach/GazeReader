@@ -1904,7 +1904,7 @@ function import_edf_Callback(hObject, eventdata, handles)
 % eventdata  reserved - to be defined in a future version of MATLAB
 % handles    structure with handles and user data (see GUIDATA)
 
-importEyetrackerData_menu_Callback(hObject, eventData, handles)
+importEyetrackerData_menu_Callback(hObject, eventdata, handles)
 
 % --------------------------------------------------------------------
 function import_ias_Callback(hObject, eventdata, handles)
