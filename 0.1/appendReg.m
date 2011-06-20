@@ -30,7 +30,7 @@ function varargout = appendReg(h,R2s,dataset,varargin)
 % In the latter cases element elements in X are assigned to every bin within the the
 % corresponding interval.
 %
-% See also MAKEREGRESSOR
+% See also MAKEREGRESSOR, SETREGDATA
 
 % ----------- SVN REVISION INFO ------------------
 % $URL$
@@ -50,6 +50,11 @@ if ishandle(h)
     end
 
     regData = getappdata(h,'regData');
+    
+    if isempty(regData);
+        regData = setRegData(h);
+    end
+    
     R1 = regData(dataset).regressors;
 
     set_regData = true;
