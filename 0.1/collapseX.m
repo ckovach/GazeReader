@@ -2,10 +2,10 @@
 function [ Iout, nrows, uindxout,bout, varargout] = collapseX(X,b,varargin)
 
 
-% [Xunq, nrows, I] = collapseX(X,noptions,X2,X3,...)
+% [I, nrows, index,nopts] = collapseX(X,noptions,X2,X3,...)
 % 
 % Returns unique row blocks of [X,X1,X2,...], frequency of occurrence, and index, 
-% where Xunq = X(I), where noptions contains the number of rows in each
+% where Xunq = X(I,:), where noptions contains the number of rows in each
 % succesive block.
 %
 
@@ -26,7 +26,7 @@ i = 1;
 discard = false;
 while i <= length(varargin)
     
-    if isstruct(varargin{i})
+    if ~ischar(varargin{i})
         moreX = [moreX,varargin{i}];
         
     elseif ischar(varargin{i})
@@ -123,7 +123,7 @@ end
 
 
     
-[Xunq,I,uindx] = unique(Xrow,'rows'); 
+[~,I,uindx] = unique(Xrow,'rows'); 
  
 
 dsrtu = diff([sort(uindx)]);
