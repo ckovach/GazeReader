@@ -2,11 +2,12 @@
 function [ Iout, nrows, uindxout,bout, varargout] = collapseX(X,b,varargin)
 
 
-% [I, nrows, index,nopts] = collapseX(X,noptions,X2,X3,...)
+% [I, nrows, index,noptsout] = collapseX(X,noptsin,X2,X3,...)
 % 
-% Returns unique row blocks of [X,X1,X2,...], frequency of occurrence, and index, 
-% where Xunq = X(I,:), where noptions contains the number of rows in each
-% succesive block.
+% Returns and index into unique row blocks of [X,X1,X2,...], frequency of occurrence (count),  
+% index of rows into Xunq, where Xunq = X(I,:) and X = Xunq(index,:), and noptions vector. 
+%
+% Input noptsin contains the number of rows in each succesive block.
 %
 
 % ----------- SVN REVISION INFO ------------------
