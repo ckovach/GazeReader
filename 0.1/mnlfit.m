@@ -105,7 +105,7 @@ while i <= length(varargin)
         case 'include_null'     %Doesn't do anything now
             const = varargin{i+1}; %#ok<NASGU>
             i = i+1;
-        case 'show_progress' 
+        case {'show_progress','showprog'} 
             showprog = varargin{i+1};
             i = i+1;
         case 'discard'     %

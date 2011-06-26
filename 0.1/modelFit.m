@@ -94,6 +94,7 @@ function fit = modelFit(trialData ,R,varargin)
 %           'discard'     	   True for every data point which should eb
 %           'fix'              1 x npar vector which is non-zer0 for every regressor whos parameter estimate 
 %                              should remain fixed at the specified value.
+%           'checkdesign'      Display a  warning if the design matrix is singular (default true) 
 %          {'diagsonly','show_progress','maxiter'}     %Other options passed to mnlfit
 %
 %
@@ -187,7 +188,7 @@ while i <= length(varargin)
         case 'fix'    
             fix = varargin{i+1};
             i = i+1;
-        case {'diagsonly','show_progress','maxiter','checkdesign'}     %%%Other options passed to mnlfit
+        case {'diagsonly','show_progress','showprog','maxiter','checkdesign'}     %%%Other options passed to mnlfit
             mnlfitopts(end+(1:2)) = varargin(i+(0:1)); 
             i = i+1;
         otherwise
