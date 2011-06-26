@@ -87,11 +87,15 @@ if max(b) > 1   %For blocks with multiple rows in X, we must identify unique row
     trindex = cumsum(trindex);
 
     %Discard trials for which noptions is zero
-    if any(discard)
-        X(discard(trindex) == 0,:) = [];
-        trindex(discard(trindex)==0,:) = [];
-        b(discard) = [];
+    if any(b==0)
+        discard = discard | b==0;
     end
+    
+%     if any(discard)
+%         X(discard(trindex) ,:) = [];
+%         trindex(discard(trindex),:) = [];
+%         b(discard) = [];
+%     end
 
     csb = cumsum(b(1:end-1));
     blindex = ones(size(X,1),1);
@@ -119,13 +123,22 @@ if max(b) > 1   %For blocks with multiple rows in X, we must identify unique row
 
     
 else
+    
     Xrow = X;
 end
 
-
+if any(discard)
+    Xrow(discard,:) = 0;
+    Xrow = [discard,Xrow];
+end
     
 [~,I,uindx] = unique(Xrow,'rows'); 
- 
+
+if any(discard)
+    I(discard(I)) = [];
+    uindx(discard) = [];
+end
+
 
 dsrtu = diff([sort(uindx)]);
 nrows = diff([0;find(dsrtu);length(dsrtu)+1]);
