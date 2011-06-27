@@ -210,7 +210,7 @@ end
 %                                 'LL',[],'AIC',[],'BIC',[],'lBayes',[],'llrpval',[],'regressors',[],'contrast',[],'W',[],'firth',[],'Hreg',[],'multassign',[],'blockC',[]);
 fitstruct = struct('label','','parest',[],'npar',[],'I',[],'badcond',[],'max_iterations_reached',[],...
                                 'LL',[],'LLR',[],'Dev',[],'deltaDev',[],'df',[],'llrpval',[],'AIC',[],'BIC',[],'R',[],'regressors',[],...
-                                'contrast',[],'W',[],'N',[],'obsfreq',[],'firth',[],'Hreg',[],'Lreg',[],'multassign',[],'blockC',[],...
+                                'contrast',[],'W',[],'N',[],'obsfreq',[],'firth',[],'Hreg',[],'Lreg',[],'mixture',[],'blockC',[],...
                                 'discarded',[],'binvolume',[],'singular_design_matrix',[]);
 
 %%% Create the response vector
@@ -394,7 +394,7 @@ fit(1).regressors = [];
 fit(1).W = Worig;
 fit(1).blockC = blockC;
 fit(1).firth = Firth;
-fit(1).multassign= multassign;
+fit(1).mixture= multassign;
 fit(1).Hreg = Hreg;
 fit(1).Lreg = Lreg;
 % fit(1).N = length(Rpooled.noptions);
