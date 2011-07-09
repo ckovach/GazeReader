@@ -181,13 +181,23 @@ R.info.label = label;
 R.noptions = noptions;
 R.Npar = npar;
 R.info.intxnord = interaction_order;
-try
-    fid = fopen([mfilename,'.m'],'r');
-    R.info.COMMAND =  fread(fid);
-    fclose(fid);
-catch
-    warning('Failed to record the script used to generate regressor %s poly',R.label);
-end
+
+
+% try
+%     fid = fopen([mfilename,'.m'],'r');
+%     R.info.COMMAND =  fread(fid);
+    R.info.version =  sprintf(['----------- SVN REVISION INFO ------------------',...
+                    '\n$URL$',...
+                    '\n$Revision$',...
+                    '\n$Date$',...
+                    '\n$Author$',...
+                    '\n------------------------------------------------',...
+                    '\ngenerated on %s'],datestr(now));
+
+%     fclose(fid);
+% catch
+%     warning('Failed to record the script used to generate regressor %s poly',R.label);
+% end
 
 R.function = mkfun;
 % R.deriv = derivfun;
