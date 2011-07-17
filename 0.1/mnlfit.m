@@ -525,6 +525,9 @@ while dstep + sqrt( damp*sum(del.^2)./sum(Theta.^2)) > tol  && runiter   ; %Adde
     if showprog
         fprintf('\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b')
         fprintf('\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b')
+        if ispc 
+            fprintf('\b\b') %%% For some reason, needs extra backspaces on PCs            
+        end
         if ~isinf(dstep)
             fprintf('%5i: damping: %1.2e,  dstep = %1.2e',count,damp,dstep);
         else
