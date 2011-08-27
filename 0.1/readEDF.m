@@ -13,11 +13,11 @@ function [FIX,RAW] = readEDF(filename,varargin)
 %           tracker model, camera type, etc.
 % FIX.filename  : name of the file from which the data were extracted.
 % FIX.seg       : A structure array for each recording segment with the fields:
-%        .xdat  : a structure array containing message events with fields:
+%        .xdat      : a structure array containing message events with fields:
 %             .startT   : Time message was received
 %             .id       : a numeric identifier for the message.
 %             .code: the string which was received.
-%        .fix   : structure array containing data for each fixation:
+%        .fix       : structure array containing data for each fixation:
 %            .meanPos   : average gaze position during fixation.
 %            .startT    : fixation onset time.
 %            .dur       : fixation duration.
@@ -31,7 +31,7 @@ function [FIX,RAW] = readEDF(filename,varargin)
 %            .shiftvec  : difference between meanPos for the previous fixation and the current one.
 %            .dt: time between the previous fixation and the present one.
 %            .sac       : index into the .sac array for the preceding saccade.
-%         .sac  : structure array containing data for each saccade:
+%         .sac      : structure array containing data for each saccade:
 %            .startT    : start of saccade.
 %            .dur       : duration of saccade.
 %            .startPos  : gaze position at start of saccade.
@@ -42,11 +42,11 @@ function [FIX,RAW] = readEDF(filename,varargin)
 %            .xdhist    : codes for two most recent message events (indexes into .xdatCodes)
 %            .xdindex   : index into .xdat for the most recent message event.
 %            .lastcode  : string for the most recently received code.
-%         .xdatCodes    : a cell array of all unique messages received during
+%         .xdatCodes: a cell array of all unique messages received during
 %                    the recording segment. The .xdhist fields in .fix and .sac 
 %                    and the id field in .xdat index into this array.
-% FIX.units: label for position units. 
-% FIX.fs: sampling frequency.
+% FIX.units     : label for position units. 
+% FIX.fs        : sampling frequency.
 %
 %
 % RAW is a data structure with the following fields:
