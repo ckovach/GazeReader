@@ -71,6 +71,8 @@ function [FIX,RAW] = readEDF(filename,varargin)
 %
 % See also EDFMEX
 
+
+
 % ----------- SVN REVISION INFO ------------------
 % $URL$
 % $Revision$
