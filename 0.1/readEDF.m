@@ -2,8 +2,7 @@ function [FIX,RAW] = readEDF(filename,varargin)
 
 % [FIX,RAW] = readEDF(filename,varargin)
 %
-%Uses edfmex to read edf files and convert them to a format consistent with
-%that used for ASL files. 
+%Uses edfmex to read edf and puts the data into a matlab data structure. 
 %
 %
 % FIX is a data structure with the following fields:
