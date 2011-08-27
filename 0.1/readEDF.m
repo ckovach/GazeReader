@@ -7,42 +7,42 @@ function [FIX,RAW] = readEDF(filename,varargin)
 %
 % FIX is a data structure with the following fields:
 %
-% FIX.recdata: recording parameter data. See eyelink manual for details.
+% FIX.recdata   : recording parameter data. See eyelink manual for details.
 % FIX.eyetracker: A label for the eye tracker used in the experiment.
-% FIX.header: EDF file header, which contains such as recording date, eye
+% FIX.header    : EDF file header, which contains such as recording date, eye
 %           tracker model, camera type, etc.
-% FIX.filename: name of the file from which the data were extracted.
-% FIX.seg: A structure array for each recording segment with the fields:
-%        .xdat: a structure array containing message events with fields:
-%             .startT: Time message was received
-%             .id: a numeric identifier for the message.
+% FIX.filename  : name of the file from which the data were extracted.
+% FIX.seg       : A structure array for each recording segment with the fields:
+%        .xdat  : a structure array containing message events with fields:
+%             .startT   : Time message was received
+%             .id       : a numeric identifier for the message.
 %             .code: the string which was received.
-%        .fix: structure array containing data for each fixation:
-%            .meanPos: average gaze position during fixation.
-%            .startT: fixation onset time.
-%            .dur: fixation duration.
-%            .endT: fixation end time.
-%            .updconv: conversion to degrees from screen units, given by the eyetracker.
-%            .eye: which was recorded - 1 left, 2 - right.
-%            .xdhist: numeric id for the last two message events [earlier, later]
-%            .xdat: most recent message event.
-%            .xdindex: icodes for two most recent message events (indexes into .xdatCodes)
-%            .lastcode: string for the most recently received message.
-%            .shiftvec: difference between meanPos for the previous fixation and the current one.
+%        .fix   : structure array containing data for each fixation:
+%            .meanPos   : average gaze position during fixation.
+%            .startT    : fixation onset time.
+%            .dur       : fixation duration.
+%            .endT      : fixation end time.
+%            .updconv   : conversion to degrees from screen units, given by the eyetracker.
+%            .eye       : which was recorded - 1 left, 2 - right.
+%            .xdhist    : numeric id for the last two message events [earlier, later]
+%            .xdat      : most recent message event.
+%            .xdindex   : ids for two most recent message events (indexes into .xdatCodes)
+%            .lastcode  : string for the most recently received message.
+%            .shiftvec  : difference between meanPos for the previous fixation and the current one.
 %            .dt: time between the previous fixation and the present one.
-%            .sac: index into the .sac array for the preceding saccade.
-%         .sac: structure array containing data for each saccade:
-%            .startT: start of saccade.
-%            .dur: duration of saccade.
-%            .startPos: gaze position at start of saccade.
-%            .shiftVec: difference between findal and starting position.
-%            .eye: eye for the saccade event.
-%            .lastfix: index into .fix array for the last fixation.
-%            .nextfix: index into .fix array for the next fixation.
-%            .xdhist: codes for two most recent message events (indexes into .xdatCodes)
-%            .xdindex: index into .xdat for the most recent message event.
-%            .lastcode: string for the most recently received code.
-%         .xdatCodes: a cell array of all unique messages received during
+%            .sac       : index into the .sac array for the preceding saccade.
+%         .sac  : structure array containing data for each saccade:
+%            .startT    : start of saccade.
+%            .dur       : duration of saccade.
+%            .startPos  : gaze position at start of saccade.
+%            .shiftVec  : difference between findal and starting position.
+%            .eye       : eye for the saccade event.
+%            .lastfix   : index into .fix array for the last fixation.
+%            .nextfix   : index into .fix array for the next fixation.
+%            .xdhist    : codes for two most recent message events (indexes into .xdatCodes)
+%            .xdindex   : index into .xdat for the most recent message event.
+%            .lastcode  : string for the most recently received code.
+%         .xdatCodes    : a cell array of all unique messages received during
 %                    the recording segment. The .xdhist fields in .fix and .sac 
 %                    and the id field in .xdat index into this array.
 % FIX.units: label for position units. 
@@ -51,22 +51,22 @@ function [FIX,RAW] = readEDF(filename,varargin)
 %
 % RAW is a data structure with the following fields:
 % 
-% RAW.recdata: same as in FIX.
+% RAW.recdata   : same as in FIX.
 % RAW.eyetracker:   "
-% RAW.header:       "
-% RAW.filename:     "
-% RAW.seg: array structure for recording segments with the following fields:
-%        .horz: horizontal gaze position.
-%        .vert: vertical gaze position.
-%        .pupil: pupil diameter.
-%        .input: external input, such as parallel port.
-%        .xdat: the id for the most recently received message at each time
+% RAW.header    :   "
+% RAW.filename  :   "
+% RAW.seg       : array structure for recording segments with the following fields:
+%        .horz      : horizontal gaze position.
+%        .vert      : vertical gaze position.
+%        .pupil     : pupil diameter.
+%        .input     : external input, such as parallel port.
+%        .xdat      : the id for the most recently received message at each time
 %               point.
-%        .degConversion: horz,vert units-to-degrees conversion as reported
+%        .degConversion  : horz,vert units-to-degrees conversion as reported
 %                       by eyelink.
-%        .sample time in ms.
-%        .xdatCodes: same as in FIX.seg.
-% RAW.fs: sampling frequency.
+%        .sample    : time in ms.
+%        .xdatCodes : same as in FIX.seg.
+% RAW.fs        : sampling frequency.
 %
 %
 % See also EDFMEX
