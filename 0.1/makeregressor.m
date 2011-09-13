@@ -125,7 +125,7 @@ R = struct('value',[],'info',[],'normconst',normconst,'label',label,'noptions',.
             noptions,'Npar',Npar,'code',codeincr+1,'codevec',[],'factmat',[],'levmat',[],...
              'fixed',[],'function',[],'deriv',[]);
 R.info = struct('form',[],'intxnord',[],'version',[],'hashcode',[],'parent',[],'label',...
-                [],'pooled_labels',{{}},'contrasts',{{}},'parentindex',[],'functionInputCodes',[],'factorlabels',[]);
+                [],'pooled_labels',{{}},'contrasts',{{}},'parentindex',[],'functionInputCodes',[],'factorlabels',[],'COMMAND',[]);
 R.Npar = 0;
 if isempty(X) %Initializes an empty regressor if X is empty
     return
