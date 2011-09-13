@@ -137,10 +137,10 @@ mnlfitopts = {};
 while i <= length(varargin)
     
     switch lower(varargin{i})
-        case {'gaussreg','regularization','L2reg'}   %%% Specify gaussian prior  (eqv. to ridge regularization)
+        case {'gaussreg','regularization','l2reg'}   %%% Specify gaussian prior  (eqv. to ridge regularization)
             Hreg = varargin{i+1};
             i = i+1;            
-        case {'laplreg','L1reg'}  %%% Specify laplacian prior
+        case {'laplreg','l1reg'}  %%% Specify laplacian prior
             Lreg = varargin{i+1};
             i = i+1;            
         case 'firth'    %%%% Use Jeffrey's prior as described by Firth -- this currently works only for dichotomous logistic regression with one 
