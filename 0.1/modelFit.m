@@ -175,7 +175,7 @@ while i <= length(varargin)
         case 'binvolume'     %%%LOG bin volume
             binvolume = varargin{i+1};
             i = i+1;
-       case 'obsfreq'     %%%LOG bin volume
+       case {'obsfreq','nobservations'}     %%%LOG bin volume
             obsfreq = varargin{i+1};
             collapserows = false; %%%Assume already collapsed.
             i = i+1;
