@@ -78,7 +78,18 @@ function fit = modelFit(trialData ,R,varargin)
 %    .singular_design_matrix: True if design matrix is singular.
 %
 %  Options: 
-%          'regularization'    Specify gaussian prior covariance matrix
+%          'l2reg'             Specify gaussian prior (L2) covariance matrix.
+%                              A vector argument specifies a diagonal matrix, and scalar
+%                              gives a scalar multiple of the identity
+%                              matrix.
+%          'l1reg'             Specify the Laplace prior (L1) with an arbitrary 
+%                              eliptical cross-section. Penalty will be,
+%                              theta'*L1*theta./sqrt(theta*L1*theta + eps).
+%                              For a vector argument, the L1 matrix is
+%                              diagonal, and for scalar input it is a
+%                              multiple of the identity matrix. Note that the argument
+%                              is the SQUARE of the penalty on the length
+%                              norm of the parameter vector.
 %          'firth'             Use Jeffrey's prior as described by Firth -- this currently works only for dichotomous logistic regression with one 
 %          'include_null'      Include a constant term for a "null" option not explicitly represented 
 %                                   in the outcome vector and regressor matrix.

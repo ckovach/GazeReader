@@ -57,10 +57,10 @@ i=1;
 while i <= length(varargin)
     
     switch lower(varargin{i})
-        case {'gaussreg','regularization'}   %Specify gaussian regularization (ridge)
+        case {'gaussreg','regularization','l2reg'}   %Specify gaussian regularization (ridge), the SQUARE of the weighting on the L2 norm (sqrt(g)*|r|^2)
             Hreg = varargin{i+1};
             i = i+1;            
-        case {'laplreg'}   %Specify laplacian regularization
+        case {'laplreg','l1reg'}   %Specify laplacian regularization, sqrt(l)*|r| (the SQUARE of the weighting on the L1 norm
             Lreg = varargin{i+1};
             i = i+1;            
         case 'firth'    %Use Jeffrey's prior as described by Firth: currently 
@@ -342,6 +342,7 @@ while dstep + sqrt( damp*sum(del.^2)./sum(Theta.^2)) > tol  && runiter   ; %Adde
     
     DL = X*OFlarge*(P2 - P)' - RegMat(Theta,2);
     
+    
     if constraint 
         DL = DL + LC(1:end-1,:)*lgm; %Derivative of parameters under linear constraint
         Dlgm = [Theta; -1]'*LC;             % Derivative of Lagrange Multipliers;
@@ -561,6 +562,8 @@ LL = LLfun(Theta);
 
 Pnorm = blocknorm(P.*Y',b);
 P2 = P.*Y'./Pnorm;
+% DL = X*OFlarge*(P2 - P)' - RegMat(Theta,2);
+
 X2 = X(:,b2bl.*Y' > 1);
 P2 = P2(:,b2bl.*Y' > 1);
 dgP2 = sparseblockmex(P2,0:length(P2), 0:length(P2),length(P2)); %Equivalent to but faster than diag(P) or diag(sparse(P))
