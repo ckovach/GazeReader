@@ -59,13 +59,13 @@ L1reg = 0;
 while i <= length(varargin)
     
     switch lower(varargin{i})
-        case {'gaussreg','regularization','l2reg'}   %Specify gaussian regularization (ridge), the SQUARE of the weighting on the L2 norm (sqrt(g)*|r|^2)
+        case {'gaussreg','regularization','l2reg', 'ridge'}   %Specify gaussian regularization (L2, ridge), the SQUARE of the weighting on the L2 norm (sqrt(g)*|r|^2)
             Hreg = varargin{i+1};
             i = i+1;            
-        case {'laplreg'}   %Specify laplacian regularization, sqrt(l)*|r| (the SQUARE of the weighting on the L1 norm
+        case {'laplreg'}   %Specify laplacian regularization, sqrt(l)*|r| (the SQUARE of the weighting on the norm
             Lreg = varargin{i+1};
             i = i+1;      
-        case {'lasso','l1reg'} 
+        case {'lasso','l1reg'}   %Specify L1 regularization
             L1reg = varargin{i+1};
             i = i+1; 
 
@@ -240,6 +240,14 @@ elseif isvector(Lreg)
 end
 
 
+
+if length(L1reg) == 1  %L1 norm
+    L1reg = ones(Npar,1).*L1reg;
+
+end
+
+
+
 if isempty(X)
     runiter = false;
     InitTheta = [];
@@ -323,7 +331,8 @@ RegMat = @(theta,a) ( a*Hreg + Lreg./wleng(theta,Lreg) )*theta;
 lrrfun = @(theta) theta' * X + binvolume; %compute the log weight
 nlrrfun = @(theta) lrrfun(theta) - blocknorm(lrrfun(theta),b)./blockn; %subtract mean to improve numerical stability
 Pfun =  @(theta) exp( nlrrfun(theta) )./  (blocknorm(exp( nlrrfun(theta) ) ,b)); %Proabability of each outcome
-LLfun = @(theta) sum(log(Pfun(theta)*Yblocksum)*OF) - theta'*RegMat(theta,1); %Log Likelihood
+
+LLfun = @(theta) sum(log(Pfun(theta)*Yblocksum)*OF) - theta'*RegMat(theta,1) - L1reg(:)'*abs(theta); %Log Likelihood
 
 %%% Function to compute the second derivative of the prior distribution
 
@@ -335,9 +344,9 @@ end
 
 
 if L1reg == 0 % apply l1 norm
-    DLfun = @(P,P2)  X*OFlarge*(P2 - P)' - RegMat(Theta,2);
+    DLfun = @(theta,P,P2)  X*OFlarge*(P2 - P)' - RegMat(Theta,2);
 else
-    DLfun = @(P,P2)  X*OFlarge*(P2 - P)' - RegMat(Theta,2) - Theta./abs(Theta);
+    DLfun = @(theta,P,P2)  X*OFlarge*(P2 - P)' - RegMat(Theta,2) - L1reg.*sign(Theta);
 end    
 
 while dstep + sqrt( damp*sum(del.^2)./sum(Theta.^2)) > tol  && runiter   ; %Added damping dependent term to avoid premature halting when damping is high
@@ -353,7 +362,7 @@ while dstep + sqrt( damp*sum(del.^2)./sum(Theta.^2)) > tol  && runiter   ; %Adde
     %%% Derivative of the log likelihood
     
 %     DL = X*OFlarge*(P2 - P)' - RegMat(Theta,2);
-    DL = DLfun(P,P2);
+    DL = DLfun(Theta,P,P2);
     
     
     if constraint 
