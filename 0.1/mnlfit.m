@@ -174,12 +174,12 @@ if firth && ( any(b>2) || any(any(abs(X(1:2:end,:).*X(2:2:end,:)>max((1e-10).*me
 end
 
 if checkdesign
-    xx = X'*X;  
+    xx = X'*X + Hreg + Lreg;  
     design_is_singular = rank(xx) < length(xx);
     if design_is_singular
        beep
        fprintf('Design Matrix is singular or poorly conditioned! Press Ctrl-C to stop, or wait to continue')
-       pause(5)
+       pause(2)
     end
 end
 
