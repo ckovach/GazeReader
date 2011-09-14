@@ -343,7 +343,7 @@ else
 end
 
 
-if L1reg == 0 % apply l1 norm
+if all(L1reg == 0) % apply l1 norm
     DLfun = @(theta,P,P2)  X*OFlarge*(P2 - P)' - RegMat(Theta,2);
 else
     DLfun = @(theta,P,P2)  X*OFlarge*(P2 - P)' - RegMat(Theta,2) - L1reg.*sign(Theta);

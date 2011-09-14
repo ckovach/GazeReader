@@ -137,7 +137,7 @@ collapserows = false;  %Improve efficiency by calling collapseX to collapse over
 testcond = true; 
 % parallel = false; %use of parallel toolbox to be implemented
 % maxcpu = 8; %Maximum workers used when using parallel computing
-
+L1reg = 0;
 Lreg = 0;
 
 H0theta = 0;
@@ -151,8 +151,11 @@ while i <= length(varargin)
         case {'gaussreg','regularization','l2reg'}   %%% Specify gaussian prior  (eqv. to ridge regularization)
             Hreg = varargin{i+1};
             i = i+1;            
-        case {'laplreg','l1reg'}  %%% Specify laplacian prior
+        case {'laplreg'}  %%% Specify laplacian prior
             Lreg = varargin{i+1};
+            i = i+1;            
+        case {'l1reg'}  %%% Specify laplacian prior
+            L1reg = varargin{i+1};
             i = i+1;            
         case 'firth'    %%%% Use Jeffrey's prior as described by Firth -- this currently works only for dichotomous logistic regression with one 
             Firth = varargin{i+1};
@@ -221,7 +224,7 @@ end
 %                                 'LL',[],'AIC',[],'BIC',[],'lBayes',[],'llrpval',[],'regressors',[],'contrast',[],'W',[],'firth',[],'Hreg',[],'multassign',[],'blockC',[]);
 fitstruct = struct('label','','parest',[],'npar',[],'I',[],'badcond',[],'max_iterations_reached',[],...
                                 'LL',[],'LLR',[],'Dev',[],'deltaDev',[],'df',[],'llrpval',[],'AIC',[],'BIC',[],'R',[],'regressors',[],...
-                                'contrast',[],'W',[],'N',[],'obsfreq',[],'firth',[],'Hreg',[],'Lreg',[],'mixture',[],'blockC',[],...
+                                'contrast',[],'W',[],'N',[],'obsfreq',[],'firth',[],'Hreg',[],'Lreg',[],'L1reg',[],'mixture',[],'blockC',[],...
                                 'discarded',[],'binvolume',[],'singular_design_matrix',[]);
 
 %%% Create the response vector
@@ -370,12 +373,12 @@ end
         
 % [parest,I,LL,badcond] = logitmodelsp(Rpooled,W, [] , Hreg);
 % [parest,I,LL,badcond] = mnlfit(Rpooled,W,0, Hreg, true, [],Firth);
-[parest,I,LL,badcond,lgm,max_iter,design_singular,Nobs] = mnlfit(Rpooled,Win,'inittheta',inittheta,'gaussreg',Hreg,'laplreg',Lreg, 'runiter',true, 'fix',[],'firth',Firth,...
+[parest,I,LL,badcond,lgm,max_iter,design_singular,Nobs] = mnlfit(Rpooled,Win,'inittheta',inittheta,'gaussreg',Hreg,'laplreg',Lreg,'L1reg',L1reg, 'runiter',true, 'fix',[],'firth',Firth,...
                                 'linearconstraint',LC,'include_null',include_null,'binvolume',binvolume,'checkdesign',true,'discard',discard,'obsfreq',obsfreq,mnlfitopts{:});
 
 %The point estimate corresponding to fixed values and 0 otherwise
 % [parest0,I0,LL0] = mnlfit(Rpooled,W,0, Hreg, false, [],Firth);
-[parest0,I0,LL0] = mnlfit(Rpooled,Win,'inittheta',H0theta, 'gaussreg',Hreg,'laplreg',Lreg, 'runiter',false, 'fix',[],'firth',Firth,...
+[parest0,I0,LL0] = mnlfit(Rpooled,Win,'inittheta',H0theta, 'gaussreg',Hreg,'laplreg',Lreg,'L1reg',L1reg, 'runiter',false, 'fix',[],'firth',Firth,...
                                 'linearconstraint',LC,'include_null',include_null,'binvolume',binvolume,'discard',discard,'obsfreq',obsfreq,mnlfitopts{:});
 
 npar = length(parest) - rank(LC);
@@ -489,7 +492,7 @@ if length(R)>1 && ~fullOnly
             fit(i+1).label = sprintf(' | %s ',R(~getreg).label);
         end
         fprintf('\nFitting submodel %i: %s\n',i,fit(i+1).label );
-        [parest,I,LL,badcond,lgm,max_iter] = mnlfit(Rpooled,Win,'inittheta',stth, 'gaussreg',Hreg,'laplreg',Lreg, 'runiter',true,...
+        [parest,I,LL,badcond,lgm,max_iter] = mnlfit(Rpooled,Win,'inittheta',stth, 'gaussreg',Hreg,'laplreg',Lreg,'L1reg',L1reg, 'runiter',true,...
                                                      'firth',Firth,'linearconstraint',LCsub,'binvolume',binvolume,'discard',discard,'obsfreq',obsfreq,mnlfitopts{:});
 
         npar = length(parest) - rank(LCsub);
