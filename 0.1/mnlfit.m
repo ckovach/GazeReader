@@ -174,7 +174,7 @@ if firth && ( any(b>2) || any(any(abs(X(1:2:end,:).*X(2:2:end,:)>max((1e-10).*me
 end
 
 if checkdesign
-    xx = X'*X + Hreg + Lreg;  
+    xx = X'*X;  
     design_is_singular = rank(xx) < length(xx);
     if design_is_singular
        beep
