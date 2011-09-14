@@ -53,6 +53,8 @@ discard = [];
 % LC = 0;
 i=1;
 
+L1reg = 0;
+
 %%%% Options are described below %%%%
 while i <= length(varargin)
     
@@ -60,9 +62,13 @@ while i <= length(varargin)
         case {'gaussreg','regularization','l2reg'}   %Specify gaussian regularization (ridge), the SQUARE of the weighting on the L2 norm (sqrt(g)*|r|^2)
             Hreg = varargin{i+1};
             i = i+1;            
-        case {'laplreg','l1reg'}   %Specify laplacian regularization, sqrt(l)*|r| (the SQUARE of the weighting on the L1 norm
+        case {'laplreg'}   %Specify laplacian regularization, sqrt(l)*|r| (the SQUARE of the weighting on the L1 norm
             Lreg = varargin{i+1};
-            i = i+1;            
+            i = i+1;      
+        case {'lasso','l1reg'} 
+            L1reg = varargin{i+1};
+            i = i+1; 
+
         case 'firth'    %Use Jeffrey's prior as described by Firth: currently 
                         % works only for logisitic regresion normalized to 2nd option!
             firth = varargin{i+1};
@@ -319,7 +325,7 @@ nlrrfun = @(theta) lrrfun(theta) - blocknorm(lrrfun(theta),b)./blockn; %subtract
 Pfun =  @(theta) exp( nlrrfun(theta) )./  (blocknorm(exp( nlrrfun(theta) ) ,b)); %Proabability of each outcome
 LLfun = @(theta) sum(log(Pfun(theta)*Yblocksum)*OF) - theta'*RegMat(theta,1); %Log Likelihood
 
-%%% Function to compute the second derivatie of the prior distribution
+%%% Function to compute the second derivative of the prior distribution
 
 if Lreg == 0
     D2Regfun =@(theta) Hreg; %%% Gaussian prior only
@@ -327,6 +333,12 @@ else
     D2Regfun =@(theta)  Lreg/wleng(theta,Lreg) - (Lreg*theta*theta'*Lreg')/wleng(theta,Lreg)^3   + Hreg; %%% Gaussian and laplace prior 
 end
 
+
+if L1reg == 0 % apply l1 norm
+    DLfun = @(P,P2)  X*OFlarge*(P2 - P)' - RegMat(Theta,2);
+else
+    DLfun = @(P,P2)  X*OFlarge*(P2 - P)' - RegMat(Theta,2) - Theta./abs(Theta);
+end    
 
 while dstep + sqrt( damp*sum(del.^2)./sum(Theta.^2)) > tol  && runiter   ; %Added damping dependent term to avoid premature halting when damping is high
 % while dstep > tol  && runiter   
@@ -340,7 +352,8 @@ while dstep + sqrt( damp*sum(del.^2)./sum(Theta.^2)) > tol  && runiter   ; %Adde
     
     %%% Derivative of the log likelihood
     
-    DL = X*OFlarge*(P2 - P)' - RegMat(Theta,2);
+%     DL = X*OFlarge*(P2 - P)' - RegMat(Theta,2);
+    DL = DLfun(P,P2);
     
     
     if constraint 
