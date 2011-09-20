@@ -46,26 +46,33 @@ binvolume = 0;
 max_iterations_reached = 0;
 design_is_singular = [];
 LevMar = true; %use Levenberg-Marquardt damping if true
-showprog = true; %Generate output 
+showprog = false; %Generate output % Fitting is ~6 x faster without display!
 maxcount = 500; %maximum iterations to continue 
 obsfreq = 1;
 discard = [];
+L2reg = 0;
+showstep = 20;
 % LC = 0;
 i=1;
 
 L1reg = 0;
 
+L2reg = 0;
+
 %%%% Options are described below %%%%
 while i <= length(varargin)
     
     switch lower(varargin{i})
-        case {'gaussreg','regularization','l2reg', 'ridge'}   %Specify gaussian regularization (L2, ridge), the SQUARE of the weighting on the L2 norm (sqrt(g)*|r|^2)
+        case {'gaussreg','regularization'}   %Specify gaussian regularization  the SQUARE of the weighting on the L2 norm (sqrt(g)*|r|^2)
             Hreg = varargin{i+1};
             i = i+1;            
+       case {'l2reg', 'ridge'}   %Specify ridge regularization (L2, ridge), this is like gaussreg but with weighting that increases in proprtion to the data.
+            L2reg = varargin{i+1};
+            i = i+1;                 
         case {'laplreg'}   %Specify laplacian regularization, sqrt(l)*|r| (the SQUARE of the weighting on the norm
             Lreg = varargin{i+1};
             i = i+1;      
-        case {'lasso','l1reg'}   %Specify L1 regularization
+        case {'lasso','l1reg'}   %Lasso estimator, which is proportional to the quantity of data.
             L1reg = varargin{i+1};
             i = i+1; 
 
@@ -117,6 +124,9 @@ while i <= length(varargin)
         case 'discard'     %
             discard = varargin{i+1};
             i = i+1;
+        case 'showstep'     %
+            showstep = varargin{i+1};
+            i = i+1;
         otherwise
             error('%s is not a valid keyword.',varargin{i})
     end
@@ -163,9 +173,16 @@ if length(obsfreq) > 1
       blocksum = sparseblock(ones(1,size(X,1)),b)';
     OF = diag(sparse(obsfreq)); %Frequency of each observation
     OFlarge = diag(sparse(blocksum*obsfreq)); %Frequency of each observation
+    
+    L1reg = L1reg*sum(obsfreq);  %%% For lasso and ridge regression, prior is proportional to the sample size
+    L2reg = L2reg*sum(obsfreq);
 else
     OF      = obsfreq(1);
     OFlarge = obsfreq(1);
+    
+   L1reg = L1reg*length(b)*obsfreq(1);
+   L2reg = L2reg*length(b)*obsfreq(1);
+    
 end
 
 
@@ -231,6 +248,16 @@ if length(Hreg) == 1  %Gaussian prior
 elseif isvector(Hreg)
     Hreg = diag(Hreg);
 end
+    
+
+if length(L2reg) == 1  %Gaussian prior
+    Hreg = Hreg + eye(Npar).*L2reg;
+elseif isvector(L2reg)
+    Hreg = Hreg + diag(L2reg);
+else
+    Hreg = Hreg + L2reg;
+end
+
     
 
 if length(Lreg) == 1  %Laplace prior
@@ -545,7 +572,7 @@ while dstep + sqrt( damp*sum(del.^2)./sum(Theta.^2)) > tol  && runiter   ; %Adde
     
     dstep = sqrt( sum(del.^2)./sum(Theta.^2));
     
-    if showprog
+    if showprog && mod(count,showstep) == 0
         fprintf('\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b')
         fprintf('\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b')
         if ispc 
