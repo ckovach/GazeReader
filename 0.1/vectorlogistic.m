@@ -119,8 +119,8 @@ y = sparse(y);
 initTheta = zeros(length(ntrials)*size(X,2),1);
 
 
-if length(Hreg) == 1 && Hreg >0
-    Hreg = diag(sparse(ones(length(initTheta),1)*Hreg));
+if min(size(Hreg)) == 1 && ~isequal(Hreg ,0)
+    Hreg = diag(sparse(ones(length(initTheta),1).*Hreg(:)));
 end
 
 if length(Lreg) == 1 && Lreg >0
@@ -164,6 +164,7 @@ wleng = @(x, M ) sparse(sqrt(sum(x'*M*x)+eps));
 
 
 
+
 if any(Lreg~=0)
     RegMat = @(theta,a) ( a*Hreg + Lreg./wleng(theta,Lreg) )*theta ;
     
@@ -179,7 +180,9 @@ end
 
 
 
-if L1reg == 0
+
+
+if all(L1reg == 0)
     l1regfun = @(theta) 0;
 else
     if length(L1reg) ==1
@@ -189,6 +192,7 @@ else
     l1regfun =@(theta)  diag(L1reg)*sign(theta); %%% Gaussian and laplace prior 
 end
 
+l1regfuno = l1regfun;
 
 if any(y>Ntot)
     error('y must be a count which is less than Ntot')
@@ -247,15 +251,15 @@ end
 
 DLLfuno = DLLfun;
 LLfuno = LLfun;
-D2Lfuno = D2LLfun;
+D2LLfuno = D2LLfun;
 % RegMato = RegMat;
 
-if L1reg ~=0
-%     discard = DLLfun(theta + 1e-6).*DLLfun(theta - 1e-6) < -1e-6;
-% 
-%     discard = discard & abs(DLLfun(theta.*0)+ l1regfun(theta*0)) < L1reg &...
-%                 sign(DLLfun(theta.*0).*DLLfun(theta))>0;
-  discard = false(size(theta));
+if any(L1reg ~=0)
+    discard = DLLfun(theta + 1e-6).*DLLfun(theta - 1e-6) < -1e-6;
+
+    discard = discard & abs(DLLfun(theta.*0)+ l1regfun(theta*0)) < L1reg &...
+                sign(DLLfun(theta.*0).*DLLfun(theta))>0;
+%   discard = false(size(theta));
 %     thetanew(discard) = 0;
     
  
@@ -265,12 +269,14 @@ end
 
        
 thetafull = theta;
+
+
 spXfull = spX;
 
 discold = nan;
 
 % Lregfull = Lreg;
-% L1regfull = L1reg;
+L1regfull = L1reg;
 ths = [];
 ll = [];
 nlasso = 0;
@@ -288,14 +294,14 @@ while ~isequal(discard,discold) && nlasso < maxlasso
     end
 
 
-    if L1reg~=0
+    if any(L1regfull~=0)
         
         spX = spXfull(:,~discard);
         theta = thetafull(~discard);
-
+        L1reg = L1regfull(~discard);
        RegMat = @(theta,a)  a*Hreg(~discard,~discard)*theta ;%+ Lreg./wleng(theta,Lreg) )*theta ; 
 %         l1regfun =@(theta)  L1reg(~discard).*sign(theta); %%% Gaussian and laplace prior 
-
+        l1regfun =@(th)  diag(L1reg)*sign(th);
 
         D2Regfun =@(theta) Hreg(~discard,~discard) ; %%% Gaussian prior only
 
@@ -310,11 +316,11 @@ while ~isequal(discard,discold) && nlasso < maxlasso
 
                 %Likelihood function
 %                 LLfun = @(th) sum(rho(th).*y - Ntot.*log(1+exp(rho(th)))) - th'*(RegMat(th,1) + L1reg(~discard).*sign(th));
-                LLfun = @(th) sum(rho(th).*y - Ntot.*log(1+exp(rho(th)))) - th'*RegMat(th,1) ;
+                LLfun = @(th) sum(rho(th).*y - Ntot.*log(1+exp(rho(th)))) - th'*(RegMat(th,1) + L1reg.*sign(th));
 
                 %First derivative of the likelihood function
 %                 DLLfun = @(th)  ((y - Ntot.*Pfun(th))'*spX)'- RegMat(th,2) - l1regfun(th);
-                DLLfun = @(th)  ((y - Ntot.*Pfun(th))'*spX)'- RegMat(th,2) ;
+                DLLfun = @(th)  ((y - Ntot.*Pfun(th))'*spX)'- RegMat(th,2) - l1regfun(th);
 
                 if ~diagHess
                     D2LLfun = @(th)   -spX'*diag( sparse(Ntot.*Pfun(th).*(1-Pfun(th))) )*spX - sparse(D2Regfun(th));
@@ -360,7 +366,7 @@ spey = speye(length(DLLfun(theta)));
                fprintf('\n%i  del: %f',iter,del)
 
             end
-            dtheta = chR\(chR'\sparse(DLLfun(theta)));
+            dtheta = chR\(chR'\sparse(DLLfun(theta)));  %%Using the cholesky factorization is faster than computing the inverse.
     %         chR = D2LLfun(theta);
     %         dtheta = chR^-1*DLLfun(theta);
             
@@ -397,7 +403,6 @@ spey = speye(length(DLLfun(theta)));
         end
 
 
-
         iter = iter+1;
 
         if iter > maxiter
@@ -409,7 +414,7 @@ spey = speye(length(DLLfun(theta)));
 
 %         ths(~discard,end+1) = theta;
     end
-    if any( L1reg~=0)
+    if any( L1regfull~=0)
 
         discold = discard;
         thetafull(~discard) = theta;
@@ -421,14 +426,16 @@ spey = speye(length(DLLfun(theta)));
         %%% IF the sign of the slope changes on either side of 0, then the
         %%% peak is at zero.
         spe =speye(length(thetafull));
-        pkval = (dlth+diag(-l1regfun(thth + 1e-6*spe ))).*...
-                  (dlth+diag(-l1regfun(thth - 1e-6*spe )));
+        pkval = (dlth+diag(-l1regfuno(thth + 1e-6*spe ))).*...
+                  (dlth+diag(-l1regfuno(thth - 1e-6*spe )));
         
         %%% resurrect a feature if pkval exceed some threshold
-        discard = pkval < -1e-6 | discold & pkval> .1;
+        discard = pkval < -1e-6 | discold & pkval > .25;
         nlasso = nlasso+1;
     else
         thetafull = theta;
+        discard = 0;
+        discold = 0;
     end
     0
 %     if any(L1reg~=0)
