@@ -46,7 +46,7 @@ while i <= length(varargin)
     
 end
 
-if ~isnumeric(varargin{end}) || ~iscell(varargin{end})
+if ~isnumeric(varargin{end}) && ~iscell(varargin{end})
     R = cat(2,varargin{1:end});
     
     grp = {1:length(R)};
@@ -61,6 +61,9 @@ elseif ~iscell(varargin{end})
         cellgrp{i} = stindex(i)+ (1:grp(i));
     end
     grp = cellgrp;
+elseif iscell(varargin{end})
+        R = cat(1,varargin{1:end-1});
+        grp = varargin{end};
 else
         R = cat(1,varargin{1:end-1});
 end

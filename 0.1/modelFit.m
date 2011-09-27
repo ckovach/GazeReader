@@ -202,7 +202,7 @@ while i <= length(varargin)
         case 'fix'    
             fix = varargin{i+1};
             i = i+1;
-        case {'diagsonly','show_progress','showprog','maxiter','checkdesign'}     %%%Other options passed to mnlfit
+        case {'diagsonly','show_progress','showprog','maxiter','checkdesign','tol','tolerance','runiter'}     %%%Other options passed to mnlfit
             mnlfitopts(end+(1:2)) = varargin(i+(0:1)); 
             i = i+1;
         otherwise

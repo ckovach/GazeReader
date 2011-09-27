@@ -22,15 +22,9 @@ function [theta,H,LL] = vectorglm(X,y,ntrials,varargin)
 %
 
 
-if ~GRcheck
-    error('This function needs the gaze reader toolbox to run')
-end
-
-
 type = 'binomial';
 
 
-i=1;
 
 % L1reg = 0;
 % L2reg = 0;
@@ -40,13 +34,14 @@ L1reg = sparse(0);
 fix  = 0;
 diagHess = false;
 Ntot = ones(size(y));
-
+maxiter = 1000;
 maxlasso = 10; % Maximum number of times to repeat lasso procedure.
-
+showiter = true;
 tol = 1e-6;
-
+printiter = 10; %print information every i'th iteration.
 LC = [];
-
+do_grcheck = true;
+initTheta = [];
 i = 1;
 %%%% Options are described below %%%%
 while i <= length(varargin)
@@ -57,7 +52,7 @@ while i <= length(varargin)
             
         case {'binomial'}
             type = 'binomial';
-         case {'gaussreg','regularization'}   %Specify gaussian regularization  the SQUARE of the weighting on the L2 norm (sqrt(g)*|r|^2)
+         case {'gaussreg','regularization','l2reg'}   %Specify gaussian regularization  the SQUARE of the weighting on the L2 norm (sqrt(g)*|r|^2)
             Hreg = varargin{i+1};
             i = i+1;            
 %        case {'l2reg', 'ridge'}   %Specify ridge regularization (L2, ridge), this is like gaussreg but with weighting that increases in proprtion to the data.
@@ -81,8 +76,17 @@ while i <= length(varargin)
        case {'diag'}
             diagHess = varargin{i+1};
             i = i+1;      
+       case {'maxiter'}
+            maxiter = varargin{i+1};
+            i = i+1;      
        case {'tol','tolerance'}
             tol = varargin{i+1};
+            i = i+1;      
+       case {'grcheck'}
+            do_grcheck = varargin{i+1};
+            i = i+1;      
+       case {'showiter','showprog'}
+            showiter = varargin{i+1};
             i = i+1;      
      case 'linearconstraint'     %a matrix of linear constraints on maximization, which is a contrast matrix such that
               LC = varargin{i+1};   %  a*C = 0 if c is the same length as
@@ -101,11 +105,20 @@ while i <= length(varargin)
 end
 
 
+if do_grcheck && ~GRcheck
+    error('This function needs the gaze reader toolbox to run')
+end
+
+
 
 
 
 if nargin < 3 || isempty(ntrials)
     ntrials = length(y);
+end
+
+if isempty(initTheta)
+    initTheta = zeros(length(ntrials)*size(X,2),1);
 end
 
 if length(ntrials) == 1
@@ -116,15 +129,15 @@ spX = sparseblock(X+eps,ntrials,'transpose');
 
 y = sparse(y);
 
-initTheta = zeros(length(ntrials)*size(X,2),1);
 
 
-if min(size(Hreg)) == 1 && ~isequal(Hreg ,0)
+if min(size(Hreg)) == 1 %&& ~isequal(Hreg ,0)
     Hreg = diag(sparse(ones(length(initTheta),1).*Hreg(:)));
 end
 
-if length(Lreg) == 1 && Lreg >0
-    Lreg = diag(sparse(ones(length(initTheta),1)*Lreg));
+
+if min(size(Lreg)) == 1 %&& Lreg >0
+    Lreg = diag(sparse(ones(length(initTheta),1).*Lreg(:)));
 end
 
 Npar = length(initTheta);
@@ -146,12 +159,12 @@ if ~isempty(LC)
     if size(LC,1) ~= Npar+1
         error('Contraint matrix must have as many rows as the number of parameters')
     end
-    constraint = 1;
+%     constraint = 1;
     
     lgm = zeros(size(LC,2),1);
 else
     lgm = []; %lagrange multipliers    
-    constraint = 0;
+%     constraint = 0;
 end
 nlgm = size(LC,2);
 
@@ -199,13 +212,12 @@ if any(y>Ntot)
 end
 
 
-maxiter = 5e2;
 
 theta = initTheta;
 
 recomputeHessian = 20;
-del = Inf;
-discard = false;
+% del = Inf;
+% discard = false;
 
 levstep = 2;
 levmar =  .1;
@@ -223,7 +235,8 @@ switch lower(type)
         Pfun = @(th) exp( rho(th) )./(1+exp(rho(th)));
         
         %Likelihood function
-        LLfun = @(th) sum(rho(th).*y - Ntot.*log(1+exp(rho(th)))) - th'*(RegMat(th,1) + L1reg.*sign(th));
+        LLvec = @(th) rho(th).*y - Ntot.*log(1+exp(rho(th)));
+        LLfun = @(th) sum(LLvec(th)) - th'*(RegMat(th,1) + L1reg.*sign(th));
         
         %First derivative of the likelihood function
         DLLfun = @(th)  ((repmat(y,1,size(th,2)) - repmat(Ntot,1,size(th,2)).*Pfun(th))'*spX)'- RegMat(th,2) - l1regfun(th);
@@ -240,7 +253,8 @@ switch lower(type)
         rho = @(th) spX*th;
         Pfun = @(th) exp( rho(th) );
         
-        LLfun = @(th) sum(rho(th).*y - Pfun(th));
+        LLvec = @(th)rho(th).*y - Pfun(th);
+        LLfun = @(th) sum( LLvec(th) ) - RegMat(th,2) - l1regfun(th);
         DLLfun = @(th)  ((y - Pfun(th))'*spX)'- RegMat(th,2);
         D2LLfun = @(th)   spX'*diag( sparse(Pfun(th)) )*spX - D2Regfun(th);
 %         DLLfun = @(th) sum((y'*- Pfun(th));
@@ -250,7 +264,7 @@ switch lower(type)
 end
 
 DLLfuno = DLLfun;
-LLfuno = LLfun;
+% LLfuno = LLfun;
 D2LLfuno = D2LLfun;
 % RegMato = RegMat;
 
@@ -277,7 +291,7 @@ discold = nan;
 
 % Lregfull = Lreg;
 L1regfull = L1reg;
-ths = [];
+% ths = [];
 ll = [];
 nlasso = 0;
 while ~isequal(discard,discold) && nlasso < maxlasso
@@ -315,9 +329,10 @@ while ~isequal(discard,discold) && nlasso < maxlasso
                 Pfun = @(th) exp( rho(th) )./(1+exp(rho(th)));
 
                 %Likelihood function
+                LLvec = @(th) rho(th).*y - Ntot.*log(1+exp(rho(th)));
 %                 LLfun = @(th) sum(rho(th).*y - Ntot.*log(1+exp(rho(th)))) - th'*(RegMat(th,1) + L1reg(~discard).*sign(th));
                 LLfun = @(th) sum(rho(th).*y - Ntot.*log(1+exp(rho(th)))) - th'*(RegMat(th,1) + L1reg.*sign(th));
-
+                
                 %First derivative of the likelihood function
 %                 DLLfun = @(th)  ((y - Ntot.*Pfun(th))'*spX)'- RegMat(th,2) - l1regfun(th);
                 DLLfun = @(th)  ((y - Ntot.*Pfun(th))'*spX)'- RegMat(th,2) - l1regfun(th);
@@ -362,11 +377,23 @@ spey = speye(length(DLLfun(theta)));
 
         if ~diagHess
             if mod(iter,recomputeHessian) == 0;
-               chR = chol(-D2LLfun(theta) + spey*levmar );
-               fprintf('\n%i  del: %f',iter,del)
-
+                try  
+                       chR = chol(-D2LLfun(theta) + spey*levmar );  %%Using the cholesky factorization is faster than computing the inverse, but might be worse for poorly conditioned matrices
+                catch
+                    levmar = .01;
+                   chR = chol(-D2LLfun(theta) + spey*levmar );  %%Using the cholesky factorization is faster than computing the inverse, but might be worse for poorly conditioned matrices
+                end
+               %                H = (-D2LLfun(theta) + spey*levmar );
+%                while condest(H) > 1e5
+%                      levmar = max( 1e-3, levmar*2);
+%                      H = (-D2LLfun(theta) + spey*levmar );
+%                end
             end
-            dtheta = chR\(chR'\sparse(DLLfun(theta)));  %%Using the cholesky factorization is faster than computing the inverse.
+           if showiter && mod(iter,printiter) == 0;
+               fprintf('\n%i  del: %f',iter,del)
+           end
+%                 dtheta = H\DLLfun(theta); 
+            dtheta = chR\(chR'\sparse(DLLfun(theta))); 
     %         chR = D2LLfun(theta);
     %         dtheta = chR^-1*DLLfun(theta);
             
@@ -389,17 +416,23 @@ spey = speye(length(DLLfun(theta)));
 %         theta(discard) = 0;
 %     end
    
-        del = LLfun(thetanew) - LLfun(theta);
-    %       del = sum(dtheta.^2)./sum(theta.^2+eps);
-
-        if del >= 0
+          dll = LLfun(thetanew) - LLfun(theta);
+          del = full(sum(dtheta.^2))./sum(theta.^2+eps);
+%         del = dll;
+%         
+        if dll >= 0
             theta = thetanew;
             levmar = levmar./levstep;
         else
-           chR = chol(-D2LLfun(theta) + spey*levmar);
-            levmar = levmar.*levstep + .001;
-
-           fprintf('\n%i  del: %f',iter,del)
+            try
+               chR = chol(-D2LLfun(theta) + spey*levmar);
+            catch 
+               levmar = levmar.*levstep + .001;
+               chR = chol(-D2LLfun(theta) + spey*levmar);
+            end
+           if showiter
+               fprintf('\n%i  del: %f',iter,del)
+           end
         end
 
 
@@ -410,7 +443,7 @@ spey = speye(length(DLLfun(theta)));
             break
         end
 
-        ll(end+1) = LLfun(theta);
+%         ll(end+1) = LLfun(theta);
 
 %         ths(~discard,end+1) = theta;
     end
@@ -437,7 +470,7 @@ spey = speye(length(DLLfun(theta)));
         discard = 0;
         discold = 0;
     end
-    0
+    
 %     if any(L1reg~=0)
 %         for i = 1:length(thetafull)
 %             zth = thetafull;
@@ -459,8 +492,18 @@ theta = thetafull;
 
 H = D2LLfuno(theta);
 
-LL = LLfuno(theta);
+% LL = LLfuno(theta);
 
+
+if ~isequal(discard,0)
+    spX = spXfull(:,~discard);
+    theta = thetafull(~discard);
+    L1reg = L1regfull(~discard);
+    RegMat = @(theta,a)  a*Hreg(~discard,~discard)*theta ;%+ Lreg./wleng(theta,Lreg) )*theta ; 
+else
+    discard = false(size(theta));
+end
+LL = sum(sparseblock(LLvec(theta),ntrials,'transpose')) - sum(sparseblock(theta.*(RegMat(theta,1) + L1reg.*sign(theta)),size(X(:,~discard),2),'transpose'));
 
 
 

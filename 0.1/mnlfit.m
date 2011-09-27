@@ -59,6 +59,8 @@ L1reg = 0;
 
 L2reg = 0;
 
+tol = 1e-6;
+
 %%%% Options are described below %%%%
 while i <= length(varargin)
     
@@ -126,6 +128,9 @@ while i <= length(varargin)
             i = i+1;
         case 'showstep'     %
             showstep = varargin{i+1};
+            i = i+1;
+        case {'tolerance','tol'}     %
+            tol = varargin{i+1};
             i = i+1;
         otherwise
             error('%s is not a valid keyword.',varargin{i})
@@ -292,7 +297,6 @@ if transposeSpx
     binvolume = binvolume';
 end    
 
-tol = 1e-6;
 
 Theta = InitTheta(:);
 
@@ -543,7 +547,7 @@ while dstep + sqrt( damp*sum(del.^2)./sum(Theta.^2)) > tol  && runiter   ; %Adde
 
         if (LL > LL1 || isnan(LL1)) && ( LL > LL2 || isnan(LL2))
              damp = damp*lmnu;
- 
+             dll =inf;
         elseif LL1 > LL2 || isnan(LL2)
             
             Theta = Theta1;
@@ -551,7 +555,8 @@ while dstep + sqrt( damp*sum(del.^2)./sum(Theta.^2)) > tol  && runiter   ; %Adde
             if constraint
                 lgm = dellgm1+lgm;
             end
-   
+            dll = LL1-LL;
+            
         else
             Theta = Theta2;
 %             TH = TH2;
@@ -561,7 +566,8 @@ while dstep + sqrt( damp*sum(del.^2)./sum(Theta.^2)) > tol  && runiter   ; %Adde
                 lgm = dellgm2+lgm;
             end
     
-  
+             dll = LL2-LL;
+            
         end
         Slev = damp*eye(length(Theta));
         
@@ -570,8 +576,9 @@ while dstep + sqrt( damp*sum(del.^2)./sum(Theta.^2)) > tol  && runiter   ; %Adde
 
         
     
-    dstep = sqrt( sum(del.^2)./sum(Theta.^2));
-    
+%     dstep = sqrt( sum(del.^2)./sum(Theta.^2));
+  dstep = abs(dll);
+  
     if showprog && mod(count,showstep) == 0
         fprintf('\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b')
         fprintf('\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b')
