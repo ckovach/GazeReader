@@ -57,7 +57,7 @@ elseif ~iscell(varargin{end})
     R = cat(1,varargin{1:end-1});
 
     stindex = cumsum([0,grp(1:end-1)]);
-    for i = 1:lengh(grp)
+    for i = 1:length(grp)
         cellgrp{i} = stindex(i)+ (1:grp(i));
     end
     grp = cellgrp;
@@ -81,11 +81,11 @@ end
 Rout = makeregressor([]);
 
 for i = 1:length(grp)   
-    noptions = R(1).noptions;
+    noptions = R(grp{i}(1)).noptions;
     V = [];
     sparseform = 0;
     for j = 1:length(grp{i})
-        if ~isequal(R(j).noptions,noptions) 
+        if ~isequal(R(grp{i}(j)).noptions,noptions) 
             error('Not all regressors share the same trial structure!')
         end
         
