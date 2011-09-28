@@ -432,12 +432,14 @@ spey = speye(length(DLLfun(theta)));
             theta = thetanew;
             levmar = levmar./levstep;
         else
+               levmar = levmar.*levstep + .001;
             try
                chR = chol(-D2LLfun(theta) + spey*levmar);
             catch  %#ok<CTCH>
-               levmar = levmar.*levstep + .001;
+               levmar = levmar.*levstep + .1;
                chR = chol(-D2LLfun(theta) + spey*levmar);
             end
+            
            if showiter
                fprintf('\n%i  del: %f',iter,del)
            end
@@ -521,7 +523,7 @@ if ~isequal(discard,0)
 else
     discard = false(size(theta));
 end
-LL = sum(sparseblock(LLvec(theta),ntrials,'transpose')) - sum(sparseblock(theta.*(RegMat(theta,1) + L1reg.*sign(theta)),size(X(:,~discard),2),'transpose'));
+LL = sum(sparseblock(LLvec(theta),ntrials,'transpose')) - sum(sparseblock(theta.*(RegMat(theta,1) + L1reg.*sign(theta)),size(spX(:,~discard),2),'transpose'));
 
 
 
