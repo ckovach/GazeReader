@@ -375,12 +375,15 @@ end
 
 
 if all(L1reg == 0) % apply l1 norm
-    DLfun = @(theta,P,P2)  X*OFlarge*(P2 - P)' - RegMat(Theta,2);
+    DLfun = @(theta,P,P2)  X*OFlarge*(P2 - P)' - RegMat(theta,2);
 else
-    DLfun = @(theta,P,P2)  X*OFlarge*(P2 - P)' - RegMat(Theta,2) - L1reg.*sign(Theta);
+    DLfun = @(theta,P,P2)  X*OFlarge*(P2 - P)' - RegMat(theta,2) - L1reg.*sign(Theta);
 end    
 
-while dstep + sqrt( damp*sum(del.^2)./sum(Theta.^2)) > tol  && runiter   ; %Added damping dependent term to avoid premature halting when damping is high
+stop = false;
+lastlap = false;
+
+while  ~stop  && runiter  
 % while dstep > tol  && runiter   
 
 
@@ -401,7 +404,9 @@ while dstep + sqrt( damp*sum(del.^2)./sum(Theta.^2)) > tol  && runiter   ; %Adde
         Dlgm = [Theta; -1]'*LC;             % Derivative of Lagrange Multipliers;
     end
     
-    if ~surrogate || count == 0 || mod(count,recomputeD2Lintvl)==0
+    
+    %%%  Recompute the Hessian %%%
+    if ~surrogate || count == 0 || mod(count,recomputeD2Lintvl)==0 || lastlap
         
          X2 = X(:,b2bl.*Y' > 1);
          P2 = P2(:,b2bl.*Y' > 1);
@@ -602,6 +607,19 @@ while dstep + sqrt( damp*sum(del.^2)./sum(Theta.^2)) > tol  && runiter   ; %Adde
              max_iterations_reached = 1;
              break
          end
+         
+         
+         %%% avoid stopping too early if the Hessian needs to be updated. 
+         if dstep + sqrt( damp*sum(del.^2)./sum(Theta.^2)) < tol %%% damping dependent term avoids stopping when the damping becomes high
+             if lastlap
+                 stop = true;
+             else
+                 lastlap = true;
+             end         
+         else
+             lastlap = false;
+         end
+         
 end
 
 if showprog, fprintf('\n');end
