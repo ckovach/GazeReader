@@ -43,6 +43,8 @@ LC = [];
 do_grcheck = true;
 initTheta = [];
 i = 1;
+runiter = true;
+
 %%%% Options are described below %%%%
 while i <= length(varargin)
     
@@ -81,6 +83,9 @@ while i <= length(varargin)
             i = i+1;      
        case {'tol','tolerance'}
             tol = varargin{i+1};
+            i = i+1;      
+       case {'runiter'}
+            runiter = varargin{i+1};
             i = i+1;      
        case {'grcheck'}
             do_grcheck = varargin{i+1};
@@ -142,7 +147,7 @@ end
 
 Npar = length(initTheta);
 %Create constraint matrix for fixed parameters
-if any(fix)
+if any(fix(:))
 %     constraint = true;
     fixed = find(fix);
     LC = zeros(Npar,1);
@@ -178,7 +183,7 @@ wleng = @(x, M ) sparse(sqrt(sum(x'*M*x)+eps));
 
 
 
-if any(Lreg~=0)
+if any(Lreg(:)~=0)
     RegMat = @(theta,a) ( a*Hreg + Lreg./wleng(theta,Lreg) )*theta ;
     
     laplregfun =@(theta)  Lreg/wleng(theta,Lreg) - ((Lreg*theta)*(Lreg*theta)')/wleng(theta,Lreg)^3 ; %%% Gaussian and laplace prior 
@@ -268,7 +273,7 @@ DLLfuno = DLLfun;
 D2LLfuno = D2LLfun;
 % RegMato = RegMat;
 
-if any(L1reg ~=0)
+if any(L1reg(:) ~=0)
     discard = DLLfun(theta + 1e-6).*DLLfun(theta - 1e-6) < -1e-6;
 
     discard = discard & abs(DLLfun(theta.*0)+ l1regfun(theta*0)) < L1reg &...
@@ -308,7 +313,7 @@ while ~isequal(discard,discold) && nlasso < maxlasso
     end
 
 
-    if any(L1regfull~=0)
+    if any(L1regfull(:)~=0)
         
         spX = spXfull(:,~discard);
         theta = thetafull(~discard);
@@ -373,10 +378,13 @@ spey = speye(length(DLLfun(theta)));
 
 
     % Newton-raphson gradient ascent
-    while abs(del) > tol 
+    lastlap = false;
+    stop = false;
+    
+    while  runiter && ~stop 
 
         if ~diagHess
-            if mod(iter,recomputeHessian) == 0;
+            if mod(iter,recomputeHessian) == 0 || lastlap;
                 try  
                        chR = chol(-D2LLfun(theta) + spey*levmar );  %%Using the cholesky factorization is faster than computing the inverse, but might be worse for poorly conditioned matrices
                 catch
@@ -426,7 +434,7 @@ spey = speye(length(DLLfun(theta)));
         else
             try
                chR = chol(-D2LLfun(theta) + spey*levmar);
-            catch 
+            catch  %#ok<CTCH>
                levmar = levmar.*levstep + .001;
                chR = chol(-D2LLfun(theta) + spey*levmar);
             end
@@ -442,12 +450,21 @@ spey = speye(length(DLLfun(theta)));
             warning('Maximum iterations reached')
             break
         end
-
+        
+        if del + sqrt( levmar*sum(del.^2)./sum(theta.^2)) < tol %%% damping dependent term avoids stopping when the damping becomes high
+             if lastlap
+                 stop = true;
+             else
+                 lastlap = true;
+             end         
+         else
+             lastlap = false;
+        end
+         
 %         ll(end+1) = LLfun(theta);
-
 %         ths(~discard,end+1) = theta;
     end
-    if any( L1regfull~=0)
+    if any( L1regfull(:)~=0)
 
         discold = discard;
         thetafull(~discard) = theta;
@@ -485,7 +502,8 @@ spey = speye(length(DLLfun(theta)));
 %             end
 %         end    
 %     end
-    
+  
+
 end
 
 theta = thetafull;
