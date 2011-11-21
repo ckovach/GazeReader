@@ -132,7 +132,7 @@ if any(discard)
     Xrow = [discard,Xrow];
 end
     
-[~,I,uindx] = unique(Xrow,'rows'); 
+[xx,I,uindx] = unique(Xrow,'rows'); 
 
 if any(discard)
     I(discard(I)) = [];
