@@ -37,7 +37,11 @@ function varargout = ordinalReg(X,noptions,varargin)
 %
 % or intercepts can be disabled altogether
 %
-%  [Xout,Yout] = ordinalReg(Xin,Yin,noptions,...,'intercepts', false,...);
+%          ,...,'intercepts', false,...);
+%
+% To specify any category as the baseline, use
+%
+%          ,...,'baseline', k,...); % Default k = 1;
 %
 % Agresti A (2010) Analysis of ordinal categorical data. Hoboken, NJ: John Wiley & Sons Inc.
 %
@@ -55,7 +59,7 @@ baseline_index = 1; % This is the index of the options that serves as baseline.
 cdi = 0;
 label = 'covariates';
 incl_intcpt = true;
-index_fun = [];
+indxfun = [];
 poly_intcpt = 0;
 i = 1;
 %%%% Key words are described below %%%%
@@ -156,7 +160,7 @@ end
 
 
 %%% Regressor for the option number (used
-Rnopt = makeregressor(indx-1,'noptions',totnopt,'label','order');
+Rnopt = makeregressor(indx-baseline_index,'noptions',totnopt,'label','order');
 
 if size(indx,2) > 1
     Rnopt = split(Rnopt);
