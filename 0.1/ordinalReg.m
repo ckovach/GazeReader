@@ -1,5 +1,5 @@
 
-function Rout = ordinalReg(X,noptions,varargin)
+function varargout = ordinalReg(X,noptions,varargin)
 
 
 % Create design matrix and response vector for an adjacent-categories
@@ -170,9 +170,16 @@ else
     Rintint = [];
 end
 %%% Array of output regressors
-Rout = [RF,Rintxn, Rintint]; 
+varargout{1} = [RF,Rintxn, Rintint]; 
 
 
+%%% If more than one output, then make the second set of regressors for the
+%%% non-ordinal full multinomial logit.
+
+if nargout > 1    
+       varargout{2} = [RF, interaction(RF,RX,'label','full multinomial','codeincr',cdi)]; cdi = cdi+1;
+end
+           
 
 
 
