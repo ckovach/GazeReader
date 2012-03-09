@@ -597,9 +597,7 @@ while  ~stop  && runiter
         end
     end        
         count = count+1;
-    sg(:,count)=sign(Theta);
-    ths(:,count)=Theta;
-
+  
          
              
          if count > maxcount % && std(llhist(end-50:end))./diff(llhist([1,end])) < 1e6 
