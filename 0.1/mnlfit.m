@@ -377,7 +377,7 @@ end
 if all(L1reg == 0) % apply l1 norm
     DLfun = @(theta,P,P2)  X*OFlarge*(P2 - P)' - RegMat(theta,2);
 else
-    DLfun = @(theta,P,P2)  X*OFlarge*(P2 - P)' - RegMat(theta,2) - L1reg.*sign(Theta);
+    DLfun = @(theta,P,P2)  X*OFlarge*(P2 - P)' - RegMat(theta,2) - L1reg.*sign(theta);
 end    
 
 stop = false;
@@ -597,6 +597,8 @@ while  ~stop  && runiter
         end
     end        
         count = count+1;
+    sg(:,count)=sign(Theta);
+    ths(:,count)=Theta;
 
          
              
