@@ -73,6 +73,8 @@ i = 1;
 minord = 1;
 polyord_is_vector = false;
 
+factmat_is_code = true;
+
 trig = false;
 noptions = [];
 codeincr = 0;
@@ -109,6 +111,9 @@ while i <= length(varargin)
             i = i+1; 
         case 'codeincr' 
            codeincr = varargin{i+1};
+            i = i+1; 
+        case 'code_factmat' 
+           factmat_is_code = varargin{i+1};
             i = i+1; 
         case 'keepdc' 
            keepdc = varargin{i+1};           
@@ -280,7 +285,9 @@ if ~trig
             end
         end
 %         R.factmat = R.code*ones(1,size(R.factmat,2));
+    if factmat_is_code
         R.factmat = R.code*ones(size(R.factmat));
+    end
 %         R.levmat = 1:size(R.factmat,2);
         
         if splitdim

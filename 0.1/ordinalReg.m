@@ -182,6 +182,7 @@ varargout{1} = [RF,Rintxn, Rintint];
 
 if nargout > 1    
        varargout{2} = [RF, interaction(RF,RX,'label','full multinomial','codeincr',cdi)]; cdi = cdi+1;
+             
 end
            
 
