@@ -3,7 +3,8 @@ function varargout = ordinalReg(X,noptions,varargin)
 
 
 % Create design matrix and response vector for an adjacent-categories
-% ordinal logit (see Agresti 2010, chapter 3 & 4) for use with mnlfit.
+% ordinal logit (see Agresti 2010, chapter 3 & 4) for use with modelFit and
+% mnlfit.
 %
 %  For adjacent-category logit, the probability for response i is
 %   
@@ -24,7 +25,8 @@ function varargout = ordinalReg(X,noptions,varargin)
 %  
 %  'noptions' can also be a  row vector. If so, then each column 
 %  corresponds to a separate rating scale. Interaction terms between rating
-%  scales are contained in the third element of Rout.
+%  scales are contained in the third element of Rout. In other words, each
+%  outcome can be scored on multiple ordinal scales.
 %  
 %
 %  The model is implemented as a single multinomial logit.
@@ -169,6 +171,7 @@ end
 %%% Regressor for the option number (used
 Rnopt = makeregressor(indx-baseline_index,'noptions',totnopt,'label','order');
 
+%%% This allows for multiple simultaneous ordinals
 if size(indx,2) > 1
     Rnopt = split(Rnopt);
 end
@@ -177,11 +180,12 @@ Rintxn = interaction(Rnopt,RX,'codeincr',cdi);cdi = cdi+1;
 
 if length(Rnopt) > 1
     Rintint = interaction(Rnopt,'codeincr',cdi);cdi = cdi+1;
+    Rintintx = interaction(Rintint,RX,'codeincr',cdi);cdi = cdi+1;
 else
     Rintint = [];
 end
 %%% Array of output regressors
-varargout{1} = [RF,Rintxn, Rintint]; 
+varargout{1} = [RF,Rintxn, Rintintx]; 
 
 
 %%% If more than one output, then make the second set of regressors for the
