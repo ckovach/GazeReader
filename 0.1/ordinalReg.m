@@ -33,7 +33,7 @@ function varargout = ordinalReg(X,noptions,varargin)
 %  category. Alternatively the intercepts can be specified (as a function
 %  of category number), by passing a function handle: 
 %
-%  [Xout,Yout] = ordinalReg(Xin,Yin,...,'index_fun', @(x) some_function(x),...);
+%  Rout = ordinalReg(Xin,Yin,...,'index_fun', @(x) some_function(x),...);
 %
 % or intercepts can be disabled altogether
 %
@@ -42,6 +42,13 @@ function varargout = ordinalReg(X,noptions,varargin)
 % To specify any category as the baseline, use
 %
 %          ,...,'baseline', k,...); % Default k = 1;
+%
+%
+%  [Rout, Rfull] = ordinalReg(...);
+%
+%  Returns the regressor for the full multinomial logit as a second
+%  argument. For this the interaction with the input is modeled with a separate
+%  set of parameters for each outcome category.
 %
 % Agresti A (2010) Analysis of ordinal categorical data. Hoboken, NJ: John Wiley & Sons Inc.
 %
