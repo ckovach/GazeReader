@@ -468,7 +468,9 @@ if length(R)>1 && ~fullOnly
         Q(rstartind(~getreg)) = 1;
         Q(rendind(~getreg)+1) = Q(rendind(~getreg)+1) -1;
         C = diag(cumsum(Q(1:sum([R.Npar]))));
-        fit(i+1).contrast = C(:,sum(C)>0);
+        
+        subC= diag(ismember([R.codevec],[R(getreg).code]));
+        subC(sum(subC,2)==0,:)=[];
         
         if ~isempty(LC)
             invC = eye(size(C))-C;
@@ -481,6 +483,9 @@ if length(R)>1 && ~fullOnly
             LCsub = [];
         end
         
+        C=C(:,sum(C)>0);
+        fit(i+1).contrast = C;
+        
         if size(LC,1)>size(C,2)
             LCcontr(end+1,end+1) = 1;
         end
@@ -492,7 +497,7 @@ if length(R)>1 && ~fullOnly
             fit(i+1).label = sprintf(' | %s ',R(~getreg).label);
         end
         fprintf('\nFitting submodel %i: %s\n',i,fit(i+1).label );
-        [parest,I,LL,badcond,lgm,max_iter] = mnlfit(Rpooled,Win,'inittheta',stth, 'gaussreg',Hreg,'laplreg',Lreg,'L1reg',L1reg, 'runiter',true,...
+        [parest,I,LL,badcond,lgm,max_iter] = mnlfit(Rpooled,Win,'inittheta',stth, 'gaussreg',subC*Hreg*subC','laplreg',subC*Lreg*subC','L1reg',subC*L1reg, 'runiter',true,...
                                                      'firth',Firth,'linearconstraint',LCsub,'binvolume',binvolume,'discard',discard,'obsfreq',obsfreq,mnlfitopts{:});
 
         npar = length(parest) - rank(LCsub);
