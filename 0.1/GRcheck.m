@@ -50,8 +50,9 @@ if ~exist('GazeReader.m','file')
         
         if exist(installdir,'dir') > 0 && exist(fullfile(installdir,'GazeReader.m'),'file')
             fprintf('\nAdding existing version to the matlab path.')
-            addpath(installdir)
+            addpath(installdir)            
             gr_present = true;
+            savepath
             return
         elseif exist(installdir,'dir') > 0
             grpath = fullfile(installdir,'GazeReader');
@@ -80,6 +81,7 @@ if ~exist('GazeReader.m','file')
 
         else
             addpath(grpath)
+            savepath
         end
         
     else
