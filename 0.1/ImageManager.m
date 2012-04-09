@@ -29,7 +29,7 @@ function varargout = ImageManager(varargin)
 
 % Edit the above text to modify the response to help ImageManager
 
-% Last Modified by GUIDE v2.5 01-Jan-2008 15:03:00
+% Last Modified by GUIDE v2.5 08-Apr-2012 23:41:58
 
 % Begin initialization code - DO NOT EDIT
 gui_Singleton = 1;
@@ -836,3 +836,100 @@ parent = getappdata(handles.figure1,'parent');
 if ishandle(parent)
     setappdata(parent,'ActiveControl','main');
 end
+
+
+% --- Executes during object creation, after setting all properties.
+function figure1_CreateFcn(hObject, eventdata, handles)
+% hObject    handle to figure1 (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    empty - handles not created until after all CreateFcns called
+
+
+% --- If Enable == 'on', executes on mouse press in 5 pixel border.
+% --- Otherwise, executes on mouse press in 5 pixel border or over imageList.
+function imageList_ButtonDownFcn(hObject, eventdata, handles)
+% hObject    handle to imageList (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    structure with handles and user data (see GUIDATA)
+
+
+% --- Executes on key press with focus on imageList and none of its controls.
+function imageList_KeyPressFcn(hObject, eventdata, handles)
+% hObject    handle to imageList (see GCBO)
+% eventdata  structure with the following fields (see UICONTROL)
+%	Key: name of the key that was pressed, in lower case
+%	Character: character interpretation of the key(s) that was pressed
+%	Modifier: name(s) of the modifier key(s) (i.e., control, shift) pressed
+% handles    structure with handles and user data (see GUIDATA)
+
+
+% --- Executes during object creation, after setting all properties.
+function pixelScaleCheckBox_CreateFcn(hObject, eventdata, handles)
+% hObject    handle to pixelScaleCheckBox (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    empty - handles not created until after all CreateFcns called
+
+
+% --- Executes during object deletion, before destroying properties.
+function pixelScaleCheckBox_DeleteFcn(hObject, eventdata, handles)
+% hObject    handle to pixelScaleCheckBox (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    structure with handles and user data (see GUIDATA)
+
+
+% --- Executes during object creation, after setting all properties.
+function scaleCheckBox_CreateFcn(hObject, eventdata, handles)
+% hObject    handle to scaleCheckBox (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    empty - handles not created until after all CreateFcns called
+
+
+% --- Executes during object deletion, before destroying properties.
+function scaleCheckBox_DeleteFcn(hObject, eventdata, handles)
+% hObject    handle to scaleCheckBox (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    structure with handles and user data (see GUIDATA)
+
+
+% --- Executes on key press with focus on scaleCheckBox and none of its controls.
+function scaleCheckBox_KeyPressFcn(hObject, eventdata, handles)
+% hObject    handle to scaleCheckBox (see GCBO)
+% eventdata  structure with the following fields (see UICONTROL)
+%	Key: name of the key that was pressed, in lower case
+%	Character: character interpretation of the key(s) that was pressed
+%	Modifier: name(s) of the modifier key(s) (i.e., control, shift) pressed
+% handles    structure with handles and user data (see GUIDATA)
+
+
+% --- Executes during object deletion, before destroying properties.
+function ypos1_DeleteFcn(hObject, eventdata, handles)
+% hObject    handle to ypos1 (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    structure with handles and user data (see GUIDATA)
+
+
+% --- Executes on key press with focus on ypos1 and none of its controls.
+function ypos1_KeyPressFcn(hObject, eventdata, handles)
+% hObject    handle to ypos1 (see GCBO)
+% eventdata  structure with the following fields (see UICONTROL)
+%	Key: name of the key that was pressed, in lower case
+%	Character: character interpretation of the key(s) that was pressed
+%	Modifier: name(s) of the modifier key(s) (i.e., control, shift) pressed
+% handles    structure with handles and user data (see GUIDATA)
+
+
+% --- Executes during object deletion, before destroying properties.
+function ypos2_DeleteFcn(hObject, eventdata, handles)
+% hObject    handle to ypos2 (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    structure with handles and user data (see GUIDATA)
+
+
+% --- Executes on key press with focus on ypos2 and none of its controls.
+function ypos2_KeyPressFcn(hObject, eventdata, handles)
+% hObject    handle to ypos2 (see GCBO)
+% eventdata  structure with the following fields (see UICONTROL)
+%	Key: name of the key that was pressed, in lower case
+%	Character: character interpretation of the key(s) that was pressed
+%	Modifier: name(s) of the modifier key(s) (i.e., control, shift) pressed
+% handles    structure with handles and user data (see GUIDATA)
