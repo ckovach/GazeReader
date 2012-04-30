@@ -52,6 +52,7 @@ obsfreq = 1;
 discard = [];
 L2reg = 0;
 showstep = 20;
+etaLimits = [1 -1]*log(eps); %%Maximimum and minimum value for log odds ratio
 % LC = 0;
 i=1;
 
@@ -360,7 +361,10 @@ RegMat = @(theta,a) ( a*Hreg + Lreg./wleng(theta,Lreg) )*theta;
 
 %%% Functions to compute log likelihood and outcome probability
 lrrfun = @(theta) theta' * X + binvolume; %compute the log weight
-nlrrfun = @(theta) lrrfun(theta) - blocknorm(lrrfun(theta),b)./blockn; %subtract mean to improve numerical stability
+
+forcelim = @(x) x.*(x>etaLimits(1) & x<etaLimits(2)) + etaLimits(1)*(x<etaLimits(1))+ etaLimits(2)*(x>etaLimits(2));
+nlrrfun = @(theta) forcelim( lrrfun(theta) - blocknorm(lrrfun(theta),b)./blockn ); %subtract mean to improve numerical stability
+
 Pfun =  @(theta) exp( nlrrfun(theta) )./  (blocknorm(exp( nlrrfun(theta) ) ,b)); %Proabability of each outcome
 
 LLfun = @(theta) sum(log(Pfun(theta)*Yblocksum)*OF) - theta'*RegMat(theta,1) - L1reg(:)'*abs(theta); %Log Likelihood
