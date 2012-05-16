@@ -69,6 +69,10 @@ elseif isstruct(h)
     set_regData = false;
 
     ntr = 0;
+    
+    h = GazeReader;
+  trialData = getappdata(h,'trialData');
+  
 else
     
     error('First argument is not recognized as a handle or regressor structure.')

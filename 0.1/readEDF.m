@@ -90,7 +90,7 @@ while i <= length(varargin)
    switch lower(varargin{i})
        case 'subtract_first_xdat_time' %Subtract the time of the first message event. 
            subtractFirstXdat = true;
-       case 'eye' %'Use EYE: 'L' for left,'R' for Right
+       case 'eye' %'Use EYE: 'L' for left,'R' for Right, A for average
            eyeinp = varargin{i+1};
            i = i+1;
        case 'nhist' %'Use EYE: 'L' for left,'R' for Right
@@ -134,12 +134,27 @@ eye = EDF.RECORDINGS(1).eye;
 etfs = EDF.RECORDINGS(1).sample_rate;
 if eye == 3
 %     inp = 'x';
-    while ~ismember(eyeinp,{'R','L'})
-        eyeinp = inputdlg('Which eye to analyze: L or R?');
+    while ~ismember(eyeinp,{'r','l','b','a'})
+        eyeinp = lower(inputdlg('Which eye to load: (L)eft, (R)ight, (B)oth or (A)Average?'));
     end
     
-    eye = isequal(eyeinp{1},'L')+1;
+    eye = 3*isequal(eyeinp{1},'b')+ 2*isequal(eyeinp{1},'l')+isequal(eyeinp{1},'r');
+    
+    if eye == 0  
+       eye  = [1 2];
+       avgeye=true;
+    elseif eye == 3
+        eye = [1 2];
+        avgeye=false;
+    else
+        avgeye=false;
+        
+    end
+else
+    avgeye=false;
+
 end
+
     
 code = {EDF.FEVENT.codestring};
 msg = strcmp(code,'MESSAGEEVENT');
@@ -164,6 +179,11 @@ if nargout > 1
     RAW.seg.horz = double(EDF.FSAMPLE.gx(eye,:));
     RAW.seg.vert = double(EDF.FSAMPLE.gy(eye,:));
     RAW.seg.pupil = double(EDF.FSAMPLE.pa(eye,:));
+    if eye == 0
+        RAW.seg.horz =mean(RAW.seg.horz );
+        RAW.seg.vert = mean(RAW.seg.vert);
+        RAW.seg.pupil = mean(RAW.seg.pupil);        
+    end
     RAW.seg.input = double(EDF.FSAMPLE.input); % Parallel port input
     RAW.seg.xdat = xdatraw;
     RAW.seg.degConversion(:,1) = double(EDF.FSAMPLE.rx);
@@ -211,26 +231,100 @@ end
 saccs = EDF.FEVENT(endsacc);
 if ~isempty(saccs)
     saceye = double([saccs.eye]);
-    saccs = saccs(saceye == eye -1);
+    saccs = saccs(ismember(saceye,(eye - 1)));
     sact = [saccs.sttime]-startTime;
 end
 
     
+fxeye=double([fxs.eye]);
+
+if sum(eye) == 3
+    
+    if avgeye
+        tthresh = 100; %% combine fixations only if they occur within this interval
+        dthresh = 5; %%% threshold normalized intrafixation variance
+        tthresh_keep = 200; %%% Keep monocular fixations if they are outside this time range
+
+        fxt=double([fxs.sttime]);
+
+        nfx = length(fxs);
+
+        for k = 1:nfx
+            [mn,mni] = min(abs( fxt(k) - fxt + 1e10*(fxt(k) - fxt==0 )));
+            assoc(k) = mni;
+            kp(k)=(mn <= tthresh) & (fxeye(k)~=fxeye(mni)); 
+            kpmonoc(k)= (mn > tthresh_keep); 
+        end   
+
+        spd = spalloc(length(assoc),length(assoc),2*numel(assoc));
+        spd( sub2ind(size(spd),find(assoc),assoc(assoc~=0)) )= 1;
+
+        sym = spd.*spd'; %% ignore fixations that aren't reciprocally associated 
+        kp = kp & any(sym);
+
+        fxx=double([fxs.gavx]);
+        fxy=double([fxs.gavy]);
+
+        stfx= double([fxs.gstx]);
+        stfy= double([fxs.gsty]);
+        enfx= double([fxs.genx]);
+        enfy= double([fxs.geny]);
+
+        %%% within fixation varance 
+        fvar = mean( (stfx/2+enfx/2-fxx).^2 + (stfy/2+enfy/2-fxy).^2);
+
+        %%%% inter eye distance
+        dfx=0*kp;
+        dfx(kp) = sqrt(detrend( (fxx(kp)-fxx(assoc(kp))).*(fxeye(kp)-.5)*2).^2 +...
+              detrend(( fxy((kp))-fxy(assoc((kp)))).*(fxeye(kp)-.5)*2).^2);
+
+        %%% normalized inter-fixation distance
+        ndfx = dfx./sqrt(fvar);
+        kp = kp & ndfx<=dthresh;
+        assoc(kpmonoc) = find(kpmonoc);
+    else
+        kpmonoc = true(size(fxs));
+        kp = false(size(fxs));
+        assoc= 1:length(fxs);
+    end
+    kpall =kp | kpmonoc;
+    fxs=fxs(kpall);
+
+    eyes = false(2,sum(kpall));
+    eyes(:,kp(kpall)) = true;
+    eyes((find(kpmonoc(kpall))-1)*2 +fxeye(kpmonoc(kpall))+1) = true;
+    eyes = eyes./repmat(sum(eyes),2,1);
+   
+    indxkp(kpall) =1:sum(kpall);
+    assoc = indxkp(assoc(kpall));
+else
+    assoc= 1:length(fxs);
+    eyes = ones(size(assoc));
+    
+end
+
 i = 0;
 for k = 1:length(fxs)
-    if double(fxs(k).eye) ~= eye -1
+    if ~ismember(double(fxs(k).eye), eye - 1)
         continue
     end
     i = i+1;
     
-    FIX.seg.fix(i).meanPos = [fxs(k).gavx fxs(k).gavy];
-    FIX.seg.fix(i).startT = double(fxs(k).sttime-startTime);
-    FIX.seg.fix(i).dur   = fxs(k).entime -fxs(k).sttime; 
-    FIX.seg.fix(i).endT = double(fxs(k).entime-startTime);
-    FIX.seg.fix(i).updconv = ([fxs(k).supd_x, fxs(k).supd_y] + [fxs(k).eupd_x, fxs(k).eupd_y])./2;
-    FIX.seg.fix(i).eye = fxs(k).eye;
+    if avgeye
+        inds = [k assoc(k)];
+    else 
+        inds = k;
+    end
+    
+    
+    FIX.seg.fix(i).meanPos = eyes(:,k)'*[fxs(inds).gavx; fxs(inds).gavy]';
+    FIX.seg.fix(i).startT = double([fxs(inds).sttime]-startTime)*eyes(:,k);
+    FIX.seg.fix(i).dur   = double([fxs(inds).entime] -[fxs(inds).sttime])*eyes(:,k); 
+    FIX.seg.fix(i).endT = double([fxs(inds).entime]-startTime)*eyes(:,k);
+    FIX.seg.fix(i).updconv = eyes(:,k)'*double([fxs(inds).supd_x; fxs(inds).supd_y]' + [fxs(inds).eupd_x; fxs(inds).eupd_y]')./2;
+    FIX.seg.fix(i).eye = [fxs(inds).eye];
 
-    recentmsg = msgts <= fxs(k).sttime-startTime;
+    recentmsg = msgts <= double([fxs(inds).sttime]-startTime)*eyes(:,k);
     frecentmsg= find(recentmsg );
     FIX.seg.fix(i).xdhist  = zeros(1,nhist);
     FIX.seg.fix(i).xdhist(end:-1:end-min([length(frecentmsg) nhist]-1)) = msgmap(frecentmsg(end:-1:end-min([length(frecentmsg) nhist]-1)));
@@ -260,7 +354,7 @@ end
 i = 0;
 fxts = [FIX.seg.fix.startT];
 for k = 1:length(saccs)
-    if double(saccs(k).eye) ~= eye-1
+    if ~ismember(double(saccs(k).eye), eye-1)
         continue
     end
     i = i+1;
