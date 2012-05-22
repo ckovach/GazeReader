@@ -121,7 +121,7 @@ for rg = 1:length(R2s)
         case ntr
         % If it matches the number of trials, it is applied to all bins within a given trials
             spx = sparseblock(ones(1,sum(noptions)),noptions);
-            R2.value = spx'R2.value(regData(dataset).trialIndex,:);        
+            R2.value = spx'*R2.value(regData(dataset).trialIndex,:);        
 
         case nbin
             % If number of bins is constant input equals bin size, then input
