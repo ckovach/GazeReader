@@ -117,6 +117,7 @@ for rg = 1:length(R2s)
         case length( noptions )  
             % If the input matches the number of observations, in is applied to
             % all bins on a given observation
+            spx = sparseblock(ones(1,sum(noptions)),noptions);
             R2.value = spx'*R2.value;
         case ntr
         % If it matches the number of trials, it is applied to all bins within a given trials
