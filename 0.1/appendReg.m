@@ -117,12 +117,11 @@ for rg = 1:length(R2s)
         case length( noptions )  
             % If the input matches the number of observations, in is applied to
             % all bins on a given observation
-            R2.value = R2.value(regData(dataset).fixationIndex,:);
-
+            R2.value = spx'*R2.value;
         case ntr
         % If it matches the number of trials, it is applied to all bins within a given trials
-
-            R2.value = R2.value(regData(dataset).trialIndex,:);        
+            spx = sparseblock(ones(1,sum(noptions)),noptions);
+            R2.value = spx'R2.value(regData(dataset).trialIndex,:);        
 
         case nbin
             % If number of bins is constant input equals bin size, then input
@@ -136,9 +135,15 @@ for rg = 1:length(R2s)
 
 
         otherwise %oops
-
-            error(sprintf('The number of rows (=%i) is not consistent with noptions.\nInput should have %i, %i or %i rows.',nrows2, nrows, length(noptions), ntr))
-
+            fxd = getappdata(h,'fixationData');
+            nfx = length(fxd(dataset).fix);
+            if nrows2 == nfx  %%% 1 data point for each fixation
+                
+               R2.value = R2.value(regData(dataset).fixationIndex,:);
+                      
+            else
+                error(sprintf('The number of rows (=%i) is not consistent with noptions.\nInput should have %i, %i or %i rows.',nrows2, nrows, length(noptions), ntr))
+            end
 
     end
 
