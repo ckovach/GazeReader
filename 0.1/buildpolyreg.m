@@ -316,8 +316,10 @@ else
     ncol = length(polyfun(x(1,:)));
     
     %add levels for frequency
-    for i = 1:size(fr,2)
-        [q,qq,levmat(i,:)] = unique(abs(fr(:,i))*4 + 2*(fr(:,i)<0) + mod( (1:ncol)' + mod(ncol,2)+1 ,2)+1);
+    if ~isempty(fr)
+        for i = 1:size(fr,2)
+            [q,qq,levmat(i,:)] = unique(abs(fr(:,i))*4 + 2*(fr(:,i)<0) + mod( (1:ncol)' + mod(ncol,2)+1 ,2)+1);
+        end
     end
     % add level for phase
 %     if mod(size(fr,1),2) >0

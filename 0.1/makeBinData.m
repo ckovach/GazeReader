@@ -91,14 +91,17 @@ concat =false;
 i = 2;
 append = false;
 data = [];
+zerolength = false;
 if nargin > 0 && (~isstruct(varargin{1}) || isfield(varargin{1},'vert'))
     data = varargin{1};
+    zerolength = isempty(data);
     i = 2;   
     append = 0;
     concat= 0;
 elseif nargin > 1 &&~isstruct(varargin{2})   
     binData = varargin{1};
     data = varargin{2};
+    zerolength = isempty(data);
     i = 3;
     append = 1;
     concat= 0;
@@ -187,7 +190,11 @@ binData.groups(grpind).label = label;
 binData.groups(grpind).type= type;
 binData.groups(grpind).nbin = 0;
 if isempty(data)
-        binData.groups = binData.groups(1:grpind-1);
+%         binData.groups = binData.groups(1:grpind-1);
+       if zerolength
+           binData.groups = binData.groups(1:grpind-1);
+           codeincr = 0;
+       end
         binData.codeincr = codeincr;
 %     if isempty(varargin(2:end));
 %         binData.groups = binData.groups([]);
@@ -888,7 +895,7 @@ axlim = axis(ca);
 varargout = cell(1,nargout);
 
 pos = BinGroups.pos;
-[varargout{:}] = TriPlot(pos.tri,axlim(2)*pos.vert(:,1),axlim(2)*pos.vert(:,2),varargin{:});
+[varargout{:}] = triplot(pos.tri,axlim(2)*pos.vert(:,1),axlim(2)*pos.vert(:,2),varargin{:});
 
 axis(ca,axlim);
 

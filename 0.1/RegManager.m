@@ -606,7 +606,7 @@ for CurrentDataSet = length(regData)+1:length(trialData)
             cr = cr + nbin*nfix;
             
             bindexs = cellfun(@(a,b) cat(2,(1:a)',ones(a,1)*b),{binData.groups(binGroupIndex).nbin},num2cell(binGroupIndex),'uniformoutput',false); 
-            binIndex(assigninds,1) = repmat((1:nbins)',nfix,1);
+            binIndex(assigninds,1) = repmat((1:nbin)',nfix,1);
             binIndex(assigninds,2:3) = repmat(cat(1,bindexs{:}),nfix,1);
         end
     end
