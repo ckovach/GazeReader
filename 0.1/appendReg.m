@@ -79,6 +79,9 @@ else
     
 end
 
+if islogical(R2s)
+    R2s = double(R2s);
+end
 if isnumeric(R2s)
     
 %     R2s = makeRegressor(R2s,varargin{:});
@@ -121,8 +124,8 @@ for rg = 1:length(R2s)
             R2.value = spx'*R2.value;
         case ntr
         % If it matches the number of trials, it is applied to all bins within a given trials
-            spx = sparseblock(ones(1,sum(noptions)),noptions);
-            R2.value = spx'*R2.value(regData(dataset).trialIndex,:);        
+        
+            R2.value = R2.value(regData(dataset).trialIndex,:);        
 
         case nbin
             % If number of bins is constant input equals bin size, then input
