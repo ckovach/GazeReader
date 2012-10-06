@@ -44,7 +44,7 @@ intxnord = 1;
 center = true;
 noptions = [];
 labels = repmat({[]},1,size(F,2));
-cellmeans = false;
+% cellmeans = false;
 codeincr = 0;
 postmult = 1;
 i = 1;
@@ -131,15 +131,55 @@ for f = 1:size(F,2)
         u1 = (spbl'*obsfreq).*~ignore;
         u1 = u1./sum(u1);
         u2 = ~ignore;
-        XF = XF-u2*(u1'*XF);
+        m = u2*(u1'*XF);
+        XF = XF-m;
         XF = XF(:,2:end);
+        fun= mkfun(ufs,m(find(~ignore,1),:));
+    else
+        fun= mkfun(ufs);
     end
 
-    RF(f) = makeregressor(XF,'noptions',noptions,'label',labels{f},'codeincr',codeincr,'postmultiply',postmult);
+    RF(f) = makeregressor(XF,'noptions',noptions,'label',labels{f},'codeincr',codeincr,'postmultiply',postmult); %#ok<*AGROW>
     RF(f).info.factorlabels = ufs;
+    RF(f).function =fun;
 end
 
 if intxnord>1
     RF = cat(2,RF,interaction(RF,'intxnord',intxnord));
 end
+
+%%%%%%%%%%%
+function fn = mkfun(ufs,m)
+
+%%% The function is nested here to avoid having to save the workspace to disk
+
+    if nargin > 1 %center
+        fn = @(F)mkcfun(F,ufs,m);
+    else
+        fn = @(F)mkcfun(F,ufs);
+        
+    end
+
+
+%%%%%%%%%
+function XF = mkcfun(F,ufs,m)
+
+if iscell(F)  %Allow for cell arrays as well as numeric vectors
+    eqfun = @(a,b) cellfun(@(a) isequal(a, b{1}),a);
+else
+    eqfun = @(a,b) a==b;
+end
+XF = zeros(size(F,1),length(ufs));
+
+for l = 1:length(ufs)
+
+    XF(:,l) = eqfun(F , ufs(l) );
+
+end
+if nargin > 2
+    XF = XF-repmat(m,size(XF,1),1);
+    XF = XF(:,2:end);
+end
+
+
 
