@@ -12,7 +12,7 @@ function varargout = ordinalReg(X,noptions,varargin)
 %
 %          where bi is some baseline category.
 %
-%  Rout = ordinalReg(Xin,Yin,noptions,'params',value);
+%  Rout = ordinalReg(Xin,noptions,'params',value);
 %
 %  Xin is an NxK matrix containing the indepenent variable as rows. 
 %
