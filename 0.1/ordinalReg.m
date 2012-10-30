@@ -183,6 +183,7 @@ if length(Rnopt) > 1
     Rintintx = interaction(Rintint,RX,'codeincr',cdi);cdi = cdi+1;
 else
     Rintint = [];
+    Rintxn = [];
 end
 %%% Array of output regressors
 varargout{1} = [RF,Rintxn, Rintintx]; 
