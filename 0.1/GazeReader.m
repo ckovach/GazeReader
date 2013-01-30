@@ -544,6 +544,9 @@ for i = 1:length(filenames)
                 fixdata = struct([]);
                 warning(sprintf('Unable to find a .fix file for this raw .eyd file.\nOnly raw data is loaded.'))
             end
+        case '.mat'
+            importMatFile_menu_Callback(hObject, eventData, handles,filename,fpath)
+            return
         otherwise
                 error('Unsupported file type.');
     end
