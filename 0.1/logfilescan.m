@@ -12,9 +12,13 @@ function S = logfilescan(logfilename)
 
 %C. Kovach 2007
 
-S = struct('Picture',struct([]),'Response',struct([]),'Sound',struct([]));
+S = struct('Scenario','','Time',[],'Picture',struct([]),'Response',struct([]),'Sound',struct([]));
 
 raw = textread(logfilename,'%s','delimiter','\n');
+
+decell = @(x)[x{:}];
+S.Scenario = decell(regexp(raw{1},'Scenario - (.*)','tokens','once'));
+S.Time= decell(regexp(raw{2},'Logfile written - (.*)','tokens','once'));
 
 for i = 1:length(raw)
 
