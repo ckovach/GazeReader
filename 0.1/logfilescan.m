@@ -1,7 +1,7 @@
 function S = logfilescan(logfilename)
 
-%Scans a Presentation(R) log file and returns structure containing the
-%times and data associated with events.
+%Scans a Presentation (Neurobehavioral systems) log file and returns a
+%structure containing the times and data associated with events.
 
 % ----------- SVN REVISION INFO ------------------
 % $URL$
