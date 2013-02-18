@@ -303,6 +303,15 @@ else
     
 end
 
+fixstr = struct('meanPos',[],'startT',[],'dur',[],'endT',[],'updconv',...
+                     [],'eye',[],'xdhist',[],'xdat',[],'xdindex',[],'lastcode',[],...
+                     'shiftvec',[],'dt',[],'sac',[]);
+sacstr = struct('startT',[],'dur',[],'startPos',[],'shiftVec',[],'eye',[],...
+                'lastfix',[],'nextfix',[],'xdhist',[],'xdindex',[],'lastcode',[]);
+
+FIX.seg.fix = fixstr;
+FIX.seg.sac = sacstr;
+
 i = 0;
 for k = 1:length(fxs)
     if ~ismember(double(fxs(k).eye), eye - 1)
