@@ -33,7 +33,7 @@ for k = 1:length(fieldns)
     fn = fieldns{k};
     if isa(R(1).(fn),'function_handle')  %If field contains a function handle, remove it
     
-        for i = 1:length(R)
+        for i = 1:numel(R)
             R(i).(fn) = [];  
 %             R(i).(fn)(1) = [];          % Retain the field as a zero-length function handle
                                         % to avoid possible inconsistencies later.
@@ -41,7 +41,7 @@ for k = 1:length(fieldns)
         
     elseif isa( R(1).(fn) ,'struct')  %If field contains a structure run stripfunctions recursiveley
         
-        for i = 1:length(R)
+        for i = 1:numel(R)
             R(i).(fn) = stripfunctions( R(i).(fn) );            
         end
         
