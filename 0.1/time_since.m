@@ -16,7 +16,7 @@ delt = find(delta_train);
 xt = zeros(size(delta_train,1),1);
 xt([delt(1:end)]) = delt - [0;delt(1:end-1)];
 
-tsince= (1:size(delta_train,1))'-cumsum(xt);
+tsince= repmat((1:size(delta_train,1))',size(xt,2)-cumsum(xt);
 tsince(1:delt(1)-1) = 0;
 
 

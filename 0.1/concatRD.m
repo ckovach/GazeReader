@@ -60,3 +60,5 @@ end
 if   add_indicator
     RD.regressors = appendReg(RD.regressors,indr,[],'label','data_set');
 end
+
+RD.codeincr = max([RD.regressors.code]);

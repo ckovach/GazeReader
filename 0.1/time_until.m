@@ -13,8 +13,8 @@ function tuntil = time_until(delta_train)
 
 delt = find(delta_train);
 
-xt = zeros(size(delta_train,1),1);
+xt = zeros(size(delta_train));
 xt([1;delt(1:end-1)]) = delt - [0;delt(1:end-1)];
 
-tuntil = cumsum(xt)-(1:size(delta_train,1))';
+tuntil = cumsum(xt)-repmat((1:size(delta_train,1))',1,size(xt,2));
 

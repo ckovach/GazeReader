@@ -73,7 +73,7 @@ if nargin < 4 | isempty(trialStartTs) | isempty(trialEndTs)
 end
 
 if nargin < 5 | isempty(trialIdentifier) 
-    trialIdentifier = 1:length(trialStartT);
+    trialIdentifier = 1:length(trialStartTs);
 end
 
 
@@ -108,7 +108,7 @@ etdatH = ASL.seg(segment).horz;
 etdatV = ASL.seg(segment).vert;
 XDAT = ASL.seg(segment).xdat;
 
-xdatTs = find(diff([0;XDAT]) );
+xdatTs = find(diff([0;XDAT(:)]) );
 xdatIDs = XDAT(xdatTs);
 
 xdatTs(xdatIDs == 0) = [];
@@ -124,6 +124,7 @@ ETbadtimes = ETbadtimes | etdatH > ETrangeH(2) | etdatH  < ETrangeH(1);
 ETbadtimes = ETbadtimes | etdatV > ETrangeV(2) | etdatV  < ETrangeV(1);
 
 % Extracting short dropout (which may or may not represent blinks)
+ETbadtimes=ETbadtimes(:);
 ShortDrop = zeros(size(ETbadtimes));
 BTstart = find(diff([0;ETbadtimes;0]) == 1); 
 BTend = find(diff([0;ETbadtimes(1:end-1);0]) == -1); 
@@ -134,7 +135,7 @@ ShortDrop = cumsum(ShortDrop);
 
 ETbadtimes(find(ShortDrop)) = 0;
 %Eye velocity in deg per second
-eyeV = sqrt(sum( ( ET2SCRN(1:2,1:2)^-1 * [0 0;diff(etdatH), diff(etdatV)]').^2 ))'./DegPerPix;
+eyeV = sqrt(sum( ( ET2SCRN(1:2,1:2)^-1 * [0 0;diff(etdatH(:)), diff(etdatV(:))]').^2 ))'./DegPerPix;
 
 %Smooth velocity
 eyeV = convn(eyeV,ones(etparams.smoothwin,1)./etparams.smoothwin,'same');

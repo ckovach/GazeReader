@@ -192,7 +192,7 @@ for i = 1:length(R1)
             RX(rxind).value = kron( Vi,ones(1,size( Vj,2))).*repmat( Vj ,1,size( Vi,2));     
         else
             RX(rxind).value =[];
-            RX(rxind).function = makemefun(R1.function,R2.function,R1.Npar,R2.Npar);
+            RX(rxind).function = makemefun([R1,R2]);
 %             continue
         end
         RX(rxind).levmat = cat(1,kron( R1.levmat,ones(1,R2.Npar)), repmat( R2.levmat ,1,R1.Npar));
@@ -236,7 +236,11 @@ npar2 = Rs(2).Npar;
 
 terms= zeros(2,0);
 for i = 1:length(Rs)
-    [unq,q,polyterm] = unique(factmats{i}(:,1));
+    if ~isempty(factmats{i})
+        [unq,q,polyterm] = unique(factmats{i}(:,1));
+    else
+        unq = [];
+    end
      rinputs{i} = [];
      for j = 1:length(unq)
          for k = 1:sum(polyterm==j)
@@ -281,7 +285,8 @@ try
 
     mkdfun = eval(dfunstr);
 catch
-    mdfun = [];
+
+    mkdfun = [];
 end
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%

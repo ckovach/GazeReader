@@ -33,7 +33,7 @@ else
     currdir = cd;
     cd(dirfile);
 %     edfs = dir(spritnf('%s%s%s',dirfile,filesep,'*.edf'));
-    edfs = dir('*.edf');
+    edfs = [dir('*.edf'),dir('*.EDF')];
 
     edfs = {edfs.name};
 
