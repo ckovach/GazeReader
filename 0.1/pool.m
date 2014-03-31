@@ -209,7 +209,7 @@ dfunctions = {Rs.deriv};
 
 terms= zeros(2,0);
 for i = 1:length(Rs)
-    [unq,q,polyterm] = unique(factmats{i}(:,1));
+    [unq,q,polyterm] = unique(factmats{i}(:,1),'stable');
      rinputs{i} = [];
      for j = 1:length(unq)
          for k = 1:sum(polyterm==j)

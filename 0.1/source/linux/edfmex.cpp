@@ -24,6 +24,7 @@ Questions can be sent to christopher-kovach@uiowa.edu.
 #include <stdio.h>
 #include <iostream>
 #include <string>
+#include "string.h"
 #include "edfmex.h"
 #include "edf2mex.h"
 

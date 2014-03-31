@@ -144,7 +144,7 @@ try
     fid = fopen([mfilename,'.m'],'r');
     R.info.COMMAND =  fread(fid);
     fclose(fid);
-catch
+catch %#ok<CTCH>
     warning('Failed to record the script used to generate regressor %s poly',R.label);
 end
 
@@ -225,23 +225,23 @@ end
 
 function [mkfun,mkdfun,terms] = makemefun(Rs)
 
-rcodes = [Rs.code];
-rfunctions = {Rs.function};
+rcodes = [Rs.code]; %#ok<NASGU>
+rfunctions = {Rs.function}; %#ok<NASGU>
 factmats = {Rs.factmat};
-dfunctions = {Rs.deriv};
+dfunctions = {Rs.deriv}; %#ok<NASGU>
 
-npar1 = Rs(1).Npar;
-npar2 = Rs(2).Npar;
+npar1 = Rs(1).Npar; %#ok<NASGU>
+npar2 = Rs(2).Npar; %#ok<NASGU>
 
 
 terms= zeros(2,0);
 for i = 1:length(Rs)
     if ~isempty(factmats{i})
-        [unq,q,polyterm] = unique(factmats{i}(:,1));
+        [unq,~,polyterm] = unique(factmats{i}(:,1),'stable');
     else
         unq = [];
     end
-     rinputs{i} = [];
+     rinputs{i} = []; %#ok<*AGROW>
      for j = 1:length(unq)
          for k = 1:sum(polyterm==j)
              
@@ -264,9 +264,9 @@ args = strcat('X',argnum);
 
 trim = @(a) a(1:end-1);
 genarg = @(X)trim(sprintf('%s,',X{:}));
-funs = cellfun(@(inp,i) sprintf('rfunctions{%i}(%s)',i,genarg(args(inp))),rinputs,num2cell(1:length(rinputs)),'uniformoutput',false);
+funs = cellfun(@(inp,i) sprintf('rfunctions{%i}(%s)',i,genarg(args(inp))),rinputs,num2cell(1:length(rinputs)),'uniformoutput',false); %#ok<NASGU>
 
-dfuns = cellfun(@(inp,i) sprintf('dfunctions{%i}(%s,n([%s]))',i,genarg(args(inp)),genarg(argnum(inp))),rinputs,num2cell(1:length(rinputs)),'uniformoutput',false);
+dfuns = cellfun(@(inp,i) sprintf('dfunctions{%i}(%s,n([%s]))',i,genarg(args(inp)),genarg(argnum(inp))),rinputs,num2cell(1:length(rinputs)),'uniformoutput',false); %#ok<NASGU>
 
 funstr = sprintf('@(%s) kron( rfunctions{1}(%s),ones(1,npar2) ).*repmat( rfunctions{2}(%s) , 1 , npar1 );',...
             genarg(args),...
@@ -284,7 +284,7 @@ try
                 genarg(args(rinputs{2})),genarg(argnum(rinputs{2})));
 
     mkdfun = eval(dfunstr);
-catch
+catch %#ok<CTCH>
 
     mkdfun = [];
 end

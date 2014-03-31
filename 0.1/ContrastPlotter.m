@@ -270,10 +270,10 @@ inputTerms = {infos.functionInputCodes};
 inputRegs = cellfun(@(a,b) b*ones(1,size(a,2),1),inputTerms,num2cell(1:length(infos)),'uniformoutput',false);
 inputRegs = [inputRegs{:}];
 inputTerms =[inputTerms{:}];
-[unqterms,q,termindex] = unique(inputTerms','rows');
+[unqterms,q,termindex] = unique(inputTerms','rows','stable');
 % indx = code2ind(parent,inputTerms(1,:));
 
-currentTerms = unique(termindex(ismember(inputRegs,selRegressorGroup )));
+currentTerms = unique(termindex(ismember(inputRegs,selRegressorGroup )),'stable');
 currentTermIndex = currentTerms(currentInteractionTerm);
 
 RValues{currentTermIndex} = str2num(get(handles.intxnValue,'string'));
@@ -384,9 +384,9 @@ inputTerms = {infos.functionInputCodes};
 inputRegs = cellfun(@(a,b) b*ones(1,size(a,2),1),inputTerms,num2cell(1:length(infos)),'uniformoutput',false);
 inputRegs = [inputRegs{:}];
 inputTerms =[inputTerms{:}];
-[terms,q,termindex] = unique(inputTerms','rows'); 
+[terms,q,termindex] = unique(inputTerms','rows','stable'); 
 
-currentTerms = unique(termindex(ismember(inputRegs,selectedRegressorGroups)));
+currentTerms = unique(termindex(ismember(inputRegs,selectedRegressorGroups)),'stable');
 
 
 % currentTermIndex = currentTerms(currentInteractionTerm);
@@ -569,7 +569,7 @@ switch plottype
         end
         plotvalues(CurrentDataSet).zfun = @(parest) regval*(contrast'*parest);
 %         plotvalues(CurrentDataSet).errfun = @(errmat) sqrt(diag(regval*errmat*regval'));
-        plotvalues(CurrentDataSet).errfun = @(errmat) sqrt(sum((regval*errmat).*regval,2));
+        plotvalues(CurrentDataSet).errfun = @(errmat)reshape(sqrt(sum( (regval*contrast'*errmat*contrast).*regval,2)),szX);
         plotvalues(CurrentDataSet).X = X;
         plotvalues(CurrentDataSet).Y = Y;
         plotvalues(CurrentDataSet).Z = Z;
@@ -720,7 +720,7 @@ switch plottype
         end    
         
         if bitand(plotWhat,6) 
-            err = reshape(sqrt(diag(regval*errmat*regval')),szXm);
+            err = reshape(sqrt(sum((regval*errmat).*regval,2)),szXm);
             plotvalues(CurrentDataSet).err = err;
             
         end
@@ -868,9 +868,9 @@ inputTerms = {infos.functionInputCodes};
 inputRegs = cellfun(@(a,b) b*ones(1,size(a,2),1),inputTerms,num2cell(1:length(infos)),'uniformoutput',false);
 inputRegs = [inputRegs{:}];
 inputTerms =[inputTerms{:}];
-[terms,q,termindex] = unique(inputTerms','rows'); 
+[terms,q,termindex] = unique(inputTerms','rows','stable'); 
 
-currentTerms = unique(termindex(ismember(inputRegs,selectedRegressorGroups)));
+currentTerms = unique(termindex(ismember(inputRegs,selectedRegressorGroups)),'stable');
 
 
 
@@ -1064,7 +1064,7 @@ currentRegressorGroup = getappdata(parent,'CurrentRegressorGroup');
 PR = get(handles.figure1,'XaxisTerm');
 SR = get(handles.figure1,'YaxisTerm');
 
-PR = unique(cat(PR,currentRegressorGroup));
+PR = unique(cat(PR,currentRegressorGroup),'stable');
 SR(SR == currentRegressorGroup) = [];
 
 set(handles.figure1,'XaxisTerm',PR);
@@ -1088,7 +1088,7 @@ currentRegressorGroup = getappdata(parent,'CurrentRegressorGroup');
 PR = get(handles.figure1,'XaxisTerm');
 SR = get(handles.figure1,'YaxisTerm');
 
-SR = unique(cat(SR,currentRegressorGroup));
+SR = unique(cat(SR,currentRegressorGroup),'stable');
 PR(PR == currentRegressorGroup) = [];
 
 set(handles.figure1,'XaxisTerm',PR);
@@ -1123,14 +1123,14 @@ if currentInteractionTerm == 0
     return
 end
 
-% PR = getappdata(handles.figure1,'XaxisTerm');
-SR = getappdata(handles.figure1,'YaxisTerm');
+PR = getappdata(handles.figure1,'XaxisTerm');
+% SR = getappdata(handles.figure1,'YaxisTerm');
 
 
 if get(handles.Xcheck,'value')
     set(handles.intxnValue,'string','X')
 %     PR = unique(cat(2,PR,currentTerms(currentInteractionTerm)));
-    PR = currtindx;
+    PR = [PR,currtindx];
     
     RFunctions = getappdata(handles.figure1,'RFunctions');
     RFunctions{currtindx} = str2func('@(X)X');
@@ -1141,7 +1141,7 @@ if get(handles.Xcheck,'value')
 %     setappdata(handles.figure1,'YaxisTerm',0);
 
 else
-    PR = [];
+    PR(PR==currtindx) = [];
 %     PR(ismember(PR, currentTerms(currentInteractionTerm))) = [];
     setappdata(handles.figure1,'XaxisTerm',PR);
     
@@ -1169,15 +1169,15 @@ if currentInteractionTerm == 0
     return
 end
 
-PR = getappdata(handles.figure1,'XaxisTerm');
-% SR = getappdata(handles.figure1,'YaxisTerm');
+% PR = getappdata(handles.figure1,'XaxisTerm');
+SR = getappdata(handles.figure1,'YaxisTerm');
 
 
 
 if get(handles.Ycheck,'value')
     set(handles.intxnValue,'string','Y')
 %     SR = cat(2,SR,currentTerms(currentInteractionTerm));
-    SR = currtindx; 
+    SR = [SR,currtindx]; 
     RFunctions = getappdata(handles.figure1,'RFunctions');
     RFunctions{currentTerms(currentInteractionTerm )} = str2func('@(Y)Y');
     setappdata(handles.figure1,'RFunctions',RFunctions);
@@ -1187,7 +1187,7 @@ if get(handles.Ycheck,'value')
     setappdata(handles.figure1,'YaxisTerm',SR);
 
 else
-    SR = []; 
+    SR(SR==currtindx) = []; 
 %     SR(ismember(SR,currentTerms(currentInteractionTerm))) = [];
     setappdata(handles.figure1,'YaxisTerm',SR);
 end    

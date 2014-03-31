@@ -1,14 +1,16 @@
 
-/*
- * ----------- SVN REVISION INFO ------------------
- * $URL$     
- * $Revision$
- * $Date$
- * $Author$
- * ------------------------------------------------
- */
+#include <string>
+#include "mex.h"
+#include "matrix.h"
+#include <stdlib.h>
+#include <vector>
 
-char *  build_version = "3.0 Linux Dec  1 2008";
+#include "edf.h"
+#include "edf_data.h"
+#include "edftypes.h"
+
+
+char *  build_version = "3.1 Linux Feb 29 2012";
 
 
 class BuildMexArrays : public BuildMexArraysBaseClass

@@ -23,6 +23,7 @@ Questions can be sent to christopher-kovach@uiowa.edu.
 #endif
 
 
+#include <string>
 #include "mex.h"
 #include "matrix.h"
 #include <stdlib.h>
