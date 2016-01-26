@@ -13,6 +13,10 @@ Please refer to
 <p>&emsp;Kovach CK, Adolphs R (2015) Investigating attention in complex visual search. <i>Vision Research</i> 116, Part B:127-141.
 </p></dl>
 
+To get started with the graphical interface at the Matlab command line, use:
+
+```>> h = GazeReader ```
+
 ####Note####
 Much of GazeReader is organized around a graphical user interface developed in GUIDE (a GUI development toolbox in matlab).
 Initial development also predated much of Matlab's current object-oriented capability, and the closest thing available at
