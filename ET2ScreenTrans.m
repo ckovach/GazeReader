@@ -2,7 +2,7 @@
 function ET2SCRN = ET2ScreenTrans(eydfile, calibPts,varargin)
 
 %function ET2SCRN = ET2ScreenTrans(eydfile, calibPts)
-% Returns an Abelian transformation matrix to convert between raw eyetracker
+% Returns an affine transformation matrix to convert between raw eyetracker
 % coordinates and screen coordinates. CalibPts can be an Nx2 list of
 % calibration points in the order used by the eye tracker. If CalibPts
 % is a 2X2 vector then it is assumed to represent fixed x and y spacing (top row)
