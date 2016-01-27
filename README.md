@@ -1,8 +1,7 @@
 ##The GazeReader Toolbox##
 
 GazeReader is a Matlab toolbox for the statistical analysis of eye-tracking data. It's built around a generalized linear point-process modeling framework. 
-In addition to tools for statistical analysis, it provides a user interface from which to load data, specify trial events, and data and results
-superimposed on back-ground representations of the scene and regions of interest. 
+In addition to tools for statistical analysis, it provides a user interface from which to load data, specify trial events, and display data and results superimposed on back-ground representations of the scene and regions of interest. 
 
 Please refer to
 
